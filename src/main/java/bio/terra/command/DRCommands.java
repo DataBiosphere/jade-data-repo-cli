@@ -1,7 +1,7 @@
 package bio.terra.command;
 
-import bio.terra.datarepo.model.FSObjectModel;
-import bio.terra.datarepo.model.FSObjectModelType;
+import bio.terra.datarepo.model.FileModel;
+import bio.terra.datarepo.model.FileModelType;
 import bio.terra.model.DRElement;
 import bio.terra.model.DRFile;
 import org.apache.commons.lang3.StringUtils;
@@ -9,13 +9,15 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 // object types
-// dir, file, study, dataset, cont(ainer)
+// dir, file, dataset, snapshot, cont(ainer)
 //
 // hierarchy is:
-//  /                - contains study and dataset objects
-//  /<study>/        - contains pseudo-dirs 'files' and 'tables'
-//  /<study>/files/  - the '/' directory of the file system
-//  /<study>/tables/ - the tables in the study
+//  /                - contains dataset and snapshot objects
+//  /<dataset>/        - contains pseudo-dirs 'files' and 'tables'
+//  /<dataset>/files/  - the '/' directory of the file system
+//  /<dataset>/tables/ - the tables in the dataset
+//
+// TODO: snapshot layer
 
 public class DRCommands {
     private static final String LIST_FORMAT = "%s%-7s  %-20s  %s  %s  %s\n";
@@ -108,9 +110,9 @@ public class DRCommands {
         DRElement element = DRLookup.getInstance().lookup(inPath);
         if (element instanceof DRFile) {
             DRFile file = (DRFile) element;
-            FSObjectModel fsObject = file.getFileModel();
-            if (fsObject.getObjectType() == FSObjectModelType.FILE) {
-                StreamFile.streamFile(fsObject.getFileDetail().getAccessUrl());
+            FileModel fileModel = file.getFileModel();
+            if (fileModel.getFileType() == FileModelType.FILE) {
+                StreamFile.streamFile(fileModel.getFileDetail().getAccessUrl());
             }
         }
         CommandUtils.printErrorAndExit("You can only stream files right now");

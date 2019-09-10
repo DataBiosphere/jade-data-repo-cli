@@ -4,7 +4,7 @@ import bio.terra.command.CommandEnum;
 import bio.terra.command.CommandUtils;
 import bio.terra.command.DRCommands;
 import bio.terra.command.HelpCommands;
-import bio.terra.command.StudyCommands;
+import bio.terra.command.DatasetCommands;
 import bio.terra.context.Context;
 import bio.terra.context.ContextEnum;
 import bio.terra.parser.Argument;
@@ -35,14 +35,14 @@ public class Main {
                 }
                 break;
 
-                case COMMAND_STUDY_CREATE:
-                    StudyCommands.getInstance().studyCreate(result.getArgument("input-json"));
+                case COMMAND_DATASET_CREATE:
+                    DatasetCommands.getInstance().datasetCreate(result.getArgument("input-json"));
                     break;
-                case COMMAND_STUDY_SHOW:
-                    StudyCommands.getInstance().studyShow(result.getArgument("study-name"));
+                case COMMAND_DATASET_SHOW:
+                    DatasetCommands.getInstance().datasetShow(result.getArgument("study-name"));
                     break;
-                case COMMAND_STUDY_DELETE:
-                    StudyCommands.getInstance().studyDelete(result.getArgument("study-name"));
+                case COMMAND_DATASET_DELETE:
+                    DatasetCommands.getInstance().datasetDelete(result.getArgument("study-name"));
                     break;
 
                 case COMMAND_SESSION_CD:
@@ -88,7 +88,7 @@ public class Main {
                 .addCommand(new Command()
                         .primaryName("study")
                         .secondaryName("create")
-                        .commandId(CommandEnum.COMMAND_STUDY_CREATE.getCommandId())
+                        .commandId(CommandEnum.COMMAND_DATASET_CREATE.getCommandId())
                         .help("Create a new study")
                         .addOption(new Option()
                                 .shortName("i")
@@ -99,7 +99,7 @@ public class Main {
                 .addCommand(new Command()
                         .primaryName("study")
                         .secondaryName("show")
-                        .commandId(CommandEnum.COMMAND_STUDY_SHOW.getCommandId())
+                        .commandId(CommandEnum.COMMAND_DATASET_SHOW.getCommandId())
                         .help("List one study")
                         .addArgument(new Argument()
                                 .name("study-name")
@@ -108,7 +108,7 @@ public class Main {
                 .addCommand(new Command()
                         .primaryName("study")
                         .secondaryName("delete")
-                        .commandId(CommandEnum.COMMAND_STUDY_DELETE.getCommandId())
+                        .commandId(CommandEnum.COMMAND_DATASET_DELETE.getCommandId())
                         .help("Delete a study")
                         .addArgument(new Argument()
                                 .name("study-name")

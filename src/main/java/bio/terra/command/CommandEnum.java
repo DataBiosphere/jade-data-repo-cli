@@ -2,9 +2,9 @@ package bio.terra.command;
 
 // Enumeration of commands with their command ids.
 public enum CommandEnum {
-    COMMAND_STUDY_CREATE(0),
-    COMMAND_STUDY_SHOW(1),
-    COMMAND_STUDY_DELETE(2),
+    COMMAND_DATASET_CREATE(0),
+    COMMAND_DATASET_SHOW(1),
+    COMMAND_DATASET_DELETE(2),
 
     COMMAND_DR_LIST(10),
     COMMAND_DR_STREAM(11),

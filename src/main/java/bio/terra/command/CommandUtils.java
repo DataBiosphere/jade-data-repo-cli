@@ -4,10 +4,10 @@ import bio.terra.context.Context;
 import bio.terra.context.ContextEnum;
 import bio.terra.datarepo.api.RepositoryApi;
 import bio.terra.datarepo.client.ApiException;
-import bio.terra.datarepo.model.EnumerateStudyModel;
+import bio.terra.datarepo.model.DatasetSummaryModel;
+import bio.terra.datarepo.model.EnumerateDatasetModel;
 import bio.terra.datarepo.model.ErrorModel;
 import bio.terra.datarepo.model.JobModel;
-import bio.terra.datarepo.model.StudySummaryModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
@@ -80,21 +80,21 @@ public class CommandUtils {
         System.exit(1);
     }
 
-    public static StudySummaryModel findStudyByName(String studyName) {
+    public static DatasetSummaryModel findDatasetByName(String datasetName) {
         try {
-            EnumerateStudyModel enumerateStudy = DRApis.getRepositoryApi().enumerateStudies(0, 100000, null, null, studyName);
+            EnumerateDatasetModel enumerateDataset = DRApis.getRepositoryApi().enumerateDatasets(0, 100000, null, null, datasetName);
 
-            List<StudySummaryModel> studies = enumerateStudy.getItems();
-            for (StudySummaryModel summary : studies) {
-                if (StringUtils.equals(summary.getName(), studyName)) {
+            List<DatasetSummaryModel> studies = enumerateDataset.getItems();
+            for (DatasetSummaryModel summary : studies) {
+                if (StringUtils.equals(summary.getName(), datasetName)) {
                     return summary;
                 }
             }
-            CommandUtils.printErrorAndExit("Study not found: " + studyName);
+            CommandUtils.printErrorAndExit("Dataset not found: " + datasetName);
             return null;
 
         } catch (ApiException ex) {
-            throw new IllegalArgumentException("Error processing find study by name");
+            throw new IllegalArgumentException("Error processing find dataset by name");
         }
     }
 
