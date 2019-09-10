@@ -40,7 +40,7 @@ public class DRDatasetTables extends DRElement {
 
     @Override
     public String getDescription() {
-        return "Tables in a dataset";
+        return "Tables in a study";
     }
 
     @Override
@@ -50,16 +50,11 @@ public class DRDatasetTables extends DRElement {
         }
         String name = pathParts.remove();
 
-        try {
-            DatasetModel dataset = DRApis.getRepositoryApi().retrieveDataset(datasetElement.getId());
-            for (TableModel table : dataset.getTables()) {
-                if (StringUtils.equals(name, table.getName())) {
-                    return new DRTable(datasetElement, table);
-                }
+        DatasetModel dataset = getDataset();
+        for (TableModel table : dataset.getSchema().getTables()) {
+            if (StringUtils.equals(name, table.getName())) {
+                return new DRTable(datasetElement, table);
             }
-        } catch (ApiException ex) {
-            System.err.println("Error processing dataset table lookup:");
-            CommandUtils.printErrorAndExit(ex.getMessage());
         }
         return null;
     }
@@ -67,15 +62,32 @@ public class DRDatasetTables extends DRElement {
     @Override
     public List<DRElement> enumerate() {
         List<DRElement> elementList = new ArrayList<>();
-        try {
-            DatasetModel dataset = DRApis.getRepositoryApi().retrieveDataset(datasetElement.getId());
-            for (TableModel table : dataset.getTables()) {
-                elementList.add(new DRTable(datasetElement, table));
-            }
-        } catch (ApiException ex) {
-            System.err.println("Error processing dataset enumerate tables:");
-            CommandUtils.printErrorAndExit(ex.getMessage());
+        DatasetModel dataset = getDataset();
+        for (TableModel table : dataset.getSchema().getTables()) {
+            elementList.add(new DRTable(datasetElement, table));
         }
         return elementList;
     }
+
+// TODO: Do I want to dump all of the tables on a describe of the tables?
+    @Override
+    public void describe() {
+        super.describe();
+        DatasetModel dataset = getDataset();
+        for (TableModel table : dataset.getSchema().getTables()) {
+            new DRTable(datasetElement, table).describe();
+        }
+    }
+
+    private DatasetModel getDataset() {
+        try {
+            DatasetModel dataset = DRApis.getRepositoryApi().retrieveDataset(datasetElement.getId());
+            return dataset;
+        } catch (ApiException ex) {
+            System.err.println("Error retrieving dataset");
+            CommandUtils.printErrorAndExit(ex.getMessage());
+        }
+        return null;
+    }
+
 }

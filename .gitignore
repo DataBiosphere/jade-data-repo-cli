@@ -37,7 +37,7 @@ build/
 src/generated/
 .swagger-codegen/
 .swagger-codegen-ignore
-doc/
+docs/
 
 # gradle files
 .gradle/

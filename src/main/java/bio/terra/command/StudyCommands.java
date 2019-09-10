@@ -4,7 +4,7 @@ import bio.terra.datarepo.client.ApiException;
 import bio.terra.datarepo.model.DeleteResponseModel;
 import bio.terra.datarepo.model.StudyRequestModel;
 import bio.terra.datarepo.model.StudySummaryModel;
-import bio.terra.model.DRStudy;
+import bio.terra.model.DRDataset;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +54,7 @@ public class StudyCommands {
     public void studyShow(String studyName) {
         // Show study is the same as describe
         StudySummaryModel summary = CommandUtils.findStudyByName(studyName);
-        DRStudy studyElement = new DRStudy(summary);
+        DRDataset studyElement = new DRDataset(summary);
         studyElement.describe();
     }
 }

@@ -108,7 +108,7 @@ public class DRCommands {
         DRElement element = DRLookup.getInstance().lookup(inPath);
         if (element instanceof DRFile) {
             DRFile file = (DRFile) element;
-            FSObjectModel fsObject = file.getFsObject();
+            FSObjectModel fsObject = file.getFileModel();
             if (fsObject.getObjectType() == FSObjectModelType.FILE) {
                 StreamFile.streamFile(fsObject.getFileDetail().getAccessUrl());
             }
