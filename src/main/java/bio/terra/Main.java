@@ -21,6 +21,11 @@ public class Main {
         try {
             Parser parser = new Parser(makeSyntax());
             ParsedResult result = parser.parse(args);
+            if (result == null) {
+                // If parser returns no result, then there was a parse error. The parser has written
+                // the proper message to stderr.
+                System.exit(1);
+            }
             CommandEnum command = CommandEnum.commandIdToEnum(result.getCommandId());
 
             switch(command) {

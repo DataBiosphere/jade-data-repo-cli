@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -79,22 +78,14 @@ public class ParserTest {
         Parser parser = new Parser(buildSyntax());
 
         // Missing required switch
-        try {
-            String[] testString = new String[]{"test", "-x", "xarg", "thereqarg", "theoptarg"};
-            ParsedResult result = parser.parse(testString);
-        } catch(Exception ex) {
-            assertTrue("right exception", ex instanceof IllegalArgumentException);
-            assertThat("right message", ex.getMessage(), containsString("option --rrr is required"));
-        }
+        String[] testString = new String[]{"test", "-x", "xarg", "thereqarg", "theoptarg"};
+        ParsedResult result = parser.parse(testString);
+        assertNull("caught error", result);
 
         // Missing required arg
-        try {
-            String[] testString = new String[]{"test", "-r", "grrr"};
-            ParsedResult result = parser.parse(testString);
-        } catch(Exception ex) {
-            assertTrue("right exception", ex instanceof IllegalArgumentException);
-            assertThat("right message", ex.getMessage(), containsString("required argument reqarg is missing"));
-        }
+        testString = new String[]{"test", "-r", "grrr"};
+        result = parser.parse(testString);
+        assertNull("caught error", result);
     }
 
     private Syntax buildSyntax() {
