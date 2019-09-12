@@ -37,9 +37,13 @@ build/
 src/generated/
 .swagger-codegen/
 .swagger-codegen-ignore
+docs/
 
 # gradle files
 .gradle/
+.gradletasknamecache
 
 # Mac directory metadata
 .DS_Store
+
+*.pem

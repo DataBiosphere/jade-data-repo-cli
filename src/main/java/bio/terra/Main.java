@@ -4,7 +4,7 @@ import bio.terra.command.CommandEnum;
 import bio.terra.command.CommandUtils;
 import bio.terra.command.DRCommands;
 import bio.terra.command.HelpCommands;
-import bio.terra.command.StudyCommands;
+import bio.terra.command.DatasetCommands;
 import bio.terra.context.Context;
 import bio.terra.context.ContextEnum;
 import bio.terra.parser.Argument;
@@ -21,6 +21,11 @@ public class Main {
         try {
             Parser parser = new Parser(makeSyntax());
             ParsedResult result = parser.parse(args);
+            if (result == null) {
+                // If parser returns no result, then there was a parse error. The parser has written
+                // the proper message to stderr.
+                System.exit(1);
+            }
             CommandEnum command = CommandEnum.commandIdToEnum(result.getCommandId());
 
             switch(command) {
@@ -30,14 +35,14 @@ public class Main {
                 }
                 break;
 
-                case COMMAND_STUDY_CREATE:
-                    StudyCommands.getInstance().studyCreate(result.getArgument("input-json"));
+                case COMMAND_DATASET_CREATE:
+                    DatasetCommands.getInstance().datasetCreate(result.getArgument("input-json"));
                     break;
-                case COMMAND_STUDY_SHOW:
-                    StudyCommands.getInstance().studyShow(result.getArgument("study-name"));
+                case COMMAND_DATASET_SHOW:
+                    DatasetCommands.getInstance().datasetShow(result.getArgument("dataset-name"));
                     break;
-                case COMMAND_STUDY_DELETE:
-                    StudyCommands.getInstance().studyDelete(result.getArgument("study-name"));
+                case COMMAND_DATASET_DELETE:
+                    DatasetCommands.getInstance().datasetDelete(result.getArgument("dataset-name"));
                     break;
 
                 case COMMAND_SESSION_CD:
@@ -81,34 +86,34 @@ public class Main {
     private static Syntax makeSyntax() {
         return new Syntax()
                 .addCommand(new Command()
-                        .primaryName("study")
+                        .primaryName("dataset")
                         .secondaryName("create")
-                        .commandId(CommandEnum.COMMAND_STUDY_CREATE.getCommandId())
-                        .help("Create a new study")
+                        .commandId(CommandEnum.COMMAND_DATASET_CREATE.getCommandId())
+                        .help("Create a new dataset")
                         .addOption(new Option()
                                 .shortName("i")
                                 .longName("input-json")
                                 .hasArgument(true)
                                 .optional(false)
-                                .help("Path to a file containing the JSON form of a study")))
+                                .help("Path to a file containing the JSON form of a dataset")))
                 .addCommand(new Command()
-                        .primaryName("study")
+                        .primaryName("dataset")
                         .secondaryName("show")
-                        .commandId(CommandEnum.COMMAND_STUDY_SHOW.getCommandId())
-                        .help("List one study")
+                        .commandId(CommandEnum.COMMAND_DATASET_SHOW.getCommandId())
+                        .help("List one dataset")
                         .addArgument(new Argument()
-                                .name("study-name")
+                                .name("dataset-name")
                                 .optional(false)
-                                .help("name of the study to show")))
+                                .help("name of the dataset to show")))
                 .addCommand(new Command()
-                        .primaryName("study")
+                        .primaryName("dataset")
                         .secondaryName("delete")
-                        .commandId(CommandEnum.COMMAND_STUDY_DELETE.getCommandId())
-                        .help("Delete a study")
+                        .commandId(CommandEnum.COMMAND_DATASET_DELETE.getCommandId())
+                        .help("Delete a dataset")
                         .addArgument(new Argument()
-                                .name("study-name")
+                                .name("dataset-name")
                                 .optional(false)
-                                .help("Name of the study to delete")))
+                                .help("Name of the dataset to delete")))
 
                 // -- session commands --
                 .addCommand(new Command()
@@ -216,5 +221,4 @@ public class Main {
                 );
 
     }
-
 }

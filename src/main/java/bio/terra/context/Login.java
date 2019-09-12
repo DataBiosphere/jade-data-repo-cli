@@ -1,6 +1,5 @@
 package bio.terra.context;
 
-import bio.terra.Main;
 import bio.terra.datarepo.client.Configuration;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -14,6 +13,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
@@ -46,18 +46,17 @@ public class Login {
                     "email",
                     "profile",
                     "https://www.googleapis.com/auth/devstorage.read_only");
-            File dataStoreDir = new File(System.getProperty("user.home"), ".jadecli/creds");
+            String homePath = System.getProperty("user.home");
+            File dataStoreDir = new File(homePath, ".jadecli/creds");
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(dataStoreDir);
 
             // load client secrets
-            String clientSecretPath = "/" + Context.getInstance().getContextItem(ContextEnum.APPLICATION_NAME) +
-                    "_client_secret.json";
-
+            File clientSecretsFile = new File(homePath, ".jadecli/client/jadecli_client_secret.json");
             GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory,
-                    new InputStreamReader(Main.class.getResourceAsStream(clientSecretPath)));
+                    new InputStreamReader(new FileInputStream(clientSecretsFile)));
 
             // set up authorization code flow
             GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(

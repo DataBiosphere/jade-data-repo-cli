@@ -1,9 +1,11 @@
 package bio.terra.formatting;
 
 /**
- * TableFormatInterface provides a simple interface used by TableFormatter to get
+ * TableFormatBase provides a base class used by TableFormatter to get
  * fields from an underlying object. It is up to the implementation to map index
  * to specific fields.
+ *
+ * You use this by making a derivation of TableFormatBase
  */
 public abstract class TableFormatBase {
     private String[] headers;

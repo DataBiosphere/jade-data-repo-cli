@@ -1,14 +1,14 @@
 package bio.terra.formatting;
 
-import bio.terra.datarepo.model.StudySummaryModel;
+import bio.terra.datarepo.model.DatasetSummaryModel;
 
-public class FormatStudySummary extends TableFormatBase {
+public class FormatDatasetSummary extends TableFormatBase {
     private static final String[] headers         = new String[]{"Name", "Id", "Created", "Description"};
     private static final int[] lengths            = new int[]{    20,     36,   27,       30};
     private static final boolean[] computeLengths = new boolean[]{true,   false,false,  true};
-    private StudySummaryModel summary;
+    private DatasetSummaryModel summary;
 
-    public FormatStudySummary(StudySummaryModel summary) {
+    public FormatDatasetSummary(DatasetSummaryModel summary) {
         super(headers, lengths, computeLengths);
         this.summary = summary;
     }

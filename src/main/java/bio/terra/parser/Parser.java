@@ -25,7 +25,6 @@ public class Parser {
             if (command != null) {
                 System.err.print("Help: ");
                 command.printHelpLine(System.err);
-                System.exit(1);
             }
             return null;
         }

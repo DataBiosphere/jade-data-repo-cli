@@ -1,6 +1,5 @@
 package bio.terra.command;
 
-import bio.terra.context.Context;
 import bio.terra.model.DRElement;
 import bio.terra.model.DRRoot;
 import org.apache.commons.lang3.StringUtils;
@@ -11,10 +10,10 @@ import java.util.LinkedList;
 // General lookup for objects in the logical hierarchy. The lingua franca is derivations from DRElement
 //
 // hierarchy is:
-//  /                - (0) contains study and dataset objects
-//  /<study>/        - (1) contains pseudo-dirs 'files' and 'tables'
-//  /<study>/files/  - (2) the '/' directory of the file system
-//  /<study>/tables/ - (2) the tables in the study
+//  /                  - (0) contains dataset and snapshot objects
+//  /<dataset>/        - (1) contains pseudo-dirs 'files' and 'tables'
+//  /<dataset>/files/  - (2) the '/' directory of the file system
+//  /<dataset>/tables/ - (2) the tables in the dataset
 //
 // The lookup is done by recursing through the element types starting at the root.
 
