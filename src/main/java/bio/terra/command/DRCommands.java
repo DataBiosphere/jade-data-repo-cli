@@ -20,7 +20,7 @@ import java.util.List;
 // TODO: snapshot layer
 
 public class DRCommands {
-    private static final String LIST_FORMAT = "%s%-7s  %-20s  %s  %s  %s\n";
+    private static final String LIST_FORMAT = "%s%-8s  %-20s  %s  %s  %s\n";
 
     private static DRCommands theDRCommands;
 

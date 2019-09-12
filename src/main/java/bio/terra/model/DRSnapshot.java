@@ -18,7 +18,7 @@ public class DRSnapshot extends DRElement {
 
     @Override
     public DRElementType getObjectType() {
-        return DRElementType.DR_ELEMENT_TYPE_DATASET;
+        return DRElementType.DR_ELEMENT_TYPE_SNAPSHOT;
     }
 
     @Override

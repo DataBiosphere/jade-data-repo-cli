@@ -78,7 +78,7 @@ public class DRDatasetFiles extends DRElement {
     private FileModel getFileModel() {
         try {
             FileModel fileModel = DRApis.getRepositoryApi()
-                    .lookupFileByPath(datasetElement.getId(), "/", 1);
+                    .lookupFileByPath(datasetElement.getId(), "/", 0);
             return fileModel;
         } catch (ApiException ex) {
             CommandUtils.printErrorAndExit("Error getting root file object");

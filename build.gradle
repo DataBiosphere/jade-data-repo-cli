@@ -127,6 +127,10 @@ sourceSets {
 }
 mainClassName = 'bio.terra.Main'
 
+jar {
+    from sourceSets.generated.output
+}
+
 compileGeneratedJava.dependsOn generateApi
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
