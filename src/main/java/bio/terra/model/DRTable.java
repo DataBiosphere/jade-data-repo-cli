@@ -12,12 +12,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class DRTable extends DRElement {
-    private DRElement studyOrDataset;
+    private String created;
     private TableModel tableModel;
 
-    public DRTable(DRElement studyOrDataset, TableModel tableModel) {
+    public DRTable(TableModel tableModel, String created) {
         this.tableModel = tableModel;
-        this.studyOrDataset = studyOrDataset;
+        this.created = created;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class DRTable extends DRElement {
 
     @Override
     public String getCreated() {
-        return studyOrDataset.getCreated();
+        return created;
     }
 
     @Override
@@ -65,13 +65,13 @@ public class DRTable extends DRElement {
         }
         TableFormatter<FormatColumn> formatter = new TableFormatter<>(formatColumns, System.out, 4);
         formatter.printTable();
-        System.out.println("");
+        System.out.println(StringUtils.EMPTY);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("studyOrDataset", studyOrDataset)
+                .append("created", created)
                 .append("tableModel", tableModel)
                 .toString();
     }

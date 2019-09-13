@@ -9,18 +9,26 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.LinkedList;
 import java.util.List;
 
-public class DRDatasetFiles extends DRElement {
+import static bio.terra.model.DRCollectionType.COLLECTION_TYPE_DATASET;
+
+public class DRCollectionFiles extends DRElement {
     private static final String SLASH = "/";
 
-    private DRDataset datasetElement;
+    private DRCollectionType collectionType;
+    private String collectionId;
+    private String created;
 
-    public DRDatasetFiles(DRDataset datasetElement) {
-        this.datasetElement = datasetElement;
+    public DRCollectionFiles(DRCollectionType collectionType,
+                             String collectionId,
+                             String created) {
+        this.collectionType = collectionType;
+        this.collectionId = collectionId;
+        this.created = created;
     }
 
     @Override
     public DRElementType getObjectType() {
-        return DRElementType.DR_ELEMENT_TYPE_CONTAINER;
+        return DRElementType.DR_ELEMENT_TYPE_COLLECTION;
     }
 
     @Override
@@ -30,7 +38,7 @@ public class DRDatasetFiles extends DRElement {
 
     @Override
     public String getCreated() {
-        return datasetElement.getCreated();
+        return created;
     }
 
     @Override
@@ -40,7 +48,8 @@ public class DRDatasetFiles extends DRElement {
 
     @Override
     public String getDescription() {
-        return "File system view of files in a dataset";
+        return "File system view of files in a dataset" +
+                (collectionType == COLLECTION_TYPE_DATASET ? "dataset" : "snapshot");
     }
 
     @Override
@@ -57,11 +66,10 @@ public class DRDatasetFiles extends DRElement {
         }
 
         try {
-            FileModel fileModel = DRApis.getRepositoryApi()
-                    .lookupFileByPath(datasetElement.getId(), path, 1);
+            FileModel fileModel = pathLookup(path, 1);
             return new DRFile(fileModel);
         } catch (ApiException ex) {
-            CommandUtils.printErrorAndExit("Error processing dataset files enumeration");
+            CommandUtils.printErrorAndExit("Error processing files enumeration");
         }
         return null; // unreachable
     }
@@ -73,17 +81,20 @@ public class DRDatasetFiles extends DRElement {
         return rootDir.enumerate();
     }
 
-    // TODO: Add a describe that does the describe on the top level file directory
-
     private FileModel getFileModel() {
         try {
-            FileModel fileModel = DRApis.getRepositoryApi()
-                    .lookupFileByPath(datasetElement.getId(), "/", 0);
-            return fileModel;
+            return pathLookup("/", 1);
         } catch (ApiException ex) {
             CommandUtils.printErrorAndExit("Error getting root file object");
         }
         return null; // unreachable
+    }
+
+    private FileModel pathLookup(String path, int depth) throws ApiException {
+        if (collectionType == COLLECTION_TYPE_DATASET) {
+            return DRApis.getRepositoryApi().lookupFileByPath(collectionId, path, depth);
+        }
+        return DRApis.getRepositoryApi().lookupSnapshotFileByPath(collectionId, path, depth);
     }
 
 }

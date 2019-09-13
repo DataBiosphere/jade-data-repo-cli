@@ -1,6 +1,9 @@
 package bio.terra.model;
 
 import bio.terra.command.CommandUtils;
+import bio.terra.command.DRApis;
+import bio.terra.datarepo.client.ApiException;
+import bio.terra.datarepo.model.SnapshotModel;
 import bio.terra.datarepo.model.SnapshotSummaryModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -47,21 +50,35 @@ public class DRSnapshot extends DRElement {
             return this;
         }
         String name = pathParts.remove();
-
         if (StringUtils.equalsIgnoreCase(name, "files")) {
-            return new DRSnapshotFiles(this).lookup(pathParts);
+            return new DRCollectionFiles(
+                    DRCollectionType.COLLECTION_TYPE_SNAPSHOT,
+                    summary.getId(),
+                    summary.getCreatedDate());
         } else if (StringUtils.equalsIgnoreCase(name, "tables")) {
-            return new DRSnapshotTables(this).lookup(pathParts);
+            SnapshotModel snapshot = getSnapshot(summary.getId());
+            return new DRCollectionTables(
+                    DRCollectionType.COLLECTION_TYPE_SNAPSHOT,
+                    snapshot.getCreatedDate(),
+                    snapshot.getTables());
         }
+
         CommandUtils.printErrorAndExit("Object not found");
         return null; //unreachabe
     }
 
     @Override
     public List<DRElement> enumerate() {
+        SnapshotModel snapshot = getSnapshot(summary.getId());
         List<DRElement> elementList = new ArrayList<>();
-        elementList.add(new DRSnapshotFiles(this));
-        elementList.add(new DRSnapshotTables(this));
+        elementList.add(new DRCollectionFiles(
+                DRCollectionType.COLLECTION_TYPE_SNAPSHOT,
+                summary.getId(),
+                summary.getCreatedDate()));
+        elementList.add(new DRCollectionTables(
+                DRCollectionType.COLLECTION_TYPE_SNAPSHOT,
+                snapshot.getCreatedDate(),
+                snapshot.getTables()));
         return elementList;
     }
 
@@ -70,5 +87,15 @@ public class DRSnapshot extends DRElement {
         return new ToStringBuilder(this)
                 .append("summary", summary)
                 .toString();
+    }
+
+    private SnapshotModel getSnapshot(String id) {
+        try {
+            return DRApis.getRepositoryApi().retrieveSnapshot(id);
+        } catch (ApiException ex) {
+            System.err.println("Error retrieving snapshot");
+            CommandUtils.printErrorAndExit(ex.getMessage());
+        }
+        return null; // unreachable
     }
 }

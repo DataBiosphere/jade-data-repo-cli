@@ -12,12 +12,13 @@ import java.util.List;
 // dir, file, dataset, snapshot, cont(ainer)
 //
 // hierarchy is:
-//  /                - contains dataset and snapshot objects
+//  /                  - contains dataset and snapshot objects
 //  /<dataset>/        - contains pseudo-dirs 'files' and 'tables'
 //  /<dataset>/files/  - the '/' directory of the file system
 //  /<dataset>/tables/ - the tables in the dataset
 //
 // TODO: snapshot layer
+// TODO: use TableFormatter
 
 public class DRCommands {
     private static final String LIST_FORMAT = "%s%-8s  %-20s  %s  %s  %s\n";

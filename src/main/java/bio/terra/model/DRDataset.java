@@ -55,9 +55,14 @@ public class DRDataset extends DRElement {
         }
         String name = pathParts.remove();
         if (StringUtils.equalsIgnoreCase(name, "files")) {
-            return new DRDatasetFiles(this).lookup(pathParts);
+            return new DRCollectionFiles(DRCollectionType.COLLECTION_TYPE_DATASET,
+                    summary.getId(),
+                    summary.getCreatedDate());
         } else if (StringUtils.equalsIgnoreCase(name, "tables")) {
-            return new DRDatasetTables(this).lookup(pathParts);
+            DatasetModel dataset = getDataset(summary.getId());
+            return new DRCollectionTables(DRCollectionType.COLLECTION_TYPE_DATASET,
+                    dataset.getCreatedDate(),
+                    dataset.getSchema().getTables());
         }
         CommandUtils.printErrorAndExit("Object not found");
         return null; //unreachabe
@@ -65,9 +70,16 @@ public class DRDataset extends DRElement {
 
     @Override
     public List<DRElement> enumerate() {
+        DatasetModel dataset = getDataset(summary.getId());
         List<DRElement> elementList = new ArrayList<>();
-        elementList.add(new DRDatasetFiles(this));
-        elementList.add(new DRDatasetTables(this));
+        elementList.add(new DRCollectionFiles(
+                DRCollectionType.COLLECTION_TYPE_DATASET,
+                dataset.getId(),
+                dataset.getCreatedDate()));
+        elementList.add(new DRCollectionTables(
+                DRCollectionType.COLLECTION_TYPE_DATASET,
+                dataset.getCreatedDate(),
+                dataset.getSchema().getTables()));
         return elementList;
     }
 
@@ -82,7 +94,7 @@ public class DRDataset extends DRElement {
             System.out.println("createdDate: " + dataset.getCreatedDate());
             System.out.println("..Tables");
             for (TableModel table : dataset.getSchema().getTables()) {
-                new DRTable(this, table).describe();
+                new DRTable(table, dataset.getCreatedDate()).describe();
             }
             System.out.println("..Relationships");
             printRelationships(dataset.getSchema().getRelationships());
@@ -141,4 +153,13 @@ public class DRDataset extends DRElement {
         }
     }
 
+    private DatasetModel getDataset(String id) {
+        try {
+            return DRApis.getRepositoryApi().retrieveDataset(id);
+        } catch (ApiException ex) {
+            System.err.println("Error retrieving dataset");
+            CommandUtils.printErrorAndExit(ex.getMessage());
+        }
+        return null; // unreachable
+    }
 }
