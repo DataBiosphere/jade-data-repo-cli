@@ -1,13 +1,20 @@
 package bio.terra.command;
 
+import bio.terra.datarepo.api.RepositoryApi;
 import bio.terra.datarepo.client.ApiException;
 import bio.terra.datarepo.model.DatasetRequestModel;
 import bio.terra.datarepo.model.DatasetSummaryModel;
 import bio.terra.datarepo.model.DeleteResponseModel;
+import bio.terra.datarepo.model.FileLoadModel;
+import bio.terra.datarepo.model.FileModel;
+import bio.terra.datarepo.model.JobModel;
 import bio.terra.model.DRDataset;
+import bio.terra.model.DRFile;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 
 public class DatasetCommands {
     private static DatasetCommands theDatasetCommands;
@@ -44,17 +51,68 @@ public class DatasetCommands {
 
         try {
             DeleteResponseModel deleteResponse = DRApis.getRepositoryApi().deleteDataset(summary.getId());
-            System.out.printf("Study deleted: %s (%s)", datasetName, deleteResponse.getObjectState().getValue());
+            System.out.printf("Dataset deleted: %s (%s)", datasetName, deleteResponse.getObjectState().getValue());
         } catch (ApiException ex) {
-            System.out.println("Error processing study delete:");
+            System.out.println("Error processing dataset delete:");
             CommandUtils.printError(ex);
         }
     }
 
     public void datasetShow(String datasetName) {
-        // Show study is the same as describe
+        // Show dataset is the same as describe
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
-        DRDataset studyElement = new DRDataset(summary);
-        studyElement.describe();
+        DRDataset datasetElement = new DRDataset(summary);
+        datasetElement.describe();
+    }
+
+    public void datasetIngestFile(String datasetName,
+                                  String profileId,
+                                  String inputGspath,
+                                  String targetPath,
+                                  String mimeType,
+                                  String description) {
+        DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
+
+        try {
+            if (profileId == null) {
+                profileId = summary.getDefaultProfileId();
+            }
+
+            if (targetPath == null) {
+                targetPath = URI.create(inputGspath).getPath();
+            }
+
+            if (mimeType == null) {
+                mimeType = StringUtils.EMPTY;
+            }
+
+            if (description == null) {
+                description = StringUtils.EMPTY;
+            }
+
+            FileLoadModel loadModel = new FileLoadModel()
+                    .profileId(profileId)
+                    .sourcePath(inputGspath)
+                    .targetPath(targetPath)
+                    .mimeType(mimeType)
+                    .description(description);
+
+            RepositoryApi api = DRApis.getRepositoryApi();
+            JobModel jobModel = api.ingestFile(summary.getId(), loadModel);
+            FileModel fileModel = CommandUtils.waitForResponse(
+                        api,
+                        jobModel,
+                        1,
+                        FileModel.class);
+
+
+            DRFile drFile = new DRFile(fileModel);
+            drFile.describe();
+
+        } catch (ApiException ex) {
+            System.out.println("Error processing file ingest: ");
+            CommandUtils.printError(ex);
+        }
+
     }
 }

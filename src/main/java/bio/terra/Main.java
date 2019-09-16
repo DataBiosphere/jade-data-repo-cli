@@ -5,6 +5,7 @@ import bio.terra.command.CommandUtils;
 import bio.terra.command.DRCommands;
 import bio.terra.command.HelpCommands;
 import bio.terra.command.DatasetCommands;
+import bio.terra.command.ProfileCommands;
 import bio.terra.context.Context;
 import bio.terra.context.ContextEnum;
 import bio.terra.parser.Argument;
@@ -44,6 +45,15 @@ public class Main {
                 case COMMAND_DATASET_DELETE:
                     DatasetCommands.getInstance().datasetDelete(result.getArgument("dataset-name"));
                     break;
+                case COMMAND_DATASET_FILE:
+                    DatasetCommands.getInstance().datasetIngestFile(
+                            result.getArgument("dataset-name"),
+                            result.getArgument("profile-id"),
+                            result.getArgument("input-gspath"),
+                            result.getArgument("target-path"),
+                            result.getArgument("mime-type"),
+                            result.getArgument("description"));
+                    break;
 
                 case COMMAND_SESSION_CD:
                     Context.getInstance().setContextItem(ContextEnum.PWD, result.getArgument("path"));
@@ -74,6 +84,21 @@ public class Main {
                     DRCommands.getInstance().drStream(result.getArgument("path"));
                     break;
 
+                case COMMAND_PROFILE_CREATE:
+                    ProfileCommands.getInstance().profileCreate(
+                            result.getArgument("name"),
+                            result.getArgument("account"),
+                            result.getArgument("biller"));
+                    break;
+
+                case COMMAND_PROFILE_DELETE:
+                    ProfileCommands.getInstance().profileDelete(result.getArgument("name"));
+                    break;
+
+                case COMMAND_PROFILE_SHOW:
+                    ProfileCommands.getInstance().profileShow(result.getArgument("name"));
+                    break;
+
                 default:
                     throw new IllegalArgumentException("Yikes! We shouldn't be here.");
             }
@@ -85,6 +110,7 @@ public class Main {
 
     private static Syntax makeSyntax() {
         return new Syntax()
+                // -- Dataset Commands --
                 .addCommand(new Command()
                         .primaryName("dataset")
                         .secondaryName("create")
@@ -114,6 +140,47 @@ public class Main {
                                 .name("dataset-name")
                                 .optional(false)
                                 .help("Name of the dataset to delete")))
+                .addCommand(new Command()
+                        .primaryName("dataset")
+                        .secondaryName("file")
+                        .commandId(CommandEnum.COMMAND_DATASET_FILE.getCommandId())
+                        .help("Copy one file into a dataset")
+                        .addArgument(new Argument()
+                                .name("dataset-name")
+                                .optional(false)
+                                .help("Name of the dataset where the file should go"))
+                        .addOption(new Option()
+                                .shortName("p")
+                                .longName("profile-id")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Identifies the profile to use for allocating storage for the file." +
+                                        " Defaults to the dataset profile, if not specified."))
+                        .addOption(new Option()
+                                .shortName("i")
+                                .longName("input-gspath")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("GCS URI to the source input file"))
+                        .addOption(new Option()
+                                .shortName("t")
+                                .longName("target-path")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Target file system path in the dataset. " +
+                                        "If not present, the path is derived from the input gspath"))
+                        .addOption(new Option()
+                                .shortName("m")
+                                .longName("mime-type")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Mime type of the file"))
+                        .addOption(new Option()
+                                .shortName("d")
+                                .longName("description")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Description of the file being copied")))
 
                 // -- session commands --
                 .addCommand(new Command()
@@ -205,7 +272,50 @@ public class Main {
                                 .optional(false)
                                 .help("Path to an object")))
 
-                // -- help command--
+                // -- profile commands --
+                .addCommand(new Command()
+                        .primaryName("profile")
+                        .secondaryName("create")
+                        .commandId(CommandEnum.COMMAND_PROFILE_CREATE.getCommandId())
+                        .help("Create a new profile")
+                        .addOption(new Option()
+                                .shortName("n")
+                                .longName("name")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("Profile name"))
+                        .addOption(new Option()
+                                .shortName("a")
+                                .longName("account")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("Billing account"))
+                        .addOption(new Option()
+                                .shortName("b")
+                                .longName("biller")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Biller; defaults to 'direct'")))
+                .addCommand(new Command()
+                        .primaryName("profile")
+                        .secondaryName("delete")
+                        .commandId(CommandEnum.COMMAND_PROFILE_DELETE.getCommandId())
+                        .help("Delete a profile")
+                        .addArgument(new Argument()
+                                .name("name")
+                                .optional(false)
+                                .help("Name of the profile to delete")))
+                .addCommand(new Command()
+                        .primaryName("profile")
+                        .secondaryName("show")
+                        .commandId(CommandEnum.COMMAND_PROFILE_SHOW.getCommandId())
+                        .help("Show a profile")
+                        .addArgument(new Argument()
+                                .name("name")
+                                .optional(true)
+                                .help("Name of the profile to show. Defaults to showing all accessible profiles")))
+
+                // -- help command --
                 .addCommand(new Command()
                         .primaryName("help")
                         .commandId(CommandEnum.COMMAND_HELP.getCommandId())

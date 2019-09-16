@@ -4,7 +4,9 @@ import bio.terra.context.Context;
 import bio.terra.context.ContextEnum;
 import bio.terra.datarepo.api.RepositoryApi;
 import bio.terra.datarepo.client.ApiException;
+import bio.terra.datarepo.model.BillingProfileModel;
 import bio.terra.datarepo.model.DatasetSummaryModel;
+import bio.terra.datarepo.model.EnumerateBillingProfileModel;
 import bio.terra.datarepo.model.EnumerateDatasetModel;
 import bio.terra.datarepo.model.ErrorModel;
 import bio.terra.datarepo.model.JobModel;
@@ -91,6 +93,24 @@ public class CommandUtils {
                 }
             }
             CommandUtils.printErrorAndExit("Dataset not found: " + datasetName);
+            return null;
+
+        } catch (ApiException ex) {
+            throw new IllegalArgumentException("Error processing find dataset by name");
+        }
+    }
+
+    public static BillingProfileModel findProfileByName(String profileName) {
+        try {
+            EnumerateBillingProfileModel enumerateProfiles = DRApis.getResourcesApi().enumerateProfiles(0, 100000);
+
+            List<BillingProfileModel> profiles = enumerateProfiles.getItems();
+            for (BillingProfileModel profile : profiles) {
+                if (StringUtils.equals(profile.getProfileName(), profileName)) {
+                    return profile;
+                }
+            }
+            CommandUtils.printErrorAndExit("Profile not found: " + profileName);
             return null;
 
         } catch (ApiException ex) {

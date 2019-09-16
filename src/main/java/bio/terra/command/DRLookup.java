@@ -18,16 +18,16 @@ import java.util.LinkedList;
 // The lookup is done by recursing through the element types starting at the root.
 
 public class DRLookup {
-    private static DRLookup theDRCommands;
+    private static DRLookup theDRLookup;
 
     private DRLookup() {
     }
 
     public static DRLookup getInstance(){
-        if(theDRCommands == null){
-            theDRCommands = new DRLookup();
+        if(theDRLookup == null){
+            theDRLookup = new DRLookup();
         }
-        return theDRCommands;
+        return theDRLookup;
     }
 
     public DRElement lookup(String inPath) {
