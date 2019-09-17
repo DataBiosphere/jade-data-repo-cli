@@ -4,6 +4,7 @@ import bio.terra.command.CommandUtils;
 import bio.terra.command.DRApis;
 import bio.terra.datarepo.client.ApiException;
 import bio.terra.datarepo.model.DRSChecksum;
+import bio.terra.datarepo.model.DirectoryDetailModel;
 import bio.terra.datarepo.model.FileModel;
 import bio.terra.datarepo.model.FileModelType;
 import org.apache.commons.lang3.StringUtils;
@@ -14,8 +15,10 @@ import java.util.List;
 
 public class DRFile extends DRElement {
     private FileModel fileModel;
+    private DRCollectionType collectionType;
 
-    public DRFile(FileModel fileModel) {
+    public DRFile(DRCollectionType collectionType, FileModel fileModel) {
+        this.collectionType = collectionType;
         this.fileModel = fileModel;
     }
 
@@ -50,28 +53,28 @@ public class DRFile extends DRElement {
     @Override
     public List<DRElement> enumerate() {
         if (fileModel.getFileType() == FileModelType.DIRECTORY) {
-            // There are two cases here.
-            // Case 1: this directory came from a top-level get and has contents.
-            // Case 2: this directory was a leaf from a get and has no contents.
-            // In case 2, we re-retrieve the object to get its contents. And we
-            // replace the fileModel in this class.
-            // TODO: I don't think this will work in the dataset case. Eventually, we will need
-            // to know where the file came from (dataset or study) and do the right retrieval.
-            // TODO: I need to decide what depth to get at once. And be consistent about the
-            // semantics of an empty directory detail (not enumerated? and an empty list)??
-            if (fileModel.getDirectoryDetail() == null) {
+            DirectoryDetailModel directoryDetail = fileModel.getDirectoryDetail();
+            // If the directory is not enumerated, then enumerate it
+            if (!directoryDetail.isEnumerated()) {
                 try {
-                    FileModel enumDir = DRApis.getRepositoryApi()
-                                    .lookupFileById(fileModel.getCollectionId(), fileModel.getFileId(), 1);
+                    FileModel enumDir;
+                    if (collectionType == DRCollectionType.COLLECTION_TYPE_DATASET) {
+                        enumDir = DRApis.getRepositoryApi()
+                                .lookupFileById(fileModel.getCollectionId(), fileModel.getFileId(), 1);
+                    } else {
+                        enumDir = DRApis.getRepositoryApi()
+                                .lookupSnapshotFileById(fileModel.getCollectionId(), fileModel.getFileId(), 1);
+                    }
                     fileModel = enumDir;
                 } catch (ApiException ex) {
-                    throw new IllegalArgumentException("Error processing directory enumerate");
+                    System.err.println("Error processing directory enumerate:");
+                    CommandUtils.printError(ex);
                 }
             }
 
             List<DRElement> elementList = new ArrayList<>();
             for (FileModel item : fileModel.getDirectoryDetail().getContents()) {
-                elementList.add(new DRFile(item));
+                elementList.add(new DRFile(collectionType, item));
             }
 
             return elementList;

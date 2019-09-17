@@ -20,7 +20,7 @@ public abstract class DRElement {
     // Each element has to be able to lookup a child path. If the element is the last part in the path;
     // that is, the path is empty after it is resolved, then the element returns itself. Otherwise,
     // it recursively calls. When we hit a file system, it looks up in its directory tree, so we don't
-    // worry about those. That limits the recursion to at most 3 levels: study, files/tables, file/table.
+    // worry about those. That limits the recursion to at most 3 levels: dataset/snapshot, files/tables, file/table.
     // After that, it is an error or it is a leaf.
     public DRElement lookup(LinkedList<String> pathParts) {
         return this;

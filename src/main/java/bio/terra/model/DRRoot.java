@@ -20,7 +20,7 @@ public class DRRoot extends DRElement {
 
     @Override
     public DRElementType getObjectType() {
-        return DRElementType.DR_ELEMENT_TYPE_CONTAINER;
+        return DRElementType.DR_ELEMENT_TYPE_COLLECTION;
     }
 
     @Override

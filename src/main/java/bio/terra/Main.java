@@ -3,13 +3,11 @@ package bio.terra;
 import bio.terra.command.CommandEnum;
 import bio.terra.command.CommandUtils;
 import bio.terra.command.DRCommands;
-import bio.terra.command.HelpCommands;
 import bio.terra.command.DatasetCommands;
-import bio.terra.context.Context;
-import bio.terra.context.ContextEnum;
-import bio.terra.parser.Argument;
-import bio.terra.parser.Command;
-import bio.terra.parser.Option;
+import bio.terra.command.HelpCommands;
+import bio.terra.command.ProfileCommands;
+import bio.terra.command.SessionCommands;
+import bio.terra.command.SnapshotCommands;
 import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Parser;
 import bio.terra.parser.Syntax;
@@ -36,28 +34,37 @@ public class Main {
                 break;
 
                 case COMMAND_DATASET_CREATE:
-                    DatasetCommands.getInstance().datasetCreate(result.getArgument("input-json"));
+                    DatasetCommands.datasetCreate(result.getArgument("input-json"));
                     break;
                 case COMMAND_DATASET_SHOW:
-                    DatasetCommands.getInstance().datasetShow(result.getArgument("dataset-name"));
+                    DatasetCommands.datasetShow(result.getArgument("dataset-name"));
                     break;
                 case COMMAND_DATASET_DELETE:
-                    DatasetCommands.getInstance().datasetDelete(result.getArgument("dataset-name"));
+                    DatasetCommands.datasetDelete(result.getArgument("dataset-name"));
                     break;
-
-                case COMMAND_SESSION_CD:
-                    Context.getInstance().setContextItem(ContextEnum.PWD, result.getArgument("path"));
+                case COMMAND_DATASET_FILE:
+                    DatasetCommands.datasetIngestFile(
+                            result.getArgument("dataset-name"),
+                            result.getArgument("profile-id"),
+                            result.getArgument("input-gspath"),
+                            result.getArgument("target-path"),
+                            result.getArgument("mime-type"),
+                            result.getArgument("description"));
                     break;
-                case COMMAND_SESSION_PWD:
-                    System.out.println(Context.getInstance().getContextItem(ContextEnum.PWD));
+                case COMMAND_DATASET_POLICY_ADD:
+                    DatasetCommands.datasetPolicyAdd(
+                            result.getArgument("dataset-name"),
+                            result.getArgument("policy"),
+                            result.getArgument("email"));
                     break;
-                case COMMAND_SESSION_SHOW:
-                    Context.getInstance().showContextItems();
+                case COMMAND_DATASET_POLICY_REMOVE:
+                    DatasetCommands.datasetPolicyRemove(
+                            result.getArgument("dataset-name"),
+                            result.getArgument("policy"),
+                            result.getArgument("email"));
                     break;
-                case COMMAND_SESSION_SET:
-                    Context.getInstance().setContextItemByName(
-                            result.getArgument("name"),
-                            result.getArgument("value"));
+                case COMMAND_DATASET_POLICY_SHOW:
+                    DatasetCommands.datasetPolicyShow(result.getArgument("dataset-name"));
                     break;
 
                 case COMMAND_DR_LIST:
@@ -74,6 +81,63 @@ public class Main {
                     DRCommands.getInstance().drStream(result.getArgument("path"));
                     break;
 
+                case COMMAND_PROFILE_CREATE:
+                    ProfileCommands.getInstance().profileCreate(
+                            result.getArgument("name"),
+                            result.getArgument("account"),
+                            result.getArgument("biller"));
+                    break;
+
+                case COMMAND_PROFILE_DELETE:
+                    ProfileCommands.getInstance().profileDelete(result.getArgument("name"));
+                    break;
+
+                case COMMAND_PROFILE_SHOW:
+                    ProfileCommands.getInstance().profileShow(result.getArgument("name"));
+                    break;
+
+                case COMMAND_SESSION_CD:
+                    SessionCommands.sessionCd(result.getArgument("path"));
+                    break;
+                case COMMAND_SESSION_PWD:
+                    SessionCommands.sessionPwd();
+                    break;
+                case COMMAND_SESSION_SHOW:
+                    SessionCommands.sessionShow();
+                    break;
+                case COMMAND_SESSION_SET:
+                    SessionCommands.sessionSet(
+                            result.getArgument("name"),
+                            result.getArgument("value"));
+                    break;
+
+                case COMMAND_SNAPSHOT_CREATE:
+                    SnapshotCommands.snapshotCreate(result.getArgument("input-json"));
+                    break;
+                case COMMAND_SNAPSHOT_SHOW:
+                    SnapshotCommands.snapshotShow(result.getArgument("snapshot-name"));
+                    break;
+                case COMMAND_SNAPSHOT_DELETE:
+                    SnapshotCommands.snapshotDelete(result.getArgument("snapshot-name"));
+                    break;
+                case COMMAND_SNAPSHOT_POLICY_ADD:
+                    SnapshotCommands.snapshotPolicyAdd(
+                            result.getArgument("snapshot-name"),
+                            result.getArgument("policy"),
+                            result.getArgument("email"));
+                    break;
+                case COMMAND_SNAPSHOT_POLICY_REMOVE:
+                    SnapshotCommands.snapshotPolicyRemove(
+                            result.getArgument("snapshot-name"),
+                            result.getArgument("policy"),
+                            result.getArgument("email"));
+                    break;
+                case COMMAND_SNAPSHOT_POLICY_SHOW:
+                    SnapshotCommands.snapshotPolicyShow(result.getArgument("snapshot-name"));
+                    break;
+
+
+
                 default:
                     throw new IllegalArgumentException("Yikes! We shouldn't be here.");
             }
@@ -85,140 +149,11 @@ public class Main {
 
     private static Syntax makeSyntax() {
         return new Syntax()
-                .addCommand(new Command()
-                        .primaryName("dataset")
-                        .secondaryName("create")
-                        .commandId(CommandEnum.COMMAND_DATASET_CREATE.getCommandId())
-                        .help("Create a new dataset")
-                        .addOption(new Option()
-                                .shortName("i")
-                                .longName("input-json")
-                                .hasArgument(true)
-                                .optional(false)
-                                .help("Path to a file containing the JSON form of a dataset")))
-                .addCommand(new Command()
-                        .primaryName("dataset")
-                        .secondaryName("show")
-                        .commandId(CommandEnum.COMMAND_DATASET_SHOW.getCommandId())
-                        .help("List one dataset")
-                        .addArgument(new Argument()
-                                .name("dataset-name")
-                                .optional(false)
-                                .help("name of the dataset to show")))
-                .addCommand(new Command()
-                        .primaryName("dataset")
-                        .secondaryName("delete")
-                        .commandId(CommandEnum.COMMAND_DATASET_DELETE.getCommandId())
-                        .help("Delete a dataset")
-                        .addArgument(new Argument()
-                                .name("dataset-name")
-                                .optional(false)
-                                .help("Name of the dataset to delete")))
-
-                // -- session commands --
-                .addCommand(new Command()
-                        .primaryName("session")
-                        .secondaryName("cd")
-                        .alternateNames(new String[]{"cd"})
-                        .commandId(CommandEnum.COMMAND_SESSION_CD.getCommandId())
-                        .help("set the current directory context in jadecli")
-                        .addArgument(new Argument()
-                                .name("path")
-                                .optional(true)
-                                .help("Path to a directory in the data repo")))
-                .addCommand(new Command()
-                        .primaryName("session")
-                        .secondaryName("pwd")
-                        .alternateNames(new String[]{"pwd"})
-                        .commandId(CommandEnum.COMMAND_SESSION_PWD.getCommandId())
-                        .help("show the current directory context in jadecli"))
-                .addCommand(new Command()
-                        .primaryName("session")
-                        .secondaryName("show")
-                        .commandId(CommandEnum.COMMAND_SESSION_SHOW.getCommandId())
-                        .help("show all session properties"))
-                .addCommand(new Command()
-                        .primaryName("session")
-                        .secondaryName("set")
-                        .commandId(CommandEnum.COMMAND_SESSION_SET.getCommandId())
-                        .help("set a session property")
-                        .addArgument(new Argument()
-                                .name("name")
-                                .optional(false)
-                                .help("name of the session property"))
-                        .addArgument(new Argument()
-                                .name("value")
-                                .optional(false)
-                                .help("value to assign the session property")))
-
-                // -- hierarchy commands --
-                .addCommand(new Command()
-                        .primaryName("dr")
-                        .secondaryName("list")
-                        .alternateNames(new String[]{"ls"})
-                        .commandId(CommandEnum.COMMAND_DR_LIST.getCommandId())
-                        .help("list data repo objects")
-                        .addOption(new Option()
-                                .shortName("R")
-                                .longName("recurse")
-                                .hasArgument(false)
-                                .optional(true)
-                                .help("Recurses from the path listing all elements under the path"))
-                        .addArgument(new Argument()
-                                .name("path")
-                                .optional(true)
-                                .help("Path to an object - sorry, no wildcards yet")))
-                .addCommand(new Command()
-                        .primaryName("dr")
-                        .secondaryName("tree")
-                        .alternateNames(new String[]{"tree"})
-                        .commandId(CommandEnum.COMMAND_DR_TREE.getCommandId())
-                        .help("tree formatted list of data repo objects")
-                        .addOption(new Option()
-                                .shortName("d")
-                                .longName("depth")
-                                .hasArgument(true)
-                                .optional(true)
-                                .help("depth to recurse; if unspecified, the full tree is traversed"))
-                        .addArgument(new Argument()
-                                .name("path")
-                                .optional(true)
-                                .help("Path to an object - sorry, no wildcards yet")))
-                .addCommand(new Command()
-                        .primaryName("dr")
-                        .secondaryName("describe")
-                        .alternateNames(new String[]{"describe"})
-                        .commandId(CommandEnum.COMMAND_DR_DESCRIBE.getCommandId())
-                        .help("describe a data repo object")
-                        .addArgument(new Argument()
-                                .name("path")
-                                .optional(true)
-                                .help("Path to an object - sorry, no wildcards yet")))
-                .addCommand(new Command()
-                        .primaryName("dr")
-                        .secondaryName("stream")
-                        .alternateNames(new String[]{"cat"})
-                        .commandId(CommandEnum.COMMAND_DR_STREAM.getCommandId())
-                        .help("stream an object to standard out")
-                        .addArgument(new Argument()
-                                .name("path")
-                                .optional(false)
-                                .help("Path to an object")))
-
-                // -- help command--
-                .addCommand(new Command()
-                        .primaryName("help")
-                        .commandId(CommandEnum.COMMAND_HELP.getCommandId())
-                        .help("get help on commands")
-                        .addArgument(new Argument()
-                                .name("primary")
-                                .optional(true)
-                                .help("command to get help on"))
-                        .addArgument(new Argument()
-                                .name("secondary")
-                                .optional(true)
-                                .help("second word of command to get help on"))
-                );
-
+                .mergeSyntax(DatasetCommands.getSyntax())
+                .mergeSyntax(DRCommands.getSyntax())
+                .mergeSyntax(HelpCommands.getSyntax())
+                .mergeSyntax(ProfileCommands.getSyntax())
+                .mergeSyntax(SessionCommands.getSyntax())
+                .mergeSyntax(SnapshotCommands.getSyntax());
     }
 }
