@@ -8,6 +8,9 @@ import bio.terra.datarepo.model.DeleteResponseModel;
 import bio.terra.datarepo.model.FileLoadModel;
 import bio.terra.datarepo.model.FileModel;
 import bio.terra.datarepo.model.JobModel;
+import bio.terra.datarepo.model.PolicyMemberRequest;
+import bio.terra.datarepo.model.PolicyModel;
+import bio.terra.datarepo.model.PolicyResponse;
 import bio.terra.model.DRDataset;
 import bio.terra.model.DRFile;
 import bio.terra.parser.Argument;
@@ -22,17 +25,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 public class DatasetCommands {
-    private static DatasetCommands theDatasetCommands;
-
-    private DatasetCommands() {
-    }
-
-    public static DatasetCommands getInstance() {
-        if (theDatasetCommands == null) {
-            theDatasetCommands = new DatasetCommands();
-        }
-        return theDatasetCommands;
-    }
 
     public static Syntax getSyntax() {
         return new Syntax()
@@ -105,13 +97,61 @@ public class DatasetCommands {
                                 .longName("description")
                                 .hasArgument(true)
                                 .optional(true)
-                                .help("Description of the file being copied")));
+                                .help("Description of the file being copied")))
+                .addCommand(new Command()
+                        .primaryName("dataset")
+                        .secondaryName("policy-show")
+                        .commandId(CommandEnum.COMMAND_DATASET_POLICY_SHOW.getCommandId())
+                        .help("Show policies")
+                        .addArgument(new Argument()
+                                .name("dataset-name")
+                                .optional(false)
+                                .help("Name of the dataset")))
+                .addCommand(new Command()
+                        .primaryName("dataset")
+                        .secondaryName("policy-add")
+                        .commandId(CommandEnum.COMMAND_DATASET_POLICY_ADD.getCommandId())
+                        .help("Add a member to a policy")
+                        .addArgument(new Argument()
+                                .name("dataset-name")
+                                .optional(false)
+                                .help("Name of the dataset"))
+                        .addOption(new Option()
+                                .shortName("p")
+                                .longName("policy")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("The policy to add member to"))
+                        .addOption(new Option()
+                                .shortName("e")
+                                .longName("email")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("Email of the member to be added")))
+                .addCommand(new Command()
+                        .primaryName("dataset")
+                        .secondaryName("policy-remove")
+                        .commandId(CommandEnum.COMMAND_DATASET_POLICY_REMOVE.getCommandId())
+                        .help("Remove a member from a policy")
+                        .addArgument(new Argument()
+                                .name("dataset-name")
+                                .optional(false)
+                                .help("Name of the dataset"))
+                        .addOption(new Option()
+                                .shortName("p")
+                                .longName("policy")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("The policy to remove member from"))
+                        .addOption(new Option()
+                                .shortName("e")
+                                .longName("email")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("Email of the member to be removed")));
     }
 
-
-
-
-    public void datasetCreate(String jsonpath) {
+    public static void datasetCreate(String jsonpath) {
         try {
             File file = new File(jsonpath);
             DatasetRequestModel datasetRequestModel = CommandUtils.getObjectMapper().readValue(file, DatasetRequestModel.class);
@@ -128,7 +168,7 @@ public class DatasetCommands {
         }
     }
 
-    public void datasetDelete(String datasetName) {
+    public static void datasetDelete(String datasetName) {
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
 
         try {
@@ -140,14 +180,60 @@ public class DatasetCommands {
         }
     }
 
-    public void datasetShow(String datasetName) {
+    public static void datasetShow(String datasetName) {
         // Show dataset is the same as describe
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
         DRDataset datasetElement = new DRDataset(summary);
         datasetElement.describe();
     }
 
-    public void datasetIngestFile(String datasetName,
+    public static void datasetPolicyShow(String datasetName) {
+        DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
+        try {
+            PolicyResponse policyResponse = DRApis.getRepositoryApi().retrieveDatasetPolicies(summary.getId());
+            printPolicyResponse(policyResponse);
+        } catch (ApiException ex) {
+            System.out.println("Error processing show policy:");
+            CommandUtils.printError(ex);
+        }
+    }
+
+    public static void datasetPolicyAdd(String datasetName, String policyName, String email) {
+        PolicyMemberRequest member = new PolicyMemberRequest().email(email);
+        DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
+        try {
+            PolicyResponse policyResponse = DRApis.getRepositoryApi()
+                    .addDatasetPolicyMember(summary.getId(), policyName, member);
+            printPolicyResponse(policyResponse);
+        } catch (ApiException ex) {
+            System.out.println("Error adding policy member:");
+            CommandUtils.printError(ex);
+        }
+    }
+
+    public static void datasetPolicyRemove(String datasetName, String policyName, String email) {
+        DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
+        try {
+            PolicyResponse policyResponse = DRApis.getRepositoryApi()
+                    .deleteDatasetPolicyMember(summary.getId(), policyName, email);
+            printPolicyResponse(policyResponse);
+        } catch (ApiException ex) {
+            System.out.println("Error removing policy member:");
+            CommandUtils.printError(ex);
+        }
+    }
+
+    private static void printPolicyResponse(PolicyResponse policyResponse) {
+        for (PolicyModel policyModel : policyResponse.getPolicies()) {
+            System.out.println("Policy " + policyModel.getName());
+            for (String member : policyModel.getMembers()) {
+                System.out.println("  " + member);
+            }
+            System.out.println();
+        }
+    }
+
+    public static void datasetIngestFile(String datasetName,
                                   String profileId,
                                   String inputGspath,
                                   String targetPath,
@@ -202,4 +288,8 @@ public class DatasetCommands {
             CommandUtils.printErrorAndExit("Error decoding gspath into target URI:\n" + e.getMessage());
         }
     }
+
+
+
+
 }

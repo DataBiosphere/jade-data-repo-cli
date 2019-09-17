@@ -34,22 +34,37 @@ public class Main {
                 break;
 
                 case COMMAND_DATASET_CREATE:
-                    DatasetCommands.getInstance().datasetCreate(result.getArgument("input-json"));
+                    DatasetCommands.datasetCreate(result.getArgument("input-json"));
                     break;
                 case COMMAND_DATASET_SHOW:
-                    DatasetCommands.getInstance().datasetShow(result.getArgument("dataset-name"));
+                    DatasetCommands.datasetShow(result.getArgument("dataset-name"));
                     break;
                 case COMMAND_DATASET_DELETE:
-                    DatasetCommands.getInstance().datasetDelete(result.getArgument("dataset-name"));
+                    DatasetCommands.datasetDelete(result.getArgument("dataset-name"));
                     break;
                 case COMMAND_DATASET_FILE:
-                    DatasetCommands.getInstance().datasetIngestFile(
+                    DatasetCommands.datasetIngestFile(
                             result.getArgument("dataset-name"),
                             result.getArgument("profile-id"),
                             result.getArgument("input-gspath"),
                             result.getArgument("target-path"),
                             result.getArgument("mime-type"),
                             result.getArgument("description"));
+                    break;
+                case COMMAND_DATASET_POLICY_ADD:
+                    DatasetCommands.datasetPolicyAdd(
+                            result.getArgument("dataset-name"),
+                            result.getArgument("policy"),
+                            result.getArgument("email"));
+                    break;
+                case COMMAND_DATASET_POLICY_REMOVE:
+                    DatasetCommands.datasetPolicyRemove(
+                            result.getArgument("dataset-name"),
+                            result.getArgument("policy"),
+                            result.getArgument("email"));
+                    break;
+                case COMMAND_DATASET_POLICY_SHOW:
+                    DatasetCommands.datasetPolicyShow(result.getArgument("dataset-name"));
                     break;
 
                 case COMMAND_DR_LIST:
