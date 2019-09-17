@@ -13,6 +13,8 @@ import bio.terra.datarepo.model.JobModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -60,9 +62,13 @@ public class CommandUtils {
 
                     case 200:
                         // Done case: get the result with the header URL and return the response;
-                        // let the caller interpret the response
+                        // The object from retrieve is a LinkedHashMap (always AFAIK), so to get
+                        // the right type, I cast it and then convert it back into a JSON string.
+                        // TODO: this should handle ErrorModel and it doesn't!
                         Object object = api.retrieveJobResult(jobId);
-                        return (T)object;
+                        LinkedHashMap<String, Object> hashMap = (LinkedHashMap<String, Object>) object;
+                        String jsonString = objectMapper.writeValueAsString(hashMap);
+                        return objectMapper.readValue(jsonString, tClass);
 
                     default:
                         throw new IllegalStateException("We shouldn't be here");
@@ -72,6 +78,8 @@ public class CommandUtils {
             System.err.println("Exit due to interrupt");
         } catch (ApiException ex) {
             printErrorAndExit("Failed to retrieve job status or result: " + ex.getMessage());
+        } catch (IOException ex) {
+            printErrorAndExit("Failed to parse job result: " + ex.getMessage());
         }
 
         return null;

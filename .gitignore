@@ -36,7 +36,7 @@ build/
 # generated source files
 src/generated/
 .swagger-codegen/
-.swagger-codegen-ignore
+src/test/java/bio/terra/datarepo/
 
 # gradle files
 .gradle/

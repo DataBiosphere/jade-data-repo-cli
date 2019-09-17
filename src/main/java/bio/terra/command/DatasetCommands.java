@@ -14,7 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 public class DatasetCommands {
     private static DatasetCommands theDatasetCommands;
@@ -79,7 +80,12 @@ public class DatasetCommands {
             }
 
             if (targetPath == null) {
-                targetPath = URI.create(inputGspath).getPath();
+                String[] pathParts = StringUtils.split(inputGspath, '/');
+                if (pathParts.length < 3) {
+                    CommandUtils.printErrorAndExit("Invalid GS URI");
+                }
+                String encodedPath = '/' + StringUtils.join(pathParts, '/', 2, pathParts.length);
+                targetPath = URLDecoder.decode(encodedPath, "UTF-8");
             }
 
             if (mimeType == null) {
@@ -105,14 +111,14 @@ public class DatasetCommands {
                         1,
                         FileModel.class);
 
-
             DRFile drFile = new DRFile(fileModel);
             drFile.describe();
 
         } catch (ApiException ex) {
             System.out.println("Error processing file ingest: ");
             CommandUtils.printError(ex);
+        } catch (UnsupportedEncodingException e) {
+            CommandUtils.printErrorAndExit("Error decoding gspath into target URI:\n" + e.getMessage());
         }
-
     }
 }
