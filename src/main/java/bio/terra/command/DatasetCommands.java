@@ -10,6 +10,10 @@ import bio.terra.datarepo.model.FileModel;
 import bio.terra.datarepo.model.JobModel;
 import bio.terra.model.DRDataset;
 import bio.terra.model.DRFile;
+import bio.terra.parser.Argument;
+import bio.terra.parser.Command;
+import bio.terra.parser.Option;
+import bio.terra.parser.Syntax;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -29,6 +33,83 @@ public class DatasetCommands {
         }
         return theDatasetCommands;
     }
+
+    public static Syntax getSyntax() {
+        return new Syntax()
+                .addCommand(new Command()
+                        .primaryName("dataset")
+                        .secondaryName("create")
+                        .commandId(CommandEnum.COMMAND_DATASET_CREATE.getCommandId())
+                        .help("Create a new dataset")
+                        .addOption(new Option()
+                                .shortName("i")
+                                .longName("input-json")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("Path to a file containing the JSON form of a dataset")))
+                .addCommand(new Command()
+                        .primaryName("dataset")
+                        .secondaryName("show")
+                        .commandId(CommandEnum.COMMAND_DATASET_SHOW.getCommandId())
+                        .help("List one dataset")
+                        .addArgument(new Argument()
+                                .name("dataset-name")
+                                .optional(false)
+                                .help("name of the dataset to show")))
+                .addCommand(new Command()
+                        .primaryName("dataset")
+                        .secondaryName("delete")
+                        .commandId(CommandEnum.COMMAND_DATASET_DELETE.getCommandId())
+                        .help("Delete a dataset")
+                        .addArgument(new Argument()
+                                .name("dataset-name")
+                                .optional(false)
+                                .help("Name of the dataset to delete")))
+                .addCommand(new Command()
+                        .primaryName("dataset")
+                        .secondaryName("file-load")
+                        .commandId(CommandEnum.COMMAND_DATASET_FILE.getCommandId())
+                        .help("Load one file into a dataset")
+                        .addArgument(new Argument()
+                                .name("dataset-name")
+                                .optional(false)
+                                .help("Name of the dataset where the file should go"))
+                        .addOption(new Option()
+                                .shortName("p")
+                                .longName("profile-id")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Identifies the profile to use for allocating storage for the file." +
+                                        " Defaults to the dataset profile, if not specified."))
+                        .addOption(new Option()
+                                .shortName("i")
+                                .longName("input-gspath")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("GCS URI to the source input file"))
+                        .addOption(new Option()
+                                .shortName("t")
+                                .longName("target-path")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Target file system path in the dataset. " +
+                                        "If not present, the path is derived from the input gspath"))
+                        .addOption(new Option()
+                                .shortName("m")
+                                .longName("mime-type")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Mime type of the file"))
+                        .addOption(new Option()
+                                .shortName("d")
+                                .longName("description")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Description of the file being copied")));
+    }
+
+
+
 
     public void datasetCreate(String jsonpath) {
         try {
@@ -52,7 +133,7 @@ public class DatasetCommands {
 
         try {
             DeleteResponseModel deleteResponse = DRApis.getRepositoryApi().deleteDataset(summary.getId());
-            System.out.printf("Dataset deleted: %s (%s)", datasetName, deleteResponse.getObjectState().getValue());
+            System.out.printf("Dataset deleted: %s (%s)\n", datasetName, deleteResponse.getObjectState().getValue());
         } catch (ApiException ex) {
             System.out.println("Error processing dataset delete:");
             CommandUtils.printError(ex);

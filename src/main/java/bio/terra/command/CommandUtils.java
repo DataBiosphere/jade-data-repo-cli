@@ -8,8 +8,10 @@ import bio.terra.datarepo.model.BillingProfileModel;
 import bio.terra.datarepo.model.DatasetSummaryModel;
 import bio.terra.datarepo.model.EnumerateBillingProfileModel;
 import bio.terra.datarepo.model.EnumerateDatasetModel;
+import bio.terra.datarepo.model.EnumerateSnapshotModel;
 import bio.terra.datarepo.model.ErrorModel;
 import bio.terra.datarepo.model.JobModel;
+import bio.terra.datarepo.model.SnapshotSummaryModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
@@ -105,6 +107,24 @@ public class CommandUtils {
 
         } catch (ApiException ex) {
             throw new IllegalArgumentException("Error processing find dataset by name");
+        }
+    }
+
+    public static SnapshotSummaryModel findSnapshotByName(String snapshotName) {
+        try {
+            EnumerateSnapshotModel enumerateSnapshot = DRApis.getRepositoryApi().enumerateSnapshots(0, 100000, null, null, snapshotName);
+
+            List<SnapshotSummaryModel> studies = enumerateSnapshot.getItems();
+            for (SnapshotSummaryModel summary : studies) {
+                if (StringUtils.equals(summary.getName(), snapshotName)) {
+                    return summary;
+                }
+            }
+            CommandUtils.printErrorAndExit("Snapshot not found: " + snapshotName);
+            return null;
+
+        } catch (ApiException ex) {
+            throw new IllegalArgumentException("Error processing find snapshot by name");
         }
     }
 

@@ -15,6 +15,11 @@ public class Syntax {
         return this;
     }
 
+    public Syntax mergeSyntax(Syntax other) {
+        commands.addAll(other.getCommands());
+        return this;
+    }
+
     public void parse(ParseContext context) {
         String arg = context.getArg();
         if (arg == null) {

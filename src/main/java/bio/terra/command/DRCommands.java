@@ -4,6 +4,10 @@ import bio.terra.datarepo.model.FileModel;
 import bio.terra.datarepo.model.FileModelType;
 import bio.terra.model.DRElement;
 import bio.terra.model.DRFile;
+import bio.terra.parser.Argument;
+import bio.terra.parser.Command;
+import bio.terra.parser.Option;
+import bio.terra.parser.Syntax;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -33,6 +37,62 @@ public class DRCommands {
             theDRCommands = new DRCommands();
         }
         return theDRCommands;
+    }
+
+    public static Syntax getSyntax() {
+        return new Syntax()
+                .addCommand(new Command()
+                        .primaryName("dr")
+                        .secondaryName("list")
+                        .alternateNames(new String[]{"ls"})
+                        .commandId(CommandEnum.COMMAND_DR_LIST.getCommandId())
+                        .help("list data repo objects")
+                        .addOption(new Option()
+                                .shortName("R")
+                                .longName("recurse")
+                                .hasArgument(false)
+                                .optional(true)
+                                .help("Recurses from the path listing all elements under the path"))
+                        .addArgument(new Argument()
+                                .name("path")
+                                .optional(true)
+                                .help("Path to an object - sorry, no wildcards yet")))
+                .addCommand(new Command()
+                        .primaryName("dr")
+                        .secondaryName("tree")
+                        .alternateNames(new String[]{"tree"})
+                        .commandId(CommandEnum.COMMAND_DR_TREE.getCommandId())
+                        .help("tree formatted list of data repo objects")
+                        .addOption(new Option()
+                                .shortName("d")
+                                .longName("depth")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("depth to recurse; if unspecified, the full tree is traversed"))
+                        .addArgument(new Argument()
+                                .name("path")
+                                .optional(true)
+                                .help("Path to an object - sorry, no wildcards yet")))
+                .addCommand(new Command()
+                        .primaryName("dr")
+                        .secondaryName("describe")
+                        .alternateNames(new String[]{"describe"})
+                        .commandId(CommandEnum.COMMAND_DR_DESCRIBE.getCommandId())
+                        .help("describe a data repo object")
+                        .addArgument(new Argument()
+                                .name("path")
+                                .optional(true)
+                                .help("Path to an object - sorry, no wildcards yet")))
+                .addCommand(new Command()
+                        .primaryName("dr")
+                        .secondaryName("stream")
+                        .alternateNames(new String[]{"cat"})
+                        .commandId(CommandEnum.COMMAND_DR_STREAM.getCommandId())
+                        .help("stream an object to standard out")
+                        .addArgument(new Argument()
+                                .name("path")
+                                .optional(false)
+                                .help("Path to an object")));
     }
 
     public void drDescribe(String inPath) {

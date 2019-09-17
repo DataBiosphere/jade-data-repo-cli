@@ -5,6 +5,10 @@ import bio.terra.datarepo.model.BillingProfileModel;
 import bio.terra.datarepo.model.BillingProfileRequestModel;
 import bio.terra.datarepo.model.DeleteResponseModel;
 import bio.terra.datarepo.model.EnumerateBillingProfileModel;
+import bio.terra.parser.Argument;
+import bio.terra.parser.Command;
+import bio.terra.parser.Option;
+import bio.terra.parser.Syntax;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +26,51 @@ public class ProfileCommands {
             theProfileCommands = new ProfileCommands();
         }
         return theProfileCommands;
+    }
+
+    public static Syntax getSyntax() {
+        return new Syntax()
+                .addCommand(new Command()
+                        .primaryName("profile")
+                        .secondaryName("create")
+                        .commandId(CommandEnum.COMMAND_PROFILE_CREATE.getCommandId())
+                        .help("Create a new profile")
+                        .addOption(new Option()
+                                .shortName("n")
+                                .longName("name")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("Profile name"))
+                        .addOption(new Option()
+                                .shortName("a")
+                                .longName("account")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("Billing account"))
+                        .addOption(new Option()
+                                .shortName("b")
+                                .longName("biller")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Biller; defaults to 'direct'")))
+                .addCommand(new Command()
+                        .primaryName("profile")
+                        .secondaryName("delete")
+                        .commandId(CommandEnum.COMMAND_PROFILE_DELETE.getCommandId())
+                        .help("Delete a profile")
+                        .addArgument(new Argument()
+                                .name("name")
+                                .optional(false)
+                                .help("Name of the profile to delete")))
+                .addCommand(new Command()
+                        .primaryName("profile")
+                        .secondaryName("show")
+                        .commandId(CommandEnum.COMMAND_PROFILE_SHOW.getCommandId())
+                        .help("Show a profile")
+                        .addArgument(new Argument()
+                                .name("name")
+                                .optional(true)
+                                .help("Name of the profile to show. Defaults to showing all accessible profiles")));
     }
 
     public void profileCreate(String name, String account, String biller) {
