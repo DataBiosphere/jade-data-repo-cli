@@ -120,6 +120,23 @@ public class Main {
                 case COMMAND_SNAPSHOT_DELETE:
                     SnapshotCommands.snapshotDelete(result.getArgument("snapshot-name"));
                     break;
+                case COMMAND_SNAPSHOT_POLICY_ADD:
+                    SnapshotCommands.snapshotPolicyAdd(
+                            result.getArgument("snapshot-name"),
+                            result.getArgument("policy"),
+                            result.getArgument("email"));
+                    break;
+                case COMMAND_SNAPSHOT_POLICY_REMOVE:
+                    SnapshotCommands.snapshotPolicyRemove(
+                            result.getArgument("snapshot-name"),
+                            result.getArgument("policy"),
+                            result.getArgument("email"));
+                    break;
+                case COMMAND_SNAPSHOT_POLICY_SHOW:
+                    SnapshotCommands.snapshotPolicyShow(result.getArgument("snapshot-name"));
+                    break;
+
+
 
                 default:
                     throw new IllegalArgumentException("Yikes! We shouldn't be here.");

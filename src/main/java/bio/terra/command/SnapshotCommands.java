@@ -4,6 +4,8 @@ import bio.terra.datarepo.api.RepositoryApi;
 import bio.terra.datarepo.client.ApiException;
 import bio.terra.datarepo.model.DeleteResponseModel;
 import bio.terra.datarepo.model.JobModel;
+import bio.terra.datarepo.model.PolicyMemberRequest;
+import bio.terra.datarepo.model.PolicyResponse;
 import bio.terra.datarepo.model.SnapshotRequestModel;
 import bio.terra.datarepo.model.SnapshotSummaryModel;
 import bio.terra.model.DRSnapshot;
@@ -49,7 +51,58 @@ public class SnapshotCommands {
                         .addArgument(new Argument()
                                 .name("snapshot-name")
                                 .optional(false)
-                                .help("Name of the snapshot to delete")));
+                                .help("Name of the snapshot to delete")))
+                .addCommand(new Command()
+                        .primaryName("snapshot")
+                        .secondaryName("policy-show")
+                        .commandId(CommandEnum.COMMAND_SNAPSHOT_POLICY_SHOW.getCommandId())
+                        .help("Show policies")
+                        .addArgument(new Argument()
+                                .name("snapshot-name")
+                                .optional(false)
+                                .help("Name of the snapshot")))
+                .addCommand(new Command()
+                        .primaryName("snapshot")
+                        .secondaryName("policy-add")
+                        .commandId(CommandEnum.COMMAND_SNAPSHOT_POLICY_ADD.getCommandId())
+                        .help("Add a member to a policy")
+                        .addArgument(new Argument()
+                                .name("snapshot-name")
+                                .optional(false)
+                                .help("Name of the snapshot"))
+                        .addOption(new Option()
+                                .shortName("p")
+                                .longName("policy")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("The policy to add member to"))
+                        .addOption(new Option()
+                                .shortName("e")
+                                .longName("email")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("Email of the member to be added")))
+                .addCommand(new Command()
+                        .primaryName("snapshot")
+                        .secondaryName("policy-remove")
+                        .commandId(CommandEnum.COMMAND_SNAPSHOT_POLICY_REMOVE.getCommandId())
+                        .help("Remove a member from a policy")
+                        .addArgument(new Argument()
+                                .name("snapshot-name")
+                                .optional(false)
+                                .help("Name of the snapshot"))
+                        .addOption(new Option()
+                                .shortName("p")
+                                .longName("policy")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("The policy to remove member from"))
+                        .addOption(new Option()
+                                .shortName("e")
+                                .longName("email")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("Email of the member to be removed")));
     }
 
     public static void snapshotCreate(String jsonpath) {
@@ -94,5 +147,44 @@ public class SnapshotCommands {
         DRSnapshot snapshotElement = new DRSnapshot(summary);
         snapshotElement.describe();
     }
+
+    public static void snapshotPolicyShow(String snapshotName) {
+        SnapshotSummaryModel summary = CommandUtils.findSnapshotByName(snapshotName);
+        try {
+            PolicyResponse policyResponse = DRApis.getRepositoryApi().retrieveSnapshotPolicies(summary.getId());
+            CommandUtils.printPolicyResponse(policyResponse);
+        } catch (ApiException ex) {
+            System.out.println("Error processing show policy:");
+            CommandUtils.printError(ex);
+        }
+    }
+
+    public static void snapshotPolicyAdd(String snapshotName, String policyName, String email) {
+        PolicyMemberRequest member = new PolicyMemberRequest().email(email);
+        SnapshotSummaryModel summary = CommandUtils.findSnapshotByName(snapshotName);
+        try {
+            PolicyResponse policyResponse = DRApis.getRepositoryApi()
+                    .addSnapshotPolicyMember(summary.getId(), policyName, member);
+            CommandUtils.printPolicyResponse(policyResponse);
+        } catch (ApiException ex) {
+            System.out.println("Error adding policy member:");
+            CommandUtils.printError(ex);
+        }
+    }
+
+    public static void snapshotPolicyRemove(String snapshotName, String policyName, String email) {
+        SnapshotSummaryModel summary = CommandUtils.findSnapshotByName(snapshotName);
+        try {
+            PolicyResponse policyResponse = DRApis.getRepositoryApi()
+                    .deleteSnapshotPolicyMember(summary.getId(), policyName, email);
+            CommandUtils.printPolicyResponse(policyResponse);
+        } catch (ApiException ex) {
+            System.out.println("Error removing policy member:");
+            CommandUtils.printError(ex);
+        }
+    }
+
+
+
 
 }

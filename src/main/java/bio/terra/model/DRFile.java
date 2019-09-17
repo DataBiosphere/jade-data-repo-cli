@@ -15,8 +15,10 @@ import java.util.List;
 
 public class DRFile extends DRElement {
     private FileModel fileModel;
+    private DRCollectionType collectionType;
 
-    public DRFile(FileModel fileModel) {
+    public DRFile(DRCollectionType collectionType, FileModel fileModel) {
+        this.collectionType = collectionType;
         this.fileModel = fileModel;
     }
 
@@ -55,17 +57,24 @@ public class DRFile extends DRElement {
             // If the directory is not enumerated, then enumerate it
             if (!directoryDetail.isEnumerated()) {
                 try {
-                    FileModel enumDir = DRApis.getRepositoryApi()
-                                    .lookupFileById(fileModel.getCollectionId(), fileModel.getFileId(), 1);
+                    FileModel enumDir;
+                    if (collectionType == DRCollectionType.COLLECTION_TYPE_DATASET) {
+                        enumDir = DRApis.getRepositoryApi()
+                                .lookupFileById(fileModel.getCollectionId(), fileModel.getFileId(), 1);
+                    } else {
+                        enumDir = DRApis.getRepositoryApi()
+                                .lookupSnapshotFileById(fileModel.getCollectionId(), fileModel.getFileId(), 1);
+                    }
                     fileModel = enumDir;
                 } catch (ApiException ex) {
-                    throw new IllegalArgumentException("Error processing directory enumerate");
+                    System.err.println("Error processing directory enumerate:");
+                    CommandUtils.printError(ex);
                 }
             }
 
             List<DRElement> elementList = new ArrayList<>();
             for (FileModel item : fileModel.getDirectoryDetail().getContents()) {
-                elementList.add(new DRFile(item));
+                elementList.add(new DRFile(collectionType, item));
             }
 
             return elementList;

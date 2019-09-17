@@ -11,6 +11,8 @@ import bio.terra.datarepo.model.EnumerateDatasetModel;
 import bio.terra.datarepo.model.EnumerateSnapshotModel;
 import bio.terra.datarepo.model.ErrorModel;
 import bio.terra.datarepo.model.JobModel;
+import bio.terra.datarepo.model.PolicyModel;
+import bio.terra.datarepo.model.PolicyResponse;
 import bio.terra.datarepo.model.SnapshotSummaryModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -166,6 +168,17 @@ public class CommandUtils {
             return pwd + inPath;
         }
         return pwd + SLASH + inPath;
+    }
+
+
+    public static void printPolicyResponse(PolicyResponse policyResponse) {
+        for (PolicyModel policyModel : policyResponse.getPolicies()) {
+            System.out.println("Policy " + policyModel.getName());
+            for (String member : policyModel.getMembers()) {
+                System.out.println("  " + member);
+            }
+            System.out.println();
+        }
     }
 
 }

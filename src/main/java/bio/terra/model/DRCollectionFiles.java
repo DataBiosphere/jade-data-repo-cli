@@ -67,7 +67,7 @@ public class DRCollectionFiles extends DRElement {
 
         try {
             FileModel fileModel = pathLookup(path, 1);
-            return new DRFile(fileModel);
+            return new DRFile(collectionType, fileModel);
         } catch (ApiException ex) {
             CommandUtils.printErrorAndExit("Error processing files enumeration");
         }
@@ -77,7 +77,7 @@ public class DRCollectionFiles extends DRElement {
     @Override
     public List<DRElement> enumerate() {
         FileModel fileModel = getFileModel();
-        DRFile rootDir = new DRFile(fileModel);
+        DRFile rootDir = new DRFile(collectionType, fileModel);
         return rootDir.enumerate();
     }
 

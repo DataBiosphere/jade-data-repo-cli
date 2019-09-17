@@ -9,8 +9,8 @@ import bio.terra.datarepo.model.FileLoadModel;
 import bio.terra.datarepo.model.FileModel;
 import bio.terra.datarepo.model.JobModel;
 import bio.terra.datarepo.model.PolicyMemberRequest;
-import bio.terra.datarepo.model.PolicyModel;
 import bio.terra.datarepo.model.PolicyResponse;
+import bio.terra.model.DRCollectionType;
 import bio.terra.model.DRDataset;
 import bio.terra.model.DRFile;
 import bio.terra.parser.Argument;
@@ -191,7 +191,7 @@ public class DatasetCommands {
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
         try {
             PolicyResponse policyResponse = DRApis.getRepositoryApi().retrieveDatasetPolicies(summary.getId());
-            printPolicyResponse(policyResponse);
+            CommandUtils.printPolicyResponse(policyResponse);
         } catch (ApiException ex) {
             System.out.println("Error processing show policy:");
             CommandUtils.printError(ex);
@@ -204,7 +204,7 @@ public class DatasetCommands {
         try {
             PolicyResponse policyResponse = DRApis.getRepositoryApi()
                     .addDatasetPolicyMember(summary.getId(), policyName, member);
-            printPolicyResponse(policyResponse);
+            CommandUtils.printPolicyResponse(policyResponse);
         } catch (ApiException ex) {
             System.out.println("Error adding policy member:");
             CommandUtils.printError(ex);
@@ -216,20 +216,10 @@ public class DatasetCommands {
         try {
             PolicyResponse policyResponse = DRApis.getRepositoryApi()
                     .deleteDatasetPolicyMember(summary.getId(), policyName, email);
-            printPolicyResponse(policyResponse);
+            CommandUtils.printPolicyResponse(policyResponse);
         } catch (ApiException ex) {
             System.out.println("Error removing policy member:");
             CommandUtils.printError(ex);
-        }
-    }
-
-    private static void printPolicyResponse(PolicyResponse policyResponse) {
-        for (PolicyModel policyModel : policyResponse.getPolicies()) {
-            System.out.println("Policy " + policyModel.getName());
-            for (String member : policyModel.getMembers()) {
-                System.out.println("  " + member);
-            }
-            System.out.println();
         }
     }
 
@@ -278,7 +268,7 @@ public class DatasetCommands {
                         1,
                         FileModel.class);
 
-            DRFile drFile = new DRFile(fileModel);
+            DRFile drFile = new DRFile(DRCollectionType.COLLECTION_TYPE_DATASET, fileModel);
             drFile.describe();
 
         } catch (ApiException ex) {
@@ -288,8 +278,4 @@ public class DatasetCommands {
             CommandUtils.printErrorAndExit("Error decoding gspath into target URI:\n" + e.getMessage());
         }
     }
-
-
-
-
 }
