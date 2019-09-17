@@ -57,12 +57,12 @@ public class DRDataset extends DRElement {
         if (StringUtils.equalsIgnoreCase(name, "files")) {
             return new DRCollectionFiles(DRCollectionType.COLLECTION_TYPE_DATASET,
                     summary.getId(),
-                    summary.getCreatedDate());
+                    summary.getCreatedDate()).lookup(pathParts);
         } else if (StringUtils.equalsIgnoreCase(name, "tables")) {
             DatasetModel dataset = getDataset(summary.getId());
             return new DRCollectionTables(DRCollectionType.COLLECTION_TYPE_DATASET,
                     dataset.getCreatedDate(),
-                    dataset.getSchema().getTables());
+                    dataset.getSchema().getTables()).lookup(pathParts);
         }
         CommandUtils.printErrorAndExit("Object not found");
         return null; //unreachabe

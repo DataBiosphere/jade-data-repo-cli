@@ -54,13 +54,13 @@ public class DRSnapshot extends DRElement {
             return new DRCollectionFiles(
                     DRCollectionType.COLLECTION_TYPE_SNAPSHOT,
                     summary.getId(),
-                    summary.getCreatedDate());
+                    summary.getCreatedDate()).lookup(pathParts);
         } else if (StringUtils.equalsIgnoreCase(name, "tables")) {
             SnapshotModel snapshot = getSnapshot(summary.getId());
             return new DRCollectionTables(
                     DRCollectionType.COLLECTION_TYPE_SNAPSHOT,
                     snapshot.getCreatedDate(),
-                    snapshot.getTables());
+                    snapshot.getTables()).lookup(pathParts);
         }
 
         CommandUtils.printErrorAndExit("Object not found");
