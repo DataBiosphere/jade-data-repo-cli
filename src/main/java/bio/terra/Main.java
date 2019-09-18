@@ -34,7 +34,10 @@ public class Main {
                 break;
 
                 case COMMAND_DATASET_CREATE:
-                    DatasetCommands.datasetCreate(result.getArgument("input-json"));
+                    DatasetCommands.datasetCreate(
+                            result.getArgument("input-json"),
+                            result.getArgument("name"),
+                            result.getArgument("profile"));
                     break;
                 case COMMAND_DATASET_SHOW:
                     DatasetCommands.datasetShow(result.getArgument("dataset-name"));
@@ -43,13 +46,20 @@ public class Main {
                     DatasetCommands.datasetDelete(result.getArgument("dataset-name"));
                     break;
                 case COMMAND_DATASET_FILE:
-                    DatasetCommands.datasetIngestFile(
+                    DatasetCommands.datasetFileLoad(
                             result.getArgument("dataset-name"),
                             result.getArgument("profile-id"),
                             result.getArgument("input-gspath"),
                             result.getArgument("target-path"),
                             result.getArgument("mime-type"),
-                            result.getArgument("description"));
+                            result.getArgument("description"),
+                            result.getArgument("format"));
+                    break;
+                case COMMAND_DATASET_TABLE:
+                    DatasetCommands.datasetTableLoad(
+                            result.getArgument("dataset-name"),
+                            result.getArgument("input-gspath"),
+                            result.getArgument("table"));
                     break;
                 case COMMAND_DATASET_POLICY_ADD:
                     DatasetCommands.datasetPolicyAdd(
@@ -87,11 +97,9 @@ public class Main {
                             result.getArgument("account"),
                             result.getArgument("biller"));
                     break;
-
                 case COMMAND_PROFILE_DELETE:
                     ProfileCommands.getInstance().profileDelete(result.getArgument("name"));
                     break;
-
                 case COMMAND_PROFILE_SHOW:
                     ProfileCommands.getInstance().profileShow(result.getArgument("name"));
                     break;
@@ -112,7 +120,10 @@ public class Main {
                     break;
 
                 case COMMAND_SNAPSHOT_CREATE:
-                    SnapshotCommands.snapshotCreate(result.getArgument("input-json"));
+                    SnapshotCommands.snapshotCreate(
+                            result.getArgument("input-json"),
+                            result.getArgument("name"),
+                            result.getArgument("profile"));
                     break;
                 case COMMAND_SNAPSHOT_SHOW:
                     SnapshotCommands.snapshotShow(result.getArgument("snapshot-name"));
