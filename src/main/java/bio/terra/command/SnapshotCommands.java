@@ -2,6 +2,7 @@ package bio.terra.command;
 
 import bio.terra.datarepo.api.RepositoryApi;
 import bio.terra.datarepo.client.ApiException;
+import bio.terra.datarepo.model.BillingProfileModel;
 import bio.terra.datarepo.model.DeleteResponseModel;
 import bio.terra.datarepo.model.JobModel;
 import bio.terra.datarepo.model.PolicyMemberRequest;
@@ -33,7 +34,19 @@ public class SnapshotCommands {
                                 .longName("input-json")
                                 .hasArgument(true)
                                 .optional(false)
-                                .help("Path to a file containing the JSON form of a snapshot")))
+                                .help("Path to a file containing the JSON form of a snapshot"))
+                        .addOption(new Option()
+                                .shortName("n")
+                                .longName("name")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Snapshot name; if present, overrides the name in the JSON file"))
+                        .addOption(new Option()
+                                .shortName("p")
+                                .longName("profile")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Profile name; if present, overrides the profile id in the JSON file")))
                 .addCommand(new Command()
                         .primaryName("snapshot")
                         .secondaryName("show")
@@ -105,11 +118,20 @@ public class SnapshotCommands {
                                 .help("Email of the member to be removed")));
     }
 
-    public static void snapshotCreate(String jsonpath) {
+    public static void snapshotCreate(String jsonpath, String name, String profileName) {
         try {
             File file = new File(jsonpath);
             SnapshotRequestModel snapshotRequestModel = CommandUtils.getObjectMapper().readValue(file, SnapshotRequestModel.class);
             if (snapshotRequestModel != null) {
+                // Override the name and profile if requested
+                if (name != null) {
+                    snapshotRequestModel.name(name);
+                }
+                if (profileName != null) {
+                    BillingProfileModel profileModel = CommandUtils.findProfileByName(profileName);
+                    snapshotRequestModel.profileId(profileModel.getId());
+                }
+
                 JobModel job = api.createSnapshot(snapshotRequestModel);
                 SnapshotSummaryModel summaryModel = CommandUtils.waitForResponse(
                         api,
