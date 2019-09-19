@@ -4,6 +4,7 @@ import bio.terra.context.Context;
 import bio.terra.context.ContextEnum;
 import bio.terra.parser.Argument;
 import bio.terra.parser.Command;
+import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
 
 public class SessionCommands {
@@ -57,20 +58,42 @@ public class SessionCommands {
                                 .optional(false)
                                 .help("value to assign the session property")));
     }
+    public static boolean dispatchCommand(CommandEnum command, ParsedResult result) {
+        switch (command) {
+            case COMMAND_SESSION_CD:
+                sessionCd(result.getArgument("path"));
+                break;
+            case COMMAND_SESSION_PWD:
+                sessionPwd();
+                break;
+            case COMMAND_SESSION_SHOW:
+                sessionShow();
+                break;
+            case COMMAND_SESSION_SET:
+                sessionSet(
+                        result.getArgument("name"),
+                        result.getArgument("value"));
+                break;
+            default:
+                return false;
+        }
 
-    public static void sessionCd(String path) {
+        return true;
+    }
+
+    private static void sessionCd(String path) {
         Context.getInstance().setContextItem(ContextEnum.PWD, path);
     }
 
-    public static void sessionPwd() {
+    private static void sessionPwd() {
         System.out.println(Context.getInstance().getContextItem(ContextEnum.PWD));
     }
 
-    public static void sessionShow() {
+    private static void sessionShow() {
         Context.getInstance().showContextItems();
     }
 
-    public static void sessionSet(String name, String value) {
+    private static void sessionSet(String name, String value) {
         Context.getInstance().setContextItemByName(name, value);
     }
 }

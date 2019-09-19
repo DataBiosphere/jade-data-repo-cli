@@ -25,132 +25,62 @@ public class Main {
                 System.exit(1);
             }
             CommandEnum command = CommandEnum.commandIdToEnum(result.getCommandId());
+            boolean commandHandled = false;
 
             switch(command) {
                 case COMMAND_HELP: {
                     HelpCommands cmds = new HelpCommands(parser);
                     cmds.helpCommand(result.getArgument("primary"), result.getArgument("secondary"));
+                    commandHandled = true;
                 }
                 break;
 
                 case COMMAND_DATASET_CREATE:
-                    DatasetCommands.datasetCreate(
-                            result.getArgument("input-json"),
-                            result.getArgument("name"),
-                            result.getArgument("profile"));
-                    break;
                 case COMMAND_DATASET_SHOW:
-                    DatasetCommands.datasetShow(result.getArgument("dataset-name"));
-                    break;
                 case COMMAND_DATASET_DELETE:
-                    DatasetCommands.datasetDelete(result.getArgument("dataset-name"));
-                    break;
                 case COMMAND_DATASET_FILE:
-                    DatasetCommands.datasetFileLoad(
-                            result.getArgument("dataset-name"),
-                            result.getArgument("profile-id"),
-                            result.getArgument("input-gspath"),
-                            result.getArgument("target-path"),
-                            result.getArgument("mime-type"),
-                            result.getArgument("description"),
-                            result.getArgument("format"));
-                    break;
                 case COMMAND_DATASET_TABLE:
-                    DatasetCommands.datasetTableLoad(
-                            result.getArgument("dataset-name"),
-                            result.getArgument("input-gspath"),
-                            result.getArgument("table"));
-                    break;
                 case COMMAND_DATASET_POLICY_ADD:
-                    DatasetCommands.datasetPolicyAdd(
-                            result.getArgument("dataset-name"),
-                            result.getArgument("policy"),
-                            result.getArgument("email"));
-                    break;
                 case COMMAND_DATASET_POLICY_REMOVE:
-                    DatasetCommands.datasetPolicyRemove(
-                            result.getArgument("dataset-name"),
-                            result.getArgument("policy"),
-                            result.getArgument("email"));
-                    break;
                 case COMMAND_DATASET_POLICY_SHOW:
-                    DatasetCommands.datasetPolicyShow(result.getArgument("dataset-name"));
+                    commandHandled = DatasetCommands.dispatchCommand(command, result);
                     break;
 
                 case COMMAND_DR_LIST:
-                    DRCommands.getInstance().drList(result.getArgument("path"), result.found("recurse"));
-                    break;
                 case COMMAND_DR_TREE:
-                    int depth = (result.found("depth")) ? Integer.valueOf(result.getArgument("depth")) : 1000000000;
-                    DRCommands.getInstance().drTree(result.getArgument("path"), depth);
-                    break;
                 case COMMAND_DR_DESCRIBE:
-                    DRCommands.getInstance().drDescribe(result.getArgument("path"));
-                    break;
                 case COMMAND_DR_STREAM:
-                    DRCommands.getInstance().drStream(result.getArgument("path"));
+                    commandHandled = DRCommands.dispatchCommand(command, result);
                     break;
 
                 case COMMAND_PROFILE_CREATE:
-                    ProfileCommands.getInstance().profileCreate(
-                            result.getArgument("name"),
-                            result.getArgument("account"),
-                            result.getArgument("biller"));
-                    break;
                 case COMMAND_PROFILE_DELETE:
-                    ProfileCommands.getInstance().profileDelete(result.getArgument("name"));
-                    break;
                 case COMMAND_PROFILE_SHOW:
-                    ProfileCommands.getInstance().profileShow(result.getArgument("name"));
+                    commandHandled = ProfileCommands.dispatchCommand(command, result);
                     break;
 
                 case COMMAND_SESSION_CD:
-                    SessionCommands.sessionCd(result.getArgument("path"));
-                    break;
                 case COMMAND_SESSION_PWD:
-                    SessionCommands.sessionPwd();
-                    break;
                 case COMMAND_SESSION_SHOW:
-                    SessionCommands.sessionShow();
-                    break;
                 case COMMAND_SESSION_SET:
-                    SessionCommands.sessionSet(
-                            result.getArgument("name"),
-                            result.getArgument("value"));
+                    commandHandled = SessionCommands.dispatchCommand(command, result);
                     break;
 
                 case COMMAND_SNAPSHOT_CREATE:
-                    SnapshotCommands.snapshotCreate(
-                            result.getArgument("input-json"),
-                            result.getArgument("name"),
-                            result.getArgument("profile"));
-                    break;
                 case COMMAND_SNAPSHOT_SHOW:
-                    SnapshotCommands.snapshotShow(result.getArgument("snapshot-name"));
-                    break;
                 case COMMAND_SNAPSHOT_DELETE:
-                    SnapshotCommands.snapshotDelete(result.getArgument("snapshot-name"));
-                    break;
                 case COMMAND_SNAPSHOT_POLICY_ADD:
-                    SnapshotCommands.snapshotPolicyAdd(
-                            result.getArgument("snapshot-name"),
-                            result.getArgument("policy"),
-                            result.getArgument("email"));
-                    break;
                 case COMMAND_SNAPSHOT_POLICY_REMOVE:
-                    SnapshotCommands.snapshotPolicyRemove(
-                            result.getArgument("snapshot-name"),
-                            result.getArgument("policy"),
-                            result.getArgument("email"));
-                    break;
                 case COMMAND_SNAPSHOT_POLICY_SHOW:
-                    SnapshotCommands.snapshotPolicyShow(result.getArgument("snapshot-name"));
+                    commandHandled = SnapshotCommands.dispatchCommand(command, result);
                     break;
-
-
 
                 default:
-                    throw new IllegalArgumentException("Yikes! We shouldn't be here.");
+                    commandHandled = false;
+            }
+
+            if (!commandHandled) {
+                throw new IllegalArgumentException("Unhandled command! Yikes!! We shouldn't be here.");
             }
 
         } catch (Exception ex) {

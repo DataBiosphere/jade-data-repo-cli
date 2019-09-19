@@ -19,6 +19,7 @@ import bio.terra.model.DRFile;
 import bio.terra.parser.Argument;
 import bio.terra.parser.Command;
 import bio.terra.parser.Option;
+import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
@@ -194,7 +195,58 @@ public class DatasetCommands {
                                 .help("Email of the member to be removed")));
     }
 
-    public static void datasetCreate(String jsonpath, String name, String profileName) {
+    public static boolean dispatchCommand(CommandEnum command, ParsedResult result) {
+        switch (command) {
+            case COMMAND_DATASET_CREATE:
+                datasetCreate(
+                        result.getArgument("input-json"),
+                        result.getArgument("name"),
+                        result.getArgument("profile"));
+                break;
+            case COMMAND_DATASET_SHOW:
+                datasetShow(result.getArgument("dataset-name"));
+                break;
+            case COMMAND_DATASET_DELETE:
+                datasetDelete(result.getArgument("dataset-name"));
+                break;
+            case COMMAND_DATASET_FILE:
+                datasetFileLoad(
+                        result.getArgument("dataset-name"),
+                        result.getArgument("profile-id"),
+                        result.getArgument("input-gspath"),
+                        result.getArgument("target-path"),
+                        result.getArgument("mime-type"),
+                        result.getArgument("description"),
+                        result.getArgument("format"));
+                break;
+            case COMMAND_DATASET_TABLE:
+                datasetTableLoad(
+                        result.getArgument("dataset-name"),
+                        result.getArgument("input-gspath"),
+                        result.getArgument("table"));
+                break;
+            case COMMAND_DATASET_POLICY_ADD:
+                datasetPolicyAdd(
+                        result.getArgument("dataset-name"),
+                        result.getArgument("policy"),
+                        result.getArgument("email"));
+                break;
+            case COMMAND_DATASET_POLICY_REMOVE:
+                datasetPolicyRemove(
+                        result.getArgument("dataset-name"),
+                        result.getArgument("policy"),
+                        result.getArgument("email"));
+                break;
+            case COMMAND_DATASET_POLICY_SHOW:
+                datasetPolicyShow(result.getArgument("dataset-name"));
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    private static void datasetCreate(String jsonpath, String name, String profileName) {
         try {
             File file = new File(jsonpath);
             DatasetRequestModel datasetRequestModel = CommandUtils.getObjectMapper().readValue(file, DatasetRequestModel.class);
@@ -220,7 +272,7 @@ public class DatasetCommands {
         }
     }
 
-    public static void datasetDelete(String datasetName) {
+    private static void datasetDelete(String datasetName) {
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
 
         try {
@@ -232,14 +284,14 @@ public class DatasetCommands {
         }
     }
 
-    public static void datasetShow(String datasetName) {
+    private static void datasetShow(String datasetName) {
         // Show dataset is the same as describe
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
         DRDataset datasetElement = new DRDataset(summary);
         datasetElement.describe();
     }
 
-    public static void datasetPolicyShow(String datasetName) {
+    private static void datasetPolicyShow(String datasetName) {
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
         try {
             PolicyResponse policyResponse = DRApis.getRepositoryApi().retrieveDatasetPolicies(summary.getId());
@@ -250,7 +302,7 @@ public class DatasetCommands {
         }
     }
 
-    public static void datasetPolicyAdd(String datasetName, String policyName, String email) {
+    private static void datasetPolicyAdd(String datasetName, String policyName, String email) {
         PolicyMemberRequest member = new PolicyMemberRequest().email(email);
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
         try {
@@ -263,7 +315,7 @@ public class DatasetCommands {
         }
     }
 
-    public static void datasetPolicyRemove(String datasetName, String policyName, String email) {
+    private static void datasetPolicyRemove(String datasetName, String policyName, String email) {
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
         try {
             PolicyResponse policyResponse = DRApis.getRepositoryApi()
@@ -275,7 +327,7 @@ public class DatasetCommands {
         }
     }
 
-    public static void datasetTableLoad(String datasetName,
+    private static void datasetTableLoad(String datasetName,
                                         String inputGspath,
                                         String tableName) {
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
@@ -304,7 +356,7 @@ public class DatasetCommands {
 
     }
 
-    public static void datasetFileLoad(String datasetName,
+    private static void datasetFileLoad(String datasetName,
                                        String profileName,
                                        String inputGspath,
                                        String targetPath,
