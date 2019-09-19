@@ -4,12 +4,16 @@ import bio.terra.datarepo.model.FileModel;
 import bio.terra.datarepo.model.FileModelType;
 import bio.terra.model.DRElement;
 import bio.terra.model.DRFile;
+import bio.terra.model.DRRoot;
 import bio.terra.parser.Argument;
 import bio.terra.parser.Command;
 import bio.terra.parser.Option;
+import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 // object types
@@ -26,18 +30,6 @@ import java.util.List;
 
 public class DRCommands {
     private static final String LIST_FORMAT = "%s%-8s  %-20s  %s  %s  %s\n";
-
-    private static DRCommands theDRCommands;
-
-    private DRCommands() {
-    }
-
-    public static DRCommands getInstance() {
-        if (theDRCommands == null) {
-            theDRCommands = new DRCommands();
-        }
-        return theDRCommands;
-    }
 
     public static Syntax getSyntax() {
         return new Syntax()
@@ -95,15 +87,37 @@ public class DRCommands {
                                 .help("Path to an object")));
     }
 
-    public void drDescribe(String inPath) {
-        DRElement element = DRLookup.getInstance().lookup(inPath);
+    public static boolean dispatchCommand(CommandEnum command, ParsedResult result) {
+        switch (command) {
+            case COMMAND_DR_LIST:
+                DRCommands.drList(result.getArgument("path"), result.found("recurse"));
+                break;
+            case COMMAND_DR_TREE:
+                int depth = (result.found("depth")) ? Integer.valueOf(result.getArgument("depth")) : 1000000000;
+                DRCommands.drTree(result.getArgument("path"), depth);
+                break;
+            case COMMAND_DR_DESCRIBE:
+                DRCommands.drDescribe(result.getArgument("path"));
+                break;
+            case COMMAND_DR_STREAM:
+                DRCommands.drStream(result.getArgument("path"));
+                break;
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
+    private static void drDescribe(String inPath) {
+        DRElement element = lookup(inPath);
         element.describe();
     }
 
-    public void drList(String inPath, boolean recurse) {
+    private static void drList(String inPath, boolean recurse) {
         String path = CommandUtils.makeFullPath(inPath);
 
-        DRElement elementToList = DRLookup.getInstance().lookup(path);
+        DRElement elementToList = lookup(path);
 
         if (recurse) {
             listRecursive(elementToList, path);
@@ -113,7 +127,7 @@ public class DRCommands {
         }
     }
 
-    private void listRecursive(DRElement element, String path) {
+    private static void listRecursive(DRElement element, String path) {
         System.out.println(path + ":");
         List<DRElement> elementList = element.enumerate();
         printElementList(elementList, 0);
@@ -126,12 +140,12 @@ public class DRCommands {
         }
     }
 
-    public void drTree(String inPath, int maxDepth) {
-        DRElement elementToList = DRLookup.getInstance().lookup(inPath);
+    private static void drTree(String inPath, int maxDepth) {
+        DRElement elementToList = lookup(inPath);
         treeRecursive(elementToList, maxDepth, 0);
     }
 
-    private void treeRecursive(DRElement element, int maxDepth, int currentDepth) {
+    private static void treeRecursive(DRElement element, int maxDepth, int currentDepth) {
         treePrint(element, currentDepth);
         if (currentDepth < maxDepth && !element.isLeaf()) {
             List<DRElement> elementList = element.enumerate();
@@ -141,7 +155,7 @@ public class DRCommands {
         }
     }
 
-    private void treePrint(DRElement element, int currentDepth) {
+    private static void treePrint(DRElement element, int currentDepth) {
         String prefix = StringUtils.repeat("|   ", currentDepth);
         System.out.printf("%s%s (%s)\n",
                 prefix,
@@ -149,14 +163,13 @@ public class DRCommands {
                 element.getObjectType().getName());
     }
 
-
-    private void printElementList(List<DRElement> elementList, int indent) {
+    private static void printElementList(List<DRElement> elementList, int indent) {
         for (DRElement element : elementList) {
             printElement(element, indent);
         }
     }
 
-    private void printElement(DRElement element, int indent) {
+    private static void printElement(DRElement element, int indent) {
         String indentString = StringUtils.repeat(' ', indent);
         System.out.printf(LIST_FORMAT,
                 indentString,
@@ -167,8 +180,8 @@ public class DRCommands {
                 element.getDescription());
     }
 
-    public void drStream(String inPath) {
-        DRElement element = DRLookup.getInstance().lookup(inPath);
+    private static void drStream(String inPath) {
+        DRElement element = lookup(inPath);
         if (element instanceof DRFile) {
             DRFile file = (DRFile) element;
             FileModel fileModel = file.getFileModel();
@@ -178,5 +191,15 @@ public class DRCommands {
         }
         CommandUtils.printErrorAndExit("You can only stream files right now");
     }
+
+    // General element lookup
+    private static DRElement lookup(String inPath) {
+        String path = CommandUtils.makeFullPath(inPath);
+        String[] pathParts = StringUtils.split(path, CommandUtils.SLASH);
+        LinkedList<String> pathList = new LinkedList<>(Arrays.asList(pathParts));
+        return new DRRoot().lookup(pathList);
+    }
+
+
 
 }

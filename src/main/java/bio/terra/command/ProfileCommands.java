@@ -8,25 +8,13 @@ import bio.terra.datarepo.model.EnumerateBillingProfileModel;
 import bio.terra.parser.Argument;
 import bio.terra.parser.Command;
 import bio.terra.parser.Option;
+import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
 
 import java.util.Collections;
 import java.util.List;
 
 public class ProfileCommands {
-
-
-    private static ProfileCommands theProfileCommands;
-
-    private ProfileCommands() {
-    }
-
-    public static ProfileCommands getInstance() {
-        if (theProfileCommands == null) {
-            theProfileCommands = new ProfileCommands();
-        }
-        return theProfileCommands;
-    }
 
     public static Syntax getSyntax() {
         return new Syntax()
@@ -73,7 +61,28 @@ public class ProfileCommands {
                                 .help("Name of the profile to show. Defaults to showing all accessible profiles")));
     }
 
-    public void profileCreate(String name, String account, String biller) {
+    public static boolean dispatchCommand(CommandEnum command, ParsedResult result) {
+        switch (command) {
+            case COMMAND_PROFILE_CREATE:
+                ProfileCommands.profileCreate(
+                        result.getArgument("name"),
+                        result.getArgument("account"),
+                        result.getArgument("biller"));
+                break;
+            case COMMAND_PROFILE_DELETE:
+                ProfileCommands.profileDelete(result.getArgument("name"));
+                break;
+            case COMMAND_PROFILE_SHOW:
+                ProfileCommands.profileShow(result.getArgument("name"));
+                break;
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
+    private static void profileCreate(String name, String account, String biller) {
         if (biller == null) {
             biller = "direct";
         }
@@ -91,7 +100,7 @@ public class ProfileCommands {
         }
     }
 
-    public void profileDelete(String profileName) {
+    private static void profileDelete(String profileName) {
         BillingProfileModel profile = CommandUtils.findProfileByName(profileName);
 
         try {
@@ -103,7 +112,7 @@ public class ProfileCommands {
         }
     }
 
-    public void profileShow(String profileName) {
+    private static void profileShow(String profileName) {
         try {
             List<BillingProfileModel> profiles;
             if (profileName == null) {
@@ -123,7 +132,7 @@ public class ProfileCommands {
         }
     }
 
-    private void printProfile(BillingProfileModel profile) {
+    private static void printProfile(BillingProfileModel profile) {
         System.out.println("Profile '" + profile.getProfileName() + "'");
         System.out.println("  id        : " + profile.getId());
         System.out.println("  account   : " + profile.getBillingAccountId());

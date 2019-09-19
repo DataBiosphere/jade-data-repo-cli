@@ -13,16 +13,15 @@ import bio.terra.model.DRSnapshot;
 import bio.terra.parser.Argument;
 import bio.terra.parser.Command;
 import bio.terra.parser.Option;
+import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
 
 import java.io.File;
 import java.io.IOException;
 
 public class SnapshotCommands {
-    private static final RepositoryApi api = new RepositoryApi();
 
     public static Syntax getSyntax() {
-
         return new Syntax()
                 .addCommand(new Command()
                         .primaryName("snapshot")
@@ -118,6 +117,42 @@ public class SnapshotCommands {
                                 .help("Email of the member to be removed")));
     }
 
+    public static boolean dispatchCommand(CommandEnum command, ParsedResult result) {
+        switch (command) {
+            case COMMAND_SNAPSHOT_CREATE:
+                snapshotCreate(
+                        result.getArgument("input-json"),
+                        result.getArgument("name"),
+                        result.getArgument("profile"));
+                break;
+            case COMMAND_SNAPSHOT_SHOW:
+                snapshotShow(result.getArgument("snapshot-name"));
+                break;
+            case COMMAND_SNAPSHOT_DELETE:
+                snapshotDelete(result.getArgument("snapshot-name"));
+                break;
+            case COMMAND_SNAPSHOT_POLICY_ADD:
+                snapshotPolicyAdd(
+                        result.getArgument("snapshot-name"),
+                        result.getArgument("policy"),
+                        result.getArgument("email"));
+                break;
+            case COMMAND_SNAPSHOT_POLICY_REMOVE:
+                snapshotPolicyRemove(
+                        result.getArgument("snapshot-name"),
+                        result.getArgument("policy"),
+                        result.getArgument("email"));
+                break;
+            case COMMAND_SNAPSHOT_POLICY_SHOW:
+                snapshotPolicyShow(result.getArgument("snapshot-name"));
+                break;
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
     public static void snapshotCreate(String jsonpath, String name, String profileName) {
         try {
             File file = new File(jsonpath);
@@ -132,6 +167,7 @@ public class SnapshotCommands {
                     snapshotRequestModel.profileId(profileModel.getId());
                 }
 
+                RepositoryApi api = DRApis.getRepositoryApi();
                 JobModel job = api.createSnapshot(snapshotRequestModel);
                 SnapshotSummaryModel summaryModel = CommandUtils.waitForResponse(
                         api,
@@ -151,6 +187,7 @@ public class SnapshotCommands {
     public static void snapshotDelete(String snapshotName) {
         SnapshotSummaryModel summary = CommandUtils.findSnapshotByName(snapshotName);
         try {
+            RepositoryApi api = DRApis.getRepositoryApi();
             JobModel job = api.deleteSnapshot(summary.getId());
             DeleteResponseModel deleteResponse = CommandUtils.waitForResponse(
                     api,
@@ -205,8 +242,4 @@ public class SnapshotCommands {
             CommandUtils.printError(ex);
         }
     }
-
-
-
-
 }
