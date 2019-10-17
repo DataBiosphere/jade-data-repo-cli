@@ -43,7 +43,7 @@ dependencies {
         jersey = "2.29.1"
         junit = "4.12"
         swagger = "1.5.22"
-        hamcrest = "2.1"
+        hamcrest = "2.2"
     }
 
     generatedCompile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: "${jackson}"
