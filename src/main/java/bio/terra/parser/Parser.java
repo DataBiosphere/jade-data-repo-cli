@@ -37,12 +37,28 @@ public class Parser {
 
     // Print help for a list of commands
     public void printListCommandHelp(PrintStream ps, List<Command> commands) {
-        // Compute the max names we will show, so we can get them nicely lined up
+        // Compute the max names and widths we will show, so we can get them nicely lined up
         int maxPrimaryNames = 0;
         for (Command command : commands) {
-            if (maxPrimaryNames < command.getPrimaryNames().length) {
-                maxPrimaryNames = command.getPrimaryNames().length;
+            String[] primaryNames = command.getPrimaryNames();
+            if (maxPrimaryNames < primaryNames.length) {
+                maxPrimaryNames = primaryNames.length;
             }
+        }
+
+        int[] maxColumnWidths = new int[maxPrimaryNames];
+        for (Command command : commands) {
+            String[] primaryNames = command.getPrimaryNames();
+            for (int i = 0; i < primaryNames.length; i++) {
+                if (maxColumnWidths[i] < primaryNames[i].length()) {
+                    maxColumnWidths[i] = primaryNames[i].length();
+                }
+            }
+        }
+
+        String[] columnFormats = new String[maxPrimaryNames];
+        for (int i = 0; i < maxPrimaryNames; i++) {
+            columnFormats[i] = "%-" + maxColumnWidths[i] + "s ";
         }
 
         for (Command command : commands) {
@@ -50,10 +66,10 @@ public class Parser {
             StringBuffer sb = new StringBuffer("  ");
             for (int i = 0; i < maxPrimaryNames; i++) {
                 String c = StringUtils.EMPTY;
-                if (i < command.getPrimaryNames().length - 1) {
+                if (i < command.getPrimaryNames().length) {
                     c = command.getPrimaryNames()[i];
                 }
-                String.format("%-10s ", c);
+                sb.append(String.format(columnFormats[i], c));
             }
             sb.append("- ").append(command.getHelp());
             ps.println(sb.toString());
@@ -62,11 +78,14 @@ public class Parser {
 
     public void printCommandHelp(PrintStream ps, List<String> cmdNames) {
         // Get a list of all commands that have cmdNames as the start of their primary names
-        // Three results:
+        // Four results:
         //  1. no match - error
         //  2. match one command - provide detailed help
         //  3. match several commands - list the set of commands
         List<Command> commandList = lookupCommands(cmdNames);
+
+
+
         switch (commandList.size()) {
             case 0: {
                 StringBuffer msg = new StringBuffer("No such command:");
@@ -107,12 +126,12 @@ public class Parser {
                 }
             }
         }
-        return null;
+        return commandList;
     }
 
     private boolean commandMatches(List<String> cmdNames, Command command) {
         String[] primaryNames = command.getPrimaryNames();
-        if (cmdNames.size() <= primaryNames.length) {
+        if (cmdNames.size() > primaryNames.length) {
             return false;
         }
         for (int i = 0; i < cmdNames.size(); i++) {
