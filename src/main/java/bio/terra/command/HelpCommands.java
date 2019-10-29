@@ -2,39 +2,53 @@ package bio.terra.command;
 
 import bio.terra.parser.Argument;
 import bio.terra.parser.Command;
+import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Parser;
 import bio.terra.parser.Syntax;
-import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HelpCommands {
-    Parser parser;
+    // If we have syntax with commands of more than 4 primary names, just update this constant to allow
+    // the help command to parse more.
+    private static final int CMDNAME_COUNT = 4;
 
     public static Syntax getSyntax() {
-        return new Syntax()
-                .addCommand(new Command()
-                        .primaryName("help")
-                        .commandId(CommandEnum.COMMAND_HELP.getCommandId())
-                        .help("get help on commands")
-                        .addArgument(new Argument()
-                                .name("primary")
-                                .optional(true)
-                                .help("command to get help on"))
-                        .addArgument(new Argument()
-                                .name("secondary")
-                                .optional(true)
-                                .help("second word of command to get help on")));
+        Command helpCommand = new Command()
+                .primaryNames(new String[]{"help"})
+                .commandId(CommandEnum.COMMAND_HELP.getCommandId())
+                .help("get help on commands");
+
+        for (int i = 1; i <= CMDNAME_COUNT; i++) {
+            helpCommand.addArgument(new Argument()
+                    .name("cmdname" + i)
+                    .optional(true)
+                    .help("command to get help on"));
+        }
+
+        return new Syntax().addCommand(helpCommand);
     }
 
-    public HelpCommands(Parser parser) {
-        this.parser = parser;
+    private static void addCmdName(List<String> cmdNames, ParsedResult result, int idx) {
+        String cmd = result.getArgument("cmdname" + idx);
+        if (cmd != null) {
+            cmdNames.add(cmd);
+        }
     }
 
-    public void helpCommand(String primaryName, String secondaryName) {
-        if (StringUtils.isEmpty(primaryName)) {
+    public static boolean dispatchCommand(CommandEnum command, ParsedResult result, Parser parser) {
+        List<String> cmdNames = new ArrayList<>();
+        for (int i = 1; i <= CMDNAME_COUNT; i++) {
+            addCmdName(cmdNames, result, i);
+        }
+
+        if (cmdNames.size() == 0) {
             parser.printAllCommandHelp(System.out);
         } else {
-            parser.printCommandHelp(System.out, primaryName, secondaryName);
+            parser.printCommandHelp(System.out, cmdNames);
         }
+        return true;
     }
 
 }

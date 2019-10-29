@@ -14,14 +14,15 @@ import bio.terra.parser.Syntax;
 import java.util.Collections;
 import java.util.List;
 
+import static bio.terra.command.CommandEnum.COMMAND_PROFILE_CREATE;
+
 public class ProfileCommands {
 
     public static Syntax getSyntax() {
         return new Syntax()
                 .addCommand(new Command()
-                        .primaryName("profile")
-                        .secondaryName("create")
-                        .commandId(CommandEnum.COMMAND_PROFILE_CREATE.getCommandId())
+                        .primaryNames(new String[]{"profile", "create"})
+                        .commandId(COMMAND_PROFILE_CREATE.getCommandId())
                         .help("Create a new profile")
                         .addOption(new Option()
                                 .shortName("n")
@@ -42,8 +43,7 @@ public class ProfileCommands {
                                 .optional(true)
                                 .help("Biller; defaults to 'direct'")))
                 .addCommand(new Command()
-                        .primaryName("profile")
-                        .secondaryName("delete")
+                        .primaryNames(new String[]{"profile", "delete"})
                         .commandId(CommandEnum.COMMAND_PROFILE_DELETE.getCommandId())
                         .help("Delete a profile")
                         .addArgument(new Argument()
@@ -51,8 +51,7 @@ public class ProfileCommands {
                                 .optional(false)
                                 .help("Name of the profile to delete")))
                 .addCommand(new Command()
-                        .primaryName("profile")
-                        .secondaryName("show")
+                        .primaryNames(new String[]{"profile", "show"})
                         .commandId(CommandEnum.COMMAND_PROFILE_SHOW.getCommandId())
                         .help("Show a profile")
                         .addArgument(new Argument()

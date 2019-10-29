@@ -2,7 +2,7 @@ package bio.terra.parser;
 
 /**
  * Very simple parser. The form of syntax is:
- *  command  options  arguments
+ *  commands  options  arguments
  * The command determines what options and arguments we accept. Options have long (--) and short (-) forms.
  * We can make this more complex by adding complexity to the Command parsing.
  *
