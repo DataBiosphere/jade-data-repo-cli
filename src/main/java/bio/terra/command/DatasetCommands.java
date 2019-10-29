@@ -34,8 +34,7 @@ public class DatasetCommands {
     public static Syntax getSyntax() {
         return new Syntax()
                 .addCommand(new Command()
-                        .primaryName("dataset")
-                        .secondaryName("create")
+                        .primaryNames(new String[]{"dataset", "create"})
                         .commandId(CommandEnum.COMMAND_DATASET_CREATE.getCommandId())
                         .help("Create a new dataset")
                         .addOption(new Option()
@@ -57,8 +56,7 @@ public class DatasetCommands {
                                 .optional(true)
                                 .help("Profile name; if present, overrides the profile id in the JSON file")))
                 .addCommand(new Command()
-                        .primaryName("dataset")
-                        .secondaryName("show")
+                        .primaryNames(new String[]{"dataset", "show"})
                         .commandId(CommandEnum.COMMAND_DATASET_SHOW.getCommandId())
                         .help("List one dataset")
                         .addArgument(new Argument()
@@ -66,8 +64,7 @@ public class DatasetCommands {
                                 .optional(false)
                                 .help("name of the dataset to show")))
                 .addCommand(new Command()
-                        .primaryName("dataset")
-                        .secondaryName("delete")
+                        .primaryNames(new String[]{"dataset", "delete"})
                         .commandId(CommandEnum.COMMAND_DATASET_DELETE.getCommandId())
                         .help("Delete a dataset")
                         .addArgument(new Argument()
@@ -75,8 +72,7 @@ public class DatasetCommands {
                                 .optional(false)
                                 .help("Name of the dataset to delete")))
                 .addCommand(new Command()
-                        .primaryName("dataset")
-                        .secondaryName("table-load")
+                        .primaryNames(new String[]{"dataset", "table", "load"})
                         .commandId(CommandEnum.COMMAND_DATASET_TABLE.getCommandId())
                         .help("Load rows into a table")
                         .addArgument(new Argument()
@@ -94,11 +90,21 @@ public class DatasetCommands {
                                 .longName("input-gspath")
                                 .hasArgument(true)
                                 .optional(false)
-                                .help("GCS URI to the source input file")))
+                                .help("GCS URI to the source input file"))
+                        .addOption(new Option()
+                                .shortName("s")
+                                .longName("strategy")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Load strategy: append or upsert; defaults to append"))
+                        .addOption(new Option()
+                                .longName("input-format")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Input format: csv or json; defaults to json")))
                         // TODO: support the other parameters of a table load
                 .addCommand(new Command()
-                        .primaryName("dataset")
-                        .secondaryName("file-load")
+                        .primaryNames(new String[]{"dataset", "file", "load"})
                         .commandId(CommandEnum.COMMAND_DATASET_FILE.getCommandId())
                         .help("Load one file into a dataset")
                         .addArgument(new Argument()
@@ -143,8 +149,7 @@ public class DatasetCommands {
                                 .optional(true)
                                 .help("Choose format; 'text' is the default; 'json' is supported")))
                 .addCommand(new Command()
-                        .primaryName("dataset")
-                        .secondaryName("policy-show")
+                        .primaryNames(new String[]{"dataset", "policy", "show"})
                         .commandId(CommandEnum.COMMAND_DATASET_POLICY_SHOW.getCommandId())
                         .help("Show policies")
                         .addArgument(new Argument()
@@ -152,8 +157,7 @@ public class DatasetCommands {
                                 .optional(false)
                                 .help("Name of the dataset")))
                 .addCommand(new Command()
-                        .primaryName("dataset")
-                        .secondaryName("policy-add")
+                        .primaryNames(new String[]{"dataset", "policy", "add"})
                         .commandId(CommandEnum.COMMAND_DATASET_POLICY_ADD.getCommandId())
                         .help("Add a member to a policy")
                         .addArgument(new Argument()
@@ -173,8 +177,7 @@ public class DatasetCommands {
                                 .optional(false)
                                 .help("Email of the member to be added")))
                 .addCommand(new Command()
-                        .primaryName("dataset")
-                        .secondaryName("policy-remove")
+                        .primaryNames(new String[]{"dataset", "policy", "remove"})
                         .commandId(CommandEnum.COMMAND_DATASET_POLICY_REMOVE.getCommandId())
                         .help("Remove a member from a policy")
                         .addArgument(new Argument()
@@ -223,7 +226,9 @@ public class DatasetCommands {
                 datasetTableLoad(
                         result.getArgument("dataset-name"),
                         result.getArgument("input-gspath"),
-                        result.getArgument("table"));
+                        result.getArgument("table"),
+                        result.getArgument("strategy"),
+                        result.getArgument("input-format"));
                 break;
             case COMMAND_DATASET_POLICY_ADD:
                 datasetPolicyAdd(
@@ -327,15 +332,38 @@ public class DatasetCommands {
         }
     }
 
+    private static IngestRequestModel.FormatEnum lookupFormatEnum(String inputFormat) {
+        if (inputFormat != null) {
+            IngestRequestModel.FormatEnum formatEnum = IngestRequestModel.FormatEnum.fromValue(inputFormat);
+            if (formatEnum != null) {
+                return formatEnum;
+            }
+        }
+        return IngestRequestModel.FormatEnum.JSON;
+    }
+
+    private static IngestRequestModel.StrategyEnum lookupStrategyEnum(String strategy) {
+        if (strategy != null) {
+            IngestRequestModel.StrategyEnum strategyEnum = IngestRequestModel.StrategyEnum.fromValue(strategy);
+            if (strategyEnum != null) {
+                return strategyEnum;
+            }
+        }
+        return IngestRequestModel.StrategyEnum.APPEND;
+    }
+
     private static void datasetTableLoad(String datasetName,
-                                        String inputGspath,
-                                        String tableName) {
+                                         String inputGspath,
+                                         String tableName,
+                                         String strategy,
+                                         String inputFormat) {
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
 
         IngestRequestModel ingestRequest = new IngestRequestModel()
                 .table(tableName)
                 .path(inputGspath)
-                .format(IngestRequestModel.FormatEnum.JSON);
+                .format(lookupFormatEnum(inputFormat))
+                .strategy(lookupStrategyEnum(strategy));
 
         try {
             JobModel job = DRApis.getRepositoryApi().ingestDataset(summary.getId(), ingestRequest);

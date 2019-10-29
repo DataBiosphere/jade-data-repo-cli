@@ -7,6 +7,7 @@ public class ParseContext {
     private ParsedResult result;
     private String[] args;
     private int currentIndex;
+    private int markIndex;
 
     public ParseContext(String[] args) {
         this.args = args;
@@ -35,6 +36,14 @@ public class ParseContext {
 
     public void shift() {
         currentIndex++;
+    }
+
+    public void setMark() {
+        markIndex = currentIndex;
+    }
+
+    public void resetToMark() {
+        currentIndex = markIndex;
     }
 
     public ParsedResult getResult() {

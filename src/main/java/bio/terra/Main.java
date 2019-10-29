@@ -28,12 +28,9 @@ public class Main {
             boolean commandHandled = false;
 
             switch(command) {
-                case COMMAND_HELP: {
-                    HelpCommands cmds = new HelpCommands(parser);
-                    cmds.helpCommand(result.getArgument("primary"), result.getArgument("secondary"));
-                    commandHandled = true;
-                }
-                break;
+                case COMMAND_HELP:
+                    commandHandled = HelpCommands.dispatchCommand(command, result, parser);
+                    break;
 
                 case COMMAND_DATASET_CREATE:
                 case COMMAND_DATASET_SHOW:

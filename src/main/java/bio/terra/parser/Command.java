@@ -8,8 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Command {
-    private String primaryName;
-    private String secondaryName;
+    private String[] primaryNames;
     private String[] alternateNames;
     private int commandId;
     private String help;
@@ -63,23 +62,16 @@ public class Command {
     }
 
     // If the name matches, then we are shifted past the name.
-    // Otherwise, the parsing position stays where it was.
+    // Otherwise, the parsing position is returned to where it was
     private boolean matchName(ParseContext context) {
-        String testName = context.getArg();
-        if (StringUtils.equalsIgnoreCase(testName, primaryName)) {
-            if (secondaryName == null) {
-                context.shift();
-                return true;
-            }
-
-            String testName2 = context.peekArg();
-            if (StringUtils.equalsIgnoreCase(testName2, secondaryName)) {
-                context.shift();
-                context.shift();
-                return true;
-            }
+        context.setMark();
+        if (matchPrimaryNames(context)) {
+            return true;
         }
+        context.resetToMark();
+
         if (alternateNames != null) {
+            String testName = context.getArg();
             for (String altname : alternateNames) {
                 if (StringUtils.equalsIgnoreCase(testName, altname)) {
                     context.shift();
@@ -88,6 +80,16 @@ public class Command {
             }
         }
         return false;
+    }
+
+    private boolean matchPrimaryNames(ParseContext context) {
+        for (String primaryName : primaryNames) {
+            if (!StringUtils.equalsIgnoreCase(primaryName, context.getArg())) {
+                return false;
+            }
+            context.shift();
+        }
+        return true;
     }
 
     public Command addOption(Option option) {
@@ -100,21 +102,12 @@ public class Command {
         return this;
     }
 
-    public String getPrimaryName() {
-        return primaryName;
+    public String[] getPrimaryNames() {
+        return primaryNames;
     }
 
-    public Command primaryName(String primaryName) {
-        this.primaryName = primaryName;
-        return this;
-    }
-
-    public String getSecondaryName() {
-        return secondaryName;
-    }
-
-    public Command secondaryName(String secondaryName) {
-        this.secondaryName = secondaryName;
+    public Command primaryNames(String[] primaryNames) {
+        this.primaryNames = primaryNames;
         return this;
     }
 
@@ -155,9 +148,9 @@ public class Command {
     }
 
     public void printHelpLine(PrintStream ps) {
-        StringBuffer sb = new StringBuffer().append(primaryName);
-        if (secondaryName !=null) {
-            sb.append(" ").append(secondaryName);
+        StringBuffer sb = new StringBuffer();
+        for (String primaryName : primaryNames) {
+            sb.append(primaryName).append(" ");
         }
 
         for (Option option : options) {
@@ -211,8 +204,7 @@ public class Command {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("primaryName", primaryName)
-                .append("secondaryName", secondaryName)
+                .append("primaryNames", primaryNames)
                 .append("alternateNames", alternateNames)
                 .append("commandId", commandId)
                 .append("help", help)
