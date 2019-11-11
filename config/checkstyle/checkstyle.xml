@@ -16,6 +16,7 @@ page at http://checkstyle.sourceforge.net/config.html -->
 
 <module name="Checker">
     <module name="BeforeExecutionExclusionFileFilter">
+        <!-- Skip Swagger-generated tests -->
         <property name="fileNamePattern" value="src\/test\/java\/bio\/terra\/datarepo\/.*\.java$"/>
     </module>
     <module name="SuppressWarningsFilter" />
