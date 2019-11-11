@@ -19,7 +19,9 @@ import bio.terra.parser.Syntax;
 import java.io.File;
 import java.io.IOException;
 
-public class SnapshotCommands {
+public final class SnapshotCommands {
+
+    private SnapshotCommands() { }
 
     public static Syntax getSyntax() {
         return new Syntax()
@@ -150,7 +152,8 @@ public class SnapshotCommands {
     public static void snapshotCreate(String jsonpath, String name, String profileName) {
         try {
             File file = new File(jsonpath);
-            SnapshotRequestModel snapshotRequestModel = CommandUtils.getObjectMapper().readValue(file, SnapshotRequestModel.class);
+            SnapshotRequestModel snapshotRequestModel = CommandUtils.getObjectMapper()
+                    .readValue(file, SnapshotRequestModel.class);
             if (snapshotRequestModel != null) {
                 // Override the name and profile if requested
                 if (name != null) {

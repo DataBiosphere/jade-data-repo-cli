@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.util.Properties;
 
 // Context for this run
-public class Context {
+public final class Context {
     private static final String CONTEXT_STORE_PATH = ".jadecli/context.properties";
 
 // TODO: hold some list of previous paths and allow selection

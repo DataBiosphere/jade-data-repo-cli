@@ -29,7 +29,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
-public class DatasetCommands {
+public final class DatasetCommands {
+
+    private DatasetCommands() { }
 
     public static Syntax getSyntax() {
         return new Syntax()
@@ -254,7 +256,8 @@ public class DatasetCommands {
     private static void datasetCreate(String jsonpath, String name, String profileName) {
         try {
             File file = new File(jsonpath);
-            DatasetRequestModel datasetRequestModel = CommandUtils.getObjectMapper().readValue(file, DatasetRequestModel.class);
+            DatasetRequestModel datasetRequestModel = CommandUtils.getObjectMapper()
+                    .readValue(file, DatasetRequestModel.class);
             if (datasetRequestModel != null) {
                 // Override the name and profile if requested
                 if (name != null) {

@@ -16,7 +16,9 @@ import java.util.List;
 
 import static bio.terra.command.CommandEnum.COMMAND_PROFILE_CREATE;
 
-public class ProfileCommands {
+public final class ProfileCommands {
+
+    private ProfileCommands() { }
 
     public static Syntax getSyntax() {
         return new Syntax()
@@ -104,7 +106,8 @@ public class ProfileCommands {
 
         try {
             DeleteResponseModel deleteResponse = DRApis.getResourcesApi().deleteProfile(profile.getId());
-            System.out.printf("Profile deleted: %s (%s)\n", profile.getProfileName(), deleteResponse.getObjectState().getValue());
+            System.out.printf("Profile deleted: %s (%s)\n", profile.getProfileName(),
+                    deleteResponse.getObjectState().getValue());
         } catch (ApiException ex) {
             System.out.println("Error processing profile delete:");
             CommandUtils.printError(ex);

@@ -15,7 +15,9 @@ import java.net.URI;
 import java.nio.channels.Channels;
 import java.util.Date;
 
-public class StreamFile {
+public final class StreamFile {
+
+    private StreamFile() { }
 
     public static void streamFile(String gspath) {
         Credential userCredential = Login.getUserCredential();

@@ -19,9 +19,11 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
-public class Login {
-    private static boolean isLoggedIn = false;
-    private static Credential userCredential = null;
+public final class Login {
+    private static boolean isLoggedIn;
+    private static Credential userCredential;
+
+    private Login() { }
 
     public static void requiresLogin() {
         if (!isLoggedIn) {

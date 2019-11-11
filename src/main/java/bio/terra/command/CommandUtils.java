@@ -23,10 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class CommandUtils {
+public final class CommandUtils {
     public static final String SLASH = "/";
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private CommandUtils() { }
 
     public static ObjectMapper getObjectMapper() {
         return objectMapper;
@@ -96,7 +98,8 @@ public class CommandUtils {
 
     public static DatasetSummaryModel findDatasetByName(String datasetName) {
         try {
-            EnumerateDatasetModel enumerateDataset = DRApis.getRepositoryApi().enumerateDatasets(0, 100000, null, null, datasetName);
+            EnumerateDatasetModel enumerateDataset = DRApis.getRepositoryApi()
+                    .enumerateDatasets(0, 100000, null, null, datasetName);
 
             List<DatasetSummaryModel> studies = enumerateDataset.getItems();
             for (DatasetSummaryModel summary : studies) {
@@ -114,7 +117,8 @@ public class CommandUtils {
 
     public static SnapshotSummaryModel findSnapshotByName(String snapshotName) {
         try {
-            EnumerateSnapshotModel enumerateSnapshot = DRApis.getRepositoryApi().enumerateSnapshots(0, 100000, null, null, snapshotName);
+            EnumerateSnapshotModel enumerateSnapshot = DRApis.getRepositoryApi()
+                    .enumerateSnapshots(0, 100000, null, null, snapshotName);
 
             List<SnapshotSummaryModel> studies = enumerateSnapshot.getItems();
             for (SnapshotSummaryModel summary : studies) {

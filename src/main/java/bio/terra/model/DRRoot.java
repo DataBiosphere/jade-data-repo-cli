@@ -108,7 +108,8 @@ public class DRRoot extends DRElement {
 
     private DatasetSummaryModel findDatasetByName(String datasetName) {
         try {
-            EnumerateDatasetModel enumerateDatasetModel = DRApis.getRepositoryApi().enumerateDatasets(0, 100000, null, null, datasetName);
+            EnumerateDatasetModel enumerateDatasetModel = DRApis.getRepositoryApi()
+                    .enumerateDatasets(0, 100000, null, null, datasetName);
 
             List<DatasetSummaryModel> studies = enumerateDatasetModel.getItems();
             for (DatasetSummaryModel summary : studies) {

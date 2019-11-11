@@ -28,8 +28,10 @@ import java.util.List;
 // TODO: snapshot layer
 // TODO: use TableFormatter
 
-public class DRCommands {
+public final class DRCommands {
     private static final String LIST_FORMAT = "%s%-8s  %-20s  %s  %s  %s\n";
+
+    private DRCommands() { }
 
     public static Syntax getSyntax() {
         return new Syntax()
