@@ -16,6 +16,8 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'application'
 
+apply plugin: 'checkstyle'
+
 group 'jadecli'
 version '0.1'
 sourceCompatibility = 1.8
@@ -123,6 +125,11 @@ sourceSets {
     test {
         compileClasspath += generated.output
         runtimeClasspath += generated.output
+    }
+    checkstyle {
+        toolVersion '7.8.1'
+        checkstyleGenerated.enabled = false // Don't check generated code
+        configFile file("config/checkstyle/checkstyle.xml")
     }
 }
 mainClassName = 'bio.terra.Main'
