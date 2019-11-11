@@ -39,7 +39,7 @@ dependencies {
         googleClient = "1.30.3"
         googleCloudStorage = "1.92.0"
         googleOauthClientJetty = "1.30.2"
-        jackson = "2.10.0.pr3"
+        jackson = "2.10.1"
         jersey = "2.29.1"
         junit = "4.12"
         swagger = "1.5.22"
