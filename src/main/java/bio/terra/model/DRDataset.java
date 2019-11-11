@@ -123,7 +123,7 @@ public class DRDataset extends DRElement {
                 maxToLen = StringUtils.length(sterm);
             }
         }
-        String fmt = String.format("  %%-%ds: %%-%ds --> %%-%ds\n", maxNameLen, maxFromLen, maxToLen);
+        String fmt = String.format("  %%-%ds: %%-%ds --> %%-%ds%n", maxNameLen, maxFromLen, maxToLen);
 
         for (RelationshipModel relationship : relationships) {
             System.out.printf(fmt,

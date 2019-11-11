@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public abstract class DRElement {
-    public static final String DESCRIBE_FORMAT = "%-12s: %s\n";
+    public static final String DESCRIBE_FORMAT = "%-12s: %s%n";
 
 
     // Abstract interface - provide the basics for all kinds of elements

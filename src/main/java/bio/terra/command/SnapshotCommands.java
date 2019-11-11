@@ -191,7 +191,7 @@ public final class SnapshotCommands {
                     job,
                     1,
                     DeleteResponseModel.class);
-            System.out.printf("Snapshot deleted: %s (%s)\n", snapshotName, deleteResponse.getObjectState().getValue());
+            System.out.printf("Snapshot deleted: %s (%s)%n", snapshotName, deleteResponse.getObjectState().getValue());
         } catch (ApiException ex) {
             System.out.println("Error processing snapshot delete:");
             CommandUtils.printError(ex);

@@ -14,6 +14,7 @@ import bio.terra.datarepo.model.JobModel;
 import bio.terra.datarepo.model.PolicyModel;
 import bio.terra.datarepo.model.PolicyResponse;
 import bio.terra.datarepo.model.SnapshotSummaryModel;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,15 +38,15 @@ public final class CommandUtils {
     public static void printError(ApiException ex) {
         try {
             ErrorModel errorModel = objectMapper.readValue(ex.getResponseBody(), ErrorModel.class);
-            System.out.printf("[%d] %s\n", ex.getCode(), errorModel.getMessage());
+            System.out.printf("[%d] %s%n", ex.getCode(), errorModel.getMessage());
             if (errorModel.getErrorDetail() != null) {
                 for (String detail : errorModel.getErrorDetail()) {
-                    System.out.printf("  %s\n", detail);
+                    System.out.printf("  %s%n", detail);
                 }
             }
 
-        } catch (Exception omex) {
-            System.out.printf("[%d] %s\n", ex.getCode(), ex.getMessage());
+        } catch (JsonProcessingException jsonEx) {
+            System.out.printf("[%d] %s%n", ex.getCode(), ex.getMessage());
         }
     }
 

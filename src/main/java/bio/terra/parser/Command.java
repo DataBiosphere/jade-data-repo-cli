@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Command {
@@ -103,11 +104,11 @@ public class Command {
     }
 
     public String[] getPrimaryNames() {
-        return primaryNames;
+        return Arrays.copyOf(primaryNames, primaryNames.length);
     }
 
     public Command primaryNames(String[] primaryNames) {
-        this.primaryNames = primaryNames;
+        this.primaryNames = Arrays.copyOf(primaryNames, primaryNames.length);
         return this;
     }
 
@@ -121,11 +122,11 @@ public class Command {
     }
 
     public String[] getAlternateNames() {
-        return alternateNames;
+        return Arrays.copyOf(alternateNames, alternateNames.length);
     }
 
     public Command alternateNames(String[] alternateNames) {
-        this.alternateNames = alternateNames;
+        this.alternateNames = Arrays.copyOf(alternateNames, alternateNames.length);
         return this;
     }
 
@@ -180,7 +181,7 @@ public class Command {
 
     public void printHelp(PrintStream ps) {
         printHelpLine(ps);
-        String fmt = "    %-16s    %s\n";
+        String fmt = "    %-16s    %s%n";
         if (options.size() > 0) {
             ps.println("  Options:");
             for (Option option : options) {

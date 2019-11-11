@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -57,8 +58,10 @@ public final class Login {
 
             // load client secrets
             File clientSecretsFile = new File(homePath, ".jadecli/client/jadecli_client_secret.json");
+            // TODO: for reviewers, should this be the default charset or just hardcode to UTF-8?
+            // practically, I don't think this will make a difference on Mac or Linux, only Windows
             GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory,
-                    new InputStreamReader(new FileInputStream(clientSecretsFile)));
+                    new InputStreamReader(new FileInputStream(clientSecretsFile), Charset.defaultCharset()));
 
             // set up authorization code flow
             GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(

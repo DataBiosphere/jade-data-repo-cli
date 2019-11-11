@@ -29,7 +29,7 @@ import java.util.List;
 // TODO: use TableFormatter
 
 public final class DRCommands {
-    private static final String LIST_FORMAT = "%s%-8s  %-20s  %s  %s  %s\n";
+    private static final String LIST_FORMAT = "%s%-8s  %-20s  %s  %s  %s%n";
 
     private DRCommands() { }
 
@@ -91,7 +91,7 @@ public final class DRCommands {
                 DRCommands.drList(result.getArgument("path"), result.found("recurse"));
                 break;
             case COMMAND_DR_TREE:
-                int depth = (result.found("depth")) ? Integer.valueOf(result.getArgument("depth")) : 1000000000;
+                int depth = (result.found("depth")) ? Integer.parseInt(result.getArgument("depth")) : 1000000000;
                 DRCommands.drTree(result.getArgument("path"), depth);
                 break;
             case COMMAND_DR_DESCRIBE:
@@ -155,7 +155,7 @@ public final class DRCommands {
 
     private static void treePrint(DRElement element, int currentDepth) {
         String prefix = StringUtils.repeat("|   ", currentDepth);
-        System.out.printf("%s%s (%s)\n",
+        System.out.printf("%s%s (%s)%n",
                 prefix,
                 element.getObjectName(),
                 element.getObjectType().getName());

@@ -1,5 +1,7 @@
 package bio.terra.formatting;
 
+import java.util.Arrays;
+
 /**
  * TableFormatBase provides a base class used by TableFormatter to get
  * fields from an underlying object. It is up to the implementation to map index
@@ -13,9 +15,9 @@ public abstract class TableFormatBase {
     private boolean[] computeLengths;
 
     public TableFormatBase(String[] headers, int[] lengths, boolean[] computeLengths) {
-        this.headers = headers;
-        this.lengths = lengths;
-        this.computeLengths = computeLengths;
+        this.headers = Arrays.copyOf(headers, headers.length);
+        this.lengths = Arrays.copyOf(lengths, lengths.length);
+        this.computeLengths = Arrays.copyOf(computeLengths, computeLengths.length);
     }
 
     public String getHeader(int index) {

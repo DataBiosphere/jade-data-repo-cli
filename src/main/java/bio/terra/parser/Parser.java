@@ -63,11 +63,12 @@ public class Parser {
 
         for (Command command : commands) {
             // For each command, for number of columns fill in either name or blank
+            String[] primaryNames = command.getPrimaryNames();
             StringBuffer sb = new StringBuffer("  ");
             for (int i = 0; i < maxPrimaryNames; i++) {
                 String c = StringUtils.EMPTY;
-                if (i < command.getPrimaryNames().length) {
-                    c = command.getPrimaryNames()[i];
+                if (i < primaryNames.length) {
+                    c = primaryNames[i];
                 }
                 sb.append(String.format(columnFormats[i], c));
             }
@@ -116,8 +117,9 @@ public class Parser {
                 // If we find an exact alternate name match, we just return that.
                 // TODO: This assumes the untested axiom that alternate names do not
                 //  overlap with the first name of any command.
-                if (cmdNames.size() == 1 && command.getAlternateNames() != null) {
-                    for (String name : command.getAlternateNames()) {
+                String[] alternateNames = command.getAlternateNames();
+                if (cmdNames.size() == 1 && alternateNames != null) {
+                    for (String name : alternateNames) {
                         if (StringUtils.equalsIgnoreCase(name, cmdNames.get(0))) {
                             commandList.add(command);
                             return commandList;

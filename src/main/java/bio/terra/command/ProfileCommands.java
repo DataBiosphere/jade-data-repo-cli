@@ -106,7 +106,7 @@ public final class ProfileCommands {
 
         try {
             DeleteResponseModel deleteResponse = DRApis.getResourcesApi().deleteProfile(profile.getId());
-            System.out.printf("Profile deleted: %s (%s)\n", profile.getProfileName(),
+            System.out.printf("Profile deleted: %s (%s)%n", profile.getProfileName(),
                     deleteResponse.getObjectState().getValue());
         } catch (ApiException ex) {
             System.out.println("Error processing profile delete:");

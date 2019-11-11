@@ -285,7 +285,7 @@ public final class DatasetCommands {
 
         try {
             DeleteResponseModel deleteResponse = DRApis.getRepositoryApi().deleteDataset(summary.getId());
-            System.out.printf("Dataset deleted: %s (%s)\n", datasetName, deleteResponse.getObjectState().getValue());
+            System.out.printf("Dataset deleted: %s (%s)%n", datasetName, deleteResponse.getObjectState().getValue());
         } catch (ApiException ex) {
             System.out.println("Error processing dataset delete:");
             CommandUtils.printError(ex);
@@ -376,7 +376,7 @@ public final class DatasetCommands {
                     1,
                     IngestResponseModel.class);
 
-            System.out.printf("Loaded %d rows; %d bad rows skipped\n",
+            System.out.printf("Loaded %d rows; %d bad rows skipped%n",
                     response.getRowCount(),
                     response.getBadRowCount());
 

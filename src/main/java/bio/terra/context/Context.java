@@ -37,9 +37,17 @@ public final class Context {
     }
 
     private void getContext() {
+        FileInputStream fileInputStream = null;
         try {
-            properties.load(new FileInputStream(propertiesFile));
+            fileInputStream = new FileInputStream(propertiesFile);
+            properties.load(fileInputStream);
+            fileInputStream.close();
         } catch (FileNotFoundException ex) {
+            if (fileInputStream != null) {
+                try {
+                    fileInputStream.close();
+                } catch (IOException fileCloseEx) { }
+            }
             for (ContextEnum contextEnum : ContextEnum.values()) {
                 properties.setProperty(contextEnum.getKey(), contextEnum.getDefaultValue());
             }
@@ -82,7 +90,7 @@ public final class Context {
     public void showContextItems() {
         for (ContextEnum contextEnum : ContextEnum.values()) {
             String key = contextEnum.getKey();
-            System.out.printf("  %-18s: %s\n", key, properties.getProperty(key));
+            System.out.printf("  %-18s: %s%n", key, properties.getProperty(key));
         }
     }
 
