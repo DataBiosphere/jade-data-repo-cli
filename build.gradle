@@ -17,6 +17,15 @@ apply plugin: 'idea'
 apply plugin: 'application'
 
 apply plugin: 'checkstyle'
+apply plugin: 'findbugs'
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+        html.stylesheet resources.text.fromFile('config/findbugs/plain.xsl')
+    }
+}
 
 group 'jadecli'
 version '0.1'
@@ -72,6 +81,9 @@ dependencies {
     compile group: 'com.google.api-client', name: 'google-api-client-java6', version: "${googleClient}"
     compile "com.google.cloud:google-cloud-storage:${googleCloudStorage}"
     compile group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: "${googleOauthClientJetty}"
+
+    // Findbugs annotations, so we can selectively suppress findbugs findings
+    compileOnly 'com.google.code.findbugs:annotations:3.0.1u2'
 
     testCompile group: 'junit', name: 'junit', version: "${junit}"
     testCompile group: 'org.hamcrest', name: 'hamcrest', version: "${hamcrest}"
@@ -130,6 +142,13 @@ sourceSets {
         toolVersion '7.8.1'
         checkstyleGenerated.enabled = false // Don't check generated code
         configFile file("config/checkstyle/checkstyle.xml")
+    }
+    findbugs {
+        toolVersion '3.0.1'
+        ignoreFailures = false
+        excludeFilter = file("config/findbugs/excludeFilter.xml")
+        reportsDir = file("$project.buildDir/reports/findbugs")
+        effort = "max"
     }
 }
 mainClassName = 'bio.terra.Main'
