@@ -37,17 +37,9 @@ public final class Context {
     }
 
     private void getContext() {
-        FileInputStream fileInputStream = null;
-        try {
-            fileInputStream = new FileInputStream(propertiesFile);
+        try (FileInputStream fileInputStream = new FileInputStream(propertiesFile)) {
             properties.load(fileInputStream);
-            fileInputStream.close();
         } catch (FileNotFoundException ex) {
-            if (fileInputStream != null) {
-                try {
-                    fileInputStream.close();
-                } catch (IOException fileCloseEx) { }
-            }
             for (ContextEnum contextEnum : ContextEnum.values()) {
                 properties.setProperty(contextEnum.getKey(), contextEnum.getDefaultValue());
             }
