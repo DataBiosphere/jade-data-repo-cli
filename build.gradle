@@ -19,6 +19,13 @@ apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'findbugs'
 
+if (hasProperty('buildScan')) {
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
+}
+
 tasks.withType(FindBugs) {
     reports {
         xml.enabled false
