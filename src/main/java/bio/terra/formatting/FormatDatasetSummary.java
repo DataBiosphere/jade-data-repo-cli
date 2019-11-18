@@ -3,9 +3,9 @@ package bio.terra.formatting;
 import bio.terra.datarepo.model.DatasetSummaryModel;
 
 public class FormatDatasetSummary extends TableFormatBase {
-    private static final String[] headers         = new String[]{"Name", "Id", "Created", "Description"};
-    private static final int[] lengths            = new int[]{    20,     36,   27,       30};
-    private static final boolean[] computeLengths = new boolean[]{true,   false,false,  true};
+    private static final String[] headers         = new String[] {"Name", "Id",  "Created", "Description"};
+    private static final int[] lengths            = new int[]    {20,     36,    27,        30};
+    private static final boolean[] computeLengths = new boolean[]{true,   false, false,     true};
     private DatasetSummaryModel summary;
 
     public FormatDatasetSummary(DatasetSummaryModel summary) {

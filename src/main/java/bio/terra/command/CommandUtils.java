@@ -14,6 +14,7 @@ import bio.terra.datarepo.model.JobModel;
 import bio.terra.datarepo.model.PolicyModel;
 import bio.terra.datarepo.model.PolicyResponse;
 import bio.terra.datarepo.model.SnapshotSummaryModel;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,10 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class CommandUtils {
+public final class CommandUtils {
     public static final String SLASH = "/";
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    private CommandUtils() { }
 
     public static ObjectMapper getObjectMapper() {
         return objectMapper;
@@ -35,15 +38,15 @@ public class CommandUtils {
     public static void printError(ApiException ex) {
         try {
             ErrorModel errorModel = objectMapper.readValue(ex.getResponseBody(), ErrorModel.class);
-            System.out.printf("[%d] %s\n", ex.getCode(), errorModel.getMessage());
+            System.out.printf("[%d] %s%n", ex.getCode(), errorModel.getMessage());
             if (errorModel.getErrorDetail() != null) {
                 for (String detail : errorModel.getErrorDetail()) {
-                    System.out.printf("  %s\n", detail);
+                    System.out.printf("  %s%n", detail);
                 }
             }
 
-        } catch (Exception omex) {
-            System.out.printf("[%d] %s\n", ex.getCode(), ex.getMessage());
+        } catch (JsonProcessingException jsonEx) {
+            System.out.printf("[%d] %s%n", ex.getCode(), ex.getMessage());
         }
     }
 
@@ -96,7 +99,8 @@ public class CommandUtils {
 
     public static DatasetSummaryModel findDatasetByName(String datasetName) {
         try {
-            EnumerateDatasetModel enumerateDataset = DRApis.getRepositoryApi().enumerateDatasets(0, 100000, null, null, datasetName);
+            EnumerateDatasetModel enumerateDataset = DRApis.getRepositoryApi()
+                    .enumerateDatasets(0, 100000, null, null, datasetName);
 
             List<DatasetSummaryModel> studies = enumerateDataset.getItems();
             for (DatasetSummaryModel summary : studies) {
@@ -114,7 +118,8 @@ public class CommandUtils {
 
     public static SnapshotSummaryModel findSnapshotByName(String snapshotName) {
         try {
-            EnumerateSnapshotModel enumerateSnapshot = DRApis.getRepositoryApi().enumerateSnapshots(0, 100000, null, null, snapshotName);
+            EnumerateSnapshotModel enumerateSnapshot = DRApis.getRepositoryApi()
+                    .enumerateSnapshots(0, 100000, null, null, snapshotName);
 
             List<SnapshotSummaryModel> studies = enumerateSnapshot.getItems();
             for (SnapshotSummaryModel summary : studies) {

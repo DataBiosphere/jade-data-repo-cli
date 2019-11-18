@@ -7,3 +7,4 @@ pom.xml
 .travis.yml
 .gitignore
 gradle.properties
+gradle/wrapper/gradle-wrapper.properties

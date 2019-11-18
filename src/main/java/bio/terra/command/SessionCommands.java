@@ -7,7 +7,7 @@ import bio.terra.parser.Command;
 import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
 
-public class SessionCommands {
+public final class SessionCommands {
 
     private static SessionCommands theProfileCommands;
 

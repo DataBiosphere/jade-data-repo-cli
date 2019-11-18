@@ -12,7 +12,9 @@ import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Parser;
 import bio.terra.parser.Syntax;
 
-public class Main {
+public final class Main {
+
+    private Main() { }
 
     public static void main(String[] args) {
 
@@ -27,7 +29,7 @@ public class Main {
             CommandEnum command = CommandEnum.commandIdToEnum(result.getCommandId());
             boolean commandHandled = false;
 
-            switch(command) {
+            switch (command) {
                 case COMMAND_HELP:
                     commandHandled = HelpCommands.dispatchCommand(command, result, parser);
                     break;

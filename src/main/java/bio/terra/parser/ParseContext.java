@@ -3,6 +3,8 @@ package bio.terra.parser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.Arrays;
+
 public class ParseContext {
     private ParsedResult result;
     private String[] args;
@@ -10,7 +12,7 @@ public class ParseContext {
     private int markIndex;
 
     public ParseContext(String[] args) {
-        this.args = args;
+        this.args = Arrays.copyOf(args, args.length);
         currentIndex = 0;
         result = new ParsedResult();
     }

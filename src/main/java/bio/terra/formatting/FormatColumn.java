@@ -4,8 +4,8 @@ import bio.terra.datarepo.model.ColumnModel;
 import org.apache.commons.lang3.StringUtils;
 
 public class FormatColumn extends TableFormatBase {
-    private static final String[] headers         = new String[]{"Name", "Datatype"};
-    private static final int[] lengths            = new int[]{    20,     20};
+    private static final String[] headers         = new String[] {"Name", "Datatype"};
+    private static final int[] lengths            = new int[]    {20,     20};
     private static final boolean[] computeLengths = new boolean[]{true,   false};
     private ColumnModel column;
 

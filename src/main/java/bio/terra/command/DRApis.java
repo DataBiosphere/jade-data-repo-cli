@@ -5,9 +5,11 @@ import bio.terra.datarepo.api.RepositoryApi;
 import bio.terra.datarepo.api.ResourcesApi;
 
 // Singleton container for pointers to the DR APIs
-public class DRApis {
-    private static RepositoryApi repositoryApi = null;
-    private static ResourcesApi resourcesApi = null;
+public final class DRApis {
+    private static RepositoryApi repositoryApi;
+    private static ResourcesApi resourcesApi;
+
+    private DRApis() { }
 
     public static RepositoryApi getRepositoryApi() {
         if (repositoryApi == null) {

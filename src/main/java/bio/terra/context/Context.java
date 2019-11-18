@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.util.Properties;
 
 // Context for this run
-public class Context {
+public final class Context {
     private static final String CONTEXT_STORE_PATH = ".jadecli/context.properties";
 
 // TODO: hold some list of previous paths and allow selection
@@ -37,8 +37,8 @@ public class Context {
     }
 
     private void getContext() {
-        try {
-            properties.load(new FileInputStream(propertiesFile));
+        try (FileInputStream fileInputStream = new FileInputStream(propertiesFile)) {
+            properties.load(fileInputStream);
         } catch (FileNotFoundException ex) {
             for (ContextEnum contextEnum : ContextEnum.values()) {
                 properties.setProperty(contextEnum.getKey(), contextEnum.getDefaultValue());
@@ -82,7 +82,7 @@ public class Context {
     public void showContextItems() {
         for (ContextEnum contextEnum : ContextEnum.values()) {
             String key = contextEnum.getKey();
-            System.out.printf("  %-18s: %s\n", key, properties.getProperty(key));
+            System.out.printf("  %-18s: %s%n", key, properties.getProperty(key));
         }
     }
 

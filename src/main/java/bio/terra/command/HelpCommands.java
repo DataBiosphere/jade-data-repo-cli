@@ -9,10 +9,12 @@ import bio.terra.parser.Syntax;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HelpCommands {
+public final class HelpCommands {
     // If we have syntax with commands of more than 4 primary names, just update this constant to allow
     // the help command to parse more.
     private static final int CMDNAME_COUNT = 4;
+
+    private HelpCommands() { }
 
     public static Syntax getSyntax() {
         Command helpCommand = new Command()
