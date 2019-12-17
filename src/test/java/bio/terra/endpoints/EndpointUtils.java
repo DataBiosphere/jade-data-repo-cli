@@ -3,15 +3,16 @@ package bio.terra.endpoints;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.http.HttpStatusCodes;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Utility methods for sending HTTP requests and parsing the responses from a JSON string into a Java object.
@@ -25,23 +26,36 @@ public final class EndpointUtils {
     /**
      * Sends an HTTP request using Java's HTTPURLConnection class.
      * @param urlStr where to direct the request
-     * @param requestType the type of request, GET/PUT/POST
+     * @param requestType the type of request, GET/PUT/POST/DELETE
+     * @param accessToken the bearer token to include in the request, null if not required
      * @return a Java Map that includes the HTTP status code (under statusCode key) and the parsed JSON response
      * @throws IOException
      */
-    public static Map<String, Object> sendJavaHttpRequest(String urlStr, String requestType) throws IOException {
+    public static Map<String, Object> sendJavaHttpRequest(String urlStr, String requestType, String accessToken)
+            throws IOException {
         // open HTTP connection, make request
         URL url = new URL(urlStr);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Content-Type", "application/json");
         con.setRequestMethod(requestType);
+        if (accessToken != null) {
+            con.setRequestProperty("Authorization", "Bearer " + accessToken);
+        }
 
         // read the status code
         int statusCode = con.getResponseCode();
 
+        // select the appropriate input stream depending on the status code
+        InputStream inputStream;
+        if (HttpStatusCodes.isSuccess(statusCode)) {
+            inputStream = con.getInputStream();
+        } else {
+            inputStream = con.getErrorStream();
+        }
+
         // read the response body
         BufferedReader bufferedReader =
-                new BufferedReader(new InputStreamReader(con.getInputStream(), Charset.defaultCharset()));
+                new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()));
         String inputLine;
         StringBuffer responseBody = new StringBuffer();
         while ((inputLine = bufferedReader.readLine()) != null) {
@@ -59,14 +73,21 @@ public final class EndpointUtils {
     /**
      * Sends an HTTP request using curl running in a separate process.
      * @param urlStr where to direct the request
-     * @param requestType the type of request, GET/PUT/POST
+     * @param requestType the type of request, GET/PUT/POST/DELETE
+     * @param accessToken the bearer token to include in the request, null if not required
      * @return a Java Map that includes the HTTP status code (under statusCode key) and the parsed JSON response
      * @throws IOException
      */
-    public static Map<String, Object> sendCurlRequest(String urlStr, String requestType) throws IOException {
+    public static Map<String, Object> sendCurlRequest(String urlStr, String requestType, String accessToken)
+            throws IOException {
         // build and run process
-        ProcessBuilder procBuilder = new ProcessBuilder("curl",
-                "-i", "-H", requestType, urlStr, "-H", "accept:application/json");
+        List<String> cmdArgs = new ArrayList<String>(Arrays.asList(
+                new String[]{"curl", "-i", "-H", requestType, urlStr, "-H", "accept:application/json"}));
+        if (accessToken != null) {
+            cmdArgs.add("-H");
+            cmdArgs.add("Authorization: Bearer " + accessToken);
+        }
+        ProcessBuilder procBuilder = new ProcessBuilder(cmdArgs);
         Process proc = procBuilder.start();
 
         // first line of the header output contains the status code. it looks like:
@@ -85,17 +106,19 @@ public final class EndpointUtils {
         }
         int statusCode = Integer.parseInt(statusCodeLineSplit[1]);
 
-        // next 4 lines are the rest of the header output. they look like:
+        // until the empty line are the rest of the header output. they look like:
         // Content-Type: application/json;charset=UTF-8
         // Transfer-Encoding: chunked
         // Date: Tue, 17 Dec 2019 15:58:03 GMT
         //
-        for (int ctr = 0; ctr < 4; ctr++) {
-            bufferedReader.readLine();
+        String inputLine;
+        while ((inputLine = bufferedReader.readLine()) != null) {
+            if (inputLine.equals("")) {
+                break;
+            }
         }
 
         // remaining lines are the response body
-        String inputLine;
         StringBuffer responseBody = new StringBuffer();
         while ((inputLine = bufferedReader.readLine()) != null) {
             responseBody.append(inputLine);
