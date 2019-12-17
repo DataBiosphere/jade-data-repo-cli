@@ -96,6 +96,12 @@ dependencies {
     testCompile group: 'org.hamcrest', name: 'hamcrest', version: "${hamcrest}"
 }
 
+test {
+    testLogging {
+        showStandardStreams = true // set to true to disable stdout & stderr redirection
+    }
+}
+
 // -- Swagger Client Generation --
 import io.swagger.codegen.config.CodegenConfigurator
 import io.swagger.codegen.DefaultGenerator
@@ -130,8 +136,22 @@ task generateApi {
 clean.doFirst {
     delete("${projectDir}/$openapiTargetFolder")
 }
-
 // -- End of Swagger Client Generation --
+
+
+task testCLIUnit(type: Test) {
+    useJUnit {
+        includeCategories 'bio.terra.common.category.CLIUnit'
+    }
+    outputs.upToDateWhen { false }
+}
+
+task testCLIIntegrated(type: Test) {
+    useJUnit {
+        includeCategories 'bio.terra.common.category.CLIIntegrated'
+    }
+    outputs.upToDateWhen { false }
+}
 
 sourceSets {
     generated {
