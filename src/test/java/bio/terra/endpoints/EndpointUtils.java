@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +18,9 @@ import java.util.Map;
  *   - sendJavaHttpRequest uses Java's HTTPURL library
  *   - sendCurlRequest uses curl
  */
-public class EndpointUtils {
+public final class EndpointUtils {
+
+    private EndpointUtils() { }
 
     /**
      * Sends an HTTP request using Java's HTTPURLConnection class.
@@ -37,7 +40,8 @@ public class EndpointUtils {
         int statusCode = con.getResponseCode();
 
         // read the response body
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        BufferedReader bufferedReader =
+                new BufferedReader(new InputStreamReader(con.getInputStream(), Charset.defaultCharset()));
         String inputLine;
         StringBuffer responseBody = new StringBuffer();
         while ((inputLine = bufferedReader.readLine()) != null) {
@@ -67,7 +71,8 @@ public class EndpointUtils {
 
         // first line of the header output contains the status code. it looks like:
         // HTTP/1.1 200
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+        BufferedReader bufferedReader =
+                new BufferedReader(new InputStreamReader(proc.getInputStream(), Charset.defaultCharset()));
         String statusCodeLine = bufferedReader.readLine();
         if (statusCodeLine == null) {
             throw new RuntimeException("no process output");
@@ -95,6 +100,7 @@ public class EndpointUtils {
         while ((inputLine = bufferedReader.readLine()) != null) {
             responseBody.append(inputLine);
         }
+        bufferedReader.close();
 
         // build and return the response map
         return buildResponseMap(responseBody.toString(), statusCode);

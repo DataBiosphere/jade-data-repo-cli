@@ -25,17 +25,17 @@ public class UnauthenticatedEndpointTests {
 
         // make request using Java HTTP library
         Map<String, Object> javaHttpResponse =
-                EndpointUtils.sendJavaHttpRequest("http://localhost:8080/status","GET");
+                EndpointUtils.sendJavaHttpRequest("http://localhost:8080/status", "GET");
 
         // make request using curl in a separate process
         Map<String, Object> curlResponse =
                 EndpointUtils.sendCurlRequest("http://localhost:8080/status", "GET");
 
         // check that the responses match
-        Assert.assertEquals(javaHttpResponse,curlResponse);
+        Assert.assertEquals(javaHttpResponse, curlResponse);
 
         // there should only be one field (statusCode) because there is no response body
-        Assert.assertEquals(javaHttpResponse.size(),1);
+        Assert.assertEquals(javaHttpResponse.size(), 1);
 
         // log the response map to stdout
         System.out.println("responses match");
@@ -50,7 +50,7 @@ public class UnauthenticatedEndpointTests {
     public void retrieveRepositoryConfigTest() throws IOException {
         // make request using Java HTTP library
         Map<String, Object> javaHttpResponse =
-                EndpointUtils.sendJavaHttpRequest("http://localhost:8080/configuration","GET");
+                EndpointUtils.sendJavaHttpRequest("http://localhost:8080/configuration", "GET");
 
         // make request using curl in a separate process
         Map<String, Object> curlResponse =
@@ -62,13 +62,13 @@ public class UnauthenticatedEndpointTests {
         // clientId should not be null or empty string
         String javaHttpClientId = (String)javaHttpResponse.get("clientId");
         Assert.assertNotNull(javaHttpClientId);
-        Assert.assertNotEquals(javaHttpClientId,"");
+        Assert.assertNotEquals(javaHttpClientId, "");
 
         // activeProfiles should contain one item, "google"
         ArrayList<String> activeProfiles = (ArrayList<String>)javaHttpResponse.get("activeProfiles");
         Assert.assertNotNull(activeProfiles);
-        Assert.assertEquals(activeProfiles.size(),1);
-        Assert.assertEquals(activeProfiles.get(0),"google");
+        Assert.assertEquals(activeProfiles.size(), 1);
+        Assert.assertEquals(activeProfiles.get(0), "google");
 
         // log the response map to stdout
         System.out.println("responses match");
