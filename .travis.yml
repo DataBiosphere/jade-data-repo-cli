@@ -14,5 +14,5 @@ jdk:
   - openjdk8
 
 script:
-  - ./gradlew assemble
-  - ./gradlew check --scan
+  - ./gradlew :assemble
+  - ./gradlew :check --scan
