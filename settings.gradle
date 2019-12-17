@@ -1,2 +1,3 @@
 rootProject.name = 'jadecli'
 
+include 'jade-data-repo'
