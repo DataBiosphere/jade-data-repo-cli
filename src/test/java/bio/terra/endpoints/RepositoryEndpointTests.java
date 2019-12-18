@@ -2,8 +2,7 @@ package bio.terra.endpoints;
 
 import bio.terra.common.category.CLIIntegrated;
 import bio.terra.context.Login;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -16,7 +15,19 @@ import java.util.Map;
 public class RepositoryEndpointTests {
 
     //private static final String dataRepoURL = "http://localhost:8080/";
+    //private static final String clientSecretsFilePath = null;
     private static final String dataRepoURL = "https://jade.datarepo-dev.broadinstitute.org/";
+    private static final String clientSecretsFilePath = "/tmp/jadecli_client_secret.json";
+
+    @BeforeClass
+    public static void setup() {
+        Login.setClientSecretsFilePath(clientSecretsFilePath);
+    }
+
+    @AfterClass
+    public static void teardown() {
+        Login.setClientSecretsFilePath(null);
+    }
 
     /**
      * Repository API : GET : enumerateDatasets

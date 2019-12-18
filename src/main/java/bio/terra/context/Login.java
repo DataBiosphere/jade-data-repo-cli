@@ -23,6 +23,7 @@ import java.util.List;
 public final class Login {
     private static boolean isLoggedIn;
     private static Credential userCredential;
+    private static String clientSecretsFilePath;
 
     private Login() { }
 
@@ -57,7 +58,12 @@ public final class Login {
             FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(dataStoreDir);
 
             // load client secrets
-            File clientSecretsFile = new File(homePath, ".jadecli/client/jadecli_client_secret.json");
+            File clientSecretsFile;
+            if (clientSecretsFilePath == null) {
+                clientSecretsFile = new File(homePath, ".jadecli/client/jadecli_client_secret.json");
+            } else {
+                clientSecretsFile = new File(clientSecretsFilePath);
+            }
             // TODO: for reviewers, should this be the default charset or just hardcode to UTF-8?
             // practically, I don't think this will make a difference on Mac or Linux, only Windows
             GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory,
@@ -85,6 +91,15 @@ public final class Login {
         } catch (Throwable t) {
             t.printStackTrace();
         }
+    }
+
+    /**
+     * Setter for path to client secrets JSON file.
+     * A null value means to use the default path ~/.jadecli/client/jadecli_client_secret.json
+     * @param newPath new file path, may be null
+     */
+    public static void setClientSecretsFilePath(String newPath) {
+        clientSecretsFilePath = newPath;
     }
 
 }
