@@ -2,7 +2,6 @@ package bio.terra.endpoints;
 
 import bio.terra.common.category.CLIIntegrated;
 import bio.terra.context.Login;
-import com.google.auth.oauth2.AccessToken;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -10,7 +9,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 
 @RunWith(JUnit4.class)
