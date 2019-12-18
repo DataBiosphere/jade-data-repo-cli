@@ -13,6 +13,12 @@ language: java
 jdk:
   - openjdk8
 
+services:
+  - docker
+
+before_install:
+  - ./render-configs.sh $TRAVIS_TOKEN
+
 script:
   - ./gradlew :assemble
   - ./gradlew :check --scan

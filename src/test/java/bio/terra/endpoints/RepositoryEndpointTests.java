@@ -15,8 +15,8 @@ import java.util.Map;
 @Category(CLIIntegrated.class)
 public class RepositoryEndpointTests {
 
-    private static final String dataRepoURL = "http://localhost:8080/";
-    //private static final String dataRepoURL = "https://jade-dd.datarepo-dev.broadinstitute.org/";
+    //private static final String dataRepoURL = "http://localhost:8080/";
+    private static final String dataRepoURL = "https://jade.datarepo-dev.broadinstitute.org/";
 
     /**
      * Repository API : GET : enumerateDatasets
