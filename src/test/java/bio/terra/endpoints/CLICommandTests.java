@@ -84,7 +84,7 @@ public class CLICommandTests {
         String createdDate = datasetSummary.get("createdDate").toString();
 
         // check that the responses match
-        for (int ctr=0; ctr<cliCmdResponse.size(); ctr++) {
+        for (int ctr = 0; ctr < cliCmdResponse.size(); ctr++) {
             String expectedLine = cliCmdExpectedResponse.get(ctr);
             expectedLine = expectedLine.replace("%id%", id);
             expectedLine = expectedLine.replace("%createdDate%", createdDate);
@@ -114,8 +114,8 @@ public class CLICommandTests {
         params.put("filter", datasetName);
 
         // make request using Java HTTP library
-        Map<String, Object> javaHttpResponse =
-                CLITestingUtils.sendJavaHttpRequest(CLITestingConfig.dataRepoURL + endpointName, endpointType, token, params);
+        Map<String, Object> javaHttpResponse = CLITestingUtils.sendJavaHttpRequest(
+                CLITestingConfig.dataRepoURL + endpointName, endpointType, token, params);
 
         // log the response to stdout
         System.out.println("javaHttpResponse: " + javaHttpResponse + "\n");
@@ -140,7 +140,7 @@ public class CLICommandTests {
             throws IOException {
         String datasetName = datasetSummary.get("name").toString();
         System.out.println("***********************************************");
-        System.out.println("jc dataset show "+datasetName);
+        System.out.println("jc dataset show " + datasetName);
 
         // call CLI command in a separate process
         List<String> cmdArgs = new ArrayList<String>(new ArrayList<>(Arrays.asList(
@@ -158,7 +158,7 @@ public class CLICommandTests {
         String createdDate = datasetSummary.get("createdDate").toString();
 
         // check that the responses match
-        for (int ctr=0; ctr<cliCmdResponse.size(); ctr++) {
+        for (int ctr = 0; ctr < cliCmdResponse.size(); ctr++) {
             String expectedLine = cliCmdExpectedResponse.get(ctr);
             expectedLine = expectedLine.replace("%id%", id);
             expectedLine = expectedLine.replace("%createdDate%", createdDate);
@@ -176,7 +176,7 @@ public class CLICommandTests {
             throws IOException {
         String datasetName = datasetSummary.get("name").toString();
         System.out.println("***********************************************");
-        System.out.println("jc dr describe "+datasetName);
+        System.out.println("jc dr describe " + datasetName);
 
         // call CLI command in a separate process
         List<String> cmdArgs = new ArrayList<String>(new ArrayList<>(Arrays.asList(
@@ -194,7 +194,7 @@ public class CLICommandTests {
         String createdDate = datasetSummary.get("createdDate").toString();
 
         // check that the responses match
-        for (int ctr=0; ctr<cliCmdResponse.size(); ctr++) {
+        for (int ctr = 0; ctr < cliCmdResponse.size(); ctr++) {
             String expectedLine = cliCmdExpectedResponse.get(ctr);
             expectedLine = expectedLine.replace("%id%", id);
             expectedLine = expectedLine.replace("%createdDate%", createdDate);
@@ -212,7 +212,7 @@ public class CLICommandTests {
             throws IOException {
         String datasetName = datasetSummary.get("name").toString();
         System.out.println("***********************************************");
-        System.out.println("jc dataset delete "+datasetName);
+        System.out.println("jc dataset delete " + datasetName);
 
         // call CLI command in a separate process
         List<String> cmdArgs = new ArrayList<String>(new ArrayList<>(Arrays.asList(
@@ -226,7 +226,7 @@ public class CLICommandTests {
         System.out.println("cliCmdResponse: " + cliCmdResponse + "\n");
 
         // check that the responses match
-        for (int ctr=0; ctr<cliCmdResponse.size(); ctr++) {
+        for (int ctr = 0; ctr < cliCmdResponse.size(); ctr++) {
             String expectedLine = cliCmdExpectedResponse.get(ctr);
             Assert.assertEquals(expectedLine, cliCmdResponse.get(ctr));
         }

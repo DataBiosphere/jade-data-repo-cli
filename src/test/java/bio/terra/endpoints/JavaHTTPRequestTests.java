@@ -43,8 +43,8 @@ public class JavaHTTPRequestTests {
         String endpointType = "GET";
 
         // make request using Java HTTP library
-        Map<String, Object> javaHttpResponse =
-                CLITestingUtils.sendJavaHttpRequest(CLITestingConfig.dataRepoURL + endpointName, endpointType, null, null);
+        Map<String, Object> javaHttpResponse = CLITestingUtils.sendJavaHttpRequest(
+                CLITestingConfig.dataRepoURL + endpointName, endpointType, null, null);
 
         // make request using curl in a separate process
         //Map<String, Object> curlResponse =
@@ -71,8 +71,8 @@ public class JavaHTTPRequestTests {
         String endpointType = "GET";
 
         // make request using Java HTTP library
-        Map<String, Object> javaHttpResponse =
-                CLITestingUtils.sendJavaHttpRequest(CLITestingConfig.dataRepoURL + endpointName, endpointType, null, null);
+        Map<String, Object> javaHttpResponse = CLITestingUtils.sendJavaHttpRequest(
+                CLITestingConfig.dataRepoURL + endpointName, endpointType, null, null);
 
         // make request using curl in a separate process
         //Map<String, Object> curlResponse =
@@ -111,8 +111,8 @@ public class JavaHTTPRequestTests {
         String endpointType = "GET";
 
         // make request using Java HTTP library
-        Map<String, Object> javaHttpResponse =
-                CLITestingUtils.sendJavaHttpRequest(CLITestingConfig.dataRepoURL + endpointName, endpointType, token, null);
+        Map<String, Object> javaHttpResponse = CLITestingUtils.sendJavaHttpRequest(
+                CLITestingConfig.dataRepoURL + endpointName, endpointType, token, null);
 
         // make request using curl in a separate process
         Map<String, Object> curlResponse =

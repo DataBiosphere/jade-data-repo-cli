@@ -61,7 +61,8 @@ public final class CLITestingUtils {
         File expectedOutputFile = new File(CLITestingConfig.dirName, fileName);
 
         // read in all lines
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(expectedOutputFile));
+        BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(expectedOutputFile), Charset.defaultCharset()));
         String outputLine;
         List<String> outputLines = new ArrayList<>();
         while ((outputLine = bufferedReader.readLine()) != null) {
@@ -83,7 +84,8 @@ public final class CLITestingUtils {
         File inputFile = new File(CLITestingConfig.dirName, fileName);
 
         // read in all lines
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(inputFile));
+        BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(inputFile), Charset.defaultCharset()));
         StringBuilder inputFileStr = new StringBuilder();
         String inputLine;
         while ((inputLine = bufferedReader.readLine()) != null) {
@@ -119,7 +121,7 @@ public final class CLITestingUtils {
         }
 
         // for GET requests, append the parameters to the URL
-        if (requestType == "GET") {
+        if (requestType.equals("GET")) {
             urlStr += "?" + paramsStr;
         }
 
@@ -135,7 +137,7 @@ public final class CLITestingUtils {
         }
 
         // for other request types, write the parameters to the request body
-        if (requestType != "GET") {
+        if (!requestType.equals("GET")) {
             con.setDoOutput(true);
             DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
             outputStream.writeBytes(paramsStr);
