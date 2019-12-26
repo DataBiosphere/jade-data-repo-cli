@@ -14,16 +14,9 @@ import java.util.*;
 @Category(CLIIntegrated.class)
 public class CLICommandTests {
 
-    //private static final String dataRepoURL = "http://localhost:8080/";
-    //private static final String clientSecretsFilePath = null;
-    //private static final String dataRepoURL = "https://jade.datarepo-dev.broadinstitute.org/";
-    //private static final String clientSecretsFilePath = "/tmp/jadecli_client_secret.json";
-    private static final String dataRepoURL = "https://jade-dd.datarepo-dev.broadinstitute.org/";
-    private static final String clientSecretsFilePath = "/tmp/jadecli_client_secret.json";
-
     @BeforeClass
     public static void setup() {
-        Login.setClientSecretsFilePath(clientSecretsFilePath);
+        Login.setClientSecretsFilePath(CLITestingConfig.clientSecretsFilePath);
     }
 
     @AfterClass
@@ -41,6 +34,8 @@ public class CLICommandTests {
         // this depends on the jadecli_client_secret.json file
         Login.authorize();
         String token = Login.getUserCredential().getAccessToken();
+
+        // TODO: create and delete profile, need to modify input JSON file for create dataset and write to /tmp
 
         // jc dataset create --input-json inputDatasetCreate.txt
         Map<String, Object> datasetSummary =
@@ -67,21 +62,21 @@ public class CLICommandTests {
         System.out.println("jc dataset create --input-json inputDatasetCreate.txt");
 
         // build path to input file
-        String inputJSON = EndpointUtils.dirName + inputJSONFilename;
+        String inputJSON = CLITestingConfig.dirName + inputJSONFilename;
 
         // call CLI command in a separate process
         List<String> cmdArgs = new ArrayList<String>(new ArrayList<>(Arrays.asList(
                 new String[]{"dataset", "create", "--input-json", inputJSON})));
-        List<String> cliCmdResponse = EndpointUtils.callCLICommand(cmdArgs);
+        List<String> cliCmdResponse = CLITestingUtils.callCLICommand(cmdArgs);
 
         // read in the expect CLI command output from a file
-        List<String> cliCmdExpectedResponse = EndpointUtils.readCLIExpectedOutput(expectedOutputFilename);
+        List<String> cliCmdExpectedResponse = CLITestingUtils.readCLIExpectedOutput(expectedOutputFilename);
 
         // log the response to stdout
         System.out.println("cliCmdResponse: " + cliCmdResponse + "\n");
 
         // fetch the dataset summary over HTTP
-        Map<String, Object> inputJSONMap = EndpointUtils.readCLIInput(inputJSONFilename);
+        Map<String, Object> inputJSONMap = CLITestingUtils.readCLIInput(inputJSONFilename);
         Map<String, Object> datasetSummary = datasetHttpGET(token, inputJSONMap.get("name").toString());
 
         // need to replace %xyz% variables in the CLI expected response with values from the Java HTTP response
@@ -120,7 +115,7 @@ public class CLICommandTests {
 
         // make request using Java HTTP library
         Map<String, Object> javaHttpResponse =
-                EndpointUtils.sendJavaHttpRequest(dataRepoURL + endpointName, endpointType, token, params);
+                CLITestingUtils.sendJavaHttpRequest(CLITestingConfig.dataRepoURL + endpointName, endpointType, token, params);
 
         // log the response to stdout
         System.out.println("javaHttpResponse: " + javaHttpResponse + "\n");
@@ -150,10 +145,10 @@ public class CLICommandTests {
         // call CLI command in a separate process
         List<String> cmdArgs = new ArrayList<String>(new ArrayList<>(Arrays.asList(
                 new String[]{"dataset", "show", datasetName})));
-        List<String> cliCmdResponse = EndpointUtils.callCLICommand(cmdArgs);
+        List<String> cliCmdResponse = CLITestingUtils.callCLICommand(cmdArgs);
 
         // read in the expect CLI command output from a file
-        List<String> cliCmdExpectedResponse = EndpointUtils.readCLIExpectedOutput(expectedOutputFilename);
+        List<String> cliCmdExpectedResponse = CLITestingUtils.readCLIExpectedOutput(expectedOutputFilename);
 
         // log the response to stdout
         System.out.println("cliCmdResponse: " + cliCmdResponse + "\n");
@@ -186,10 +181,10 @@ public class CLICommandTests {
         // call CLI command in a separate process
         List<String> cmdArgs = new ArrayList<String>(new ArrayList<>(Arrays.asList(
                 new String[]{"dr", "describe", datasetName})));
-        List<String> cliCmdResponse = EndpointUtils.callCLICommand(cmdArgs);
+        List<String> cliCmdResponse = CLITestingUtils.callCLICommand(cmdArgs);
 
         // read in the expect CLI command output from a file
-        List<String> cliCmdExpectedResponse = EndpointUtils.readCLIExpectedOutput(expectedOutputFilename);
+        List<String> cliCmdExpectedResponse = CLITestingUtils.readCLIExpectedOutput(expectedOutputFilename);
 
         // log the response to stdout
         System.out.println("cliCmdResponse: " + cliCmdResponse + "\n");
@@ -222,10 +217,10 @@ public class CLICommandTests {
         // call CLI command in a separate process
         List<String> cmdArgs = new ArrayList<String>(new ArrayList<>(Arrays.asList(
                 new String[]{"dataset", "delete", datasetName})));
-        List<String> cliCmdResponse = EndpointUtils.callCLICommand(cmdArgs);
+        List<String> cliCmdResponse = CLITestingUtils.callCLICommand(cmdArgs);
 
         // read in the expect CLI command output from a file
-        List<String> cliCmdExpectedResponse = EndpointUtils.readCLIExpectedOutput(expectedOutputFilename);
+        List<String> cliCmdExpectedResponse = CLITestingUtils.readCLIExpectedOutput(expectedOutputFilename);
 
         // log the response to stdout
         System.out.println("cliCmdResponse: " + cliCmdResponse + "\n");

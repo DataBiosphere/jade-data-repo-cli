@@ -21,11 +21,9 @@ import java.util.*;
  *   - callCLICommand uses Java's ProcessBuilder class
  *   - readCLIExpectedOutput read from a file in the resources/CLICommandTests directory
  */
-public final class EndpointUtils {
+public final class CLITestingUtils {
 
-    public static String dirName = "src/test/resources/CLICommandTests/";
-
-    private EndpointUtils() { }
+    private CLITestingUtils() { }
 
     /**
      * Call a CLI command in a separate process.
@@ -60,7 +58,7 @@ public final class EndpointUtils {
      */
     public static List<String> readCLIExpectedOutput(String fileName) throws IOException {
         // open file
-        File expectedOutputFile = new File(dirName, fileName);
+        File expectedOutputFile = new File(CLITestingConfig.dirName, fileName);
 
         // read in all lines
         BufferedReader bufferedReader = new BufferedReader(new FileReader(expectedOutputFile));
@@ -82,7 +80,7 @@ public final class EndpointUtils {
      */
     public static Map<String, Object> readCLIInput(String fileName) throws IOException {
         // open file
-        File inputFile = new File(dirName, fileName);
+        File inputFile = new File(CLITestingConfig.dirName, fileName);
 
         // read in all lines
         BufferedReader bufferedReader = new BufferedReader(new FileReader(inputFile));
