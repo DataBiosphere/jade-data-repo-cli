@@ -1,0 +1,29 @@
+name       : MMdataset
+description: This is a sample dataset definition
+id         : %id%
+createdDate: %createdDate%
+..Tables
+  Table: sample
+    Name                 | Datatype            
+    -------------------- | --------------------
+    id                   | STRING              
+    participant_id       | STRING              
+    date_collected       | DATE                
+
+  Table: participant
+    Name                 | Datatype            
+    -------------------- | --------------------
+    id                   | STRING              
+    age                  | INTEGER             
+
+..Relationships
+  participant_sample: participant.id --> sample.participant_id
+
+..Assets
+  Asset: sample
+    root: sample.id
+    tables:
+      participant
+      sample
+    follow:
+      participant_sample

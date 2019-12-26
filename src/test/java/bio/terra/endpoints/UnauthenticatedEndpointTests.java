@@ -30,7 +30,7 @@ public class UnauthenticatedEndpointTests {
 
         // make request using Java HTTP library
         Map<String, Object> javaHttpResponse =
-                EndpointUtils.sendJavaHttpRequest(dataRepoURL + endpointName, endpointType, null);
+                EndpointUtils.sendJavaHttpRequest(dataRepoURL + endpointName, endpointType, null, null);
 
         // make request using curl in a separate process
         Map<String, Object> curlResponse =
@@ -62,7 +62,7 @@ public class UnauthenticatedEndpointTests {
 
         // make request using Java HTTP library
         Map<String, Object> javaHttpResponse =
-                EndpointUtils.sendJavaHttpRequest(dataRepoURL + endpointName, endpointType, null);
+                EndpointUtils.sendJavaHttpRequest(dataRepoURL + endpointName, endpointType, null, null);
 
         // make request using curl in a separate process
         Map<String, Object> curlResponse =

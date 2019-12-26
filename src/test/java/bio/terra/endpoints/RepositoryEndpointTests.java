@@ -46,7 +46,7 @@ public class RepositoryEndpointTests {
 
         // make request using Java HTTP library
         Map<String, Object> javaHttpResponse =
-                EndpointUtils.sendJavaHttpRequest(dataRepoURL + endpointName, endpointType, token);
+                EndpointUtils.sendJavaHttpRequest(dataRepoURL + endpointName, endpointType, token, null);
 
         // make request using curl in a separate process
         Map<String, Object> curlResponse =

@@ -5,44 +5,125 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpStatusCodes;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.file.NoSuchFileException;
 import java.util.*;
 
 /**
  * Utility methods for sending HTTP requests and parsing the responses from a JSON string into a Java object.
  *   - sendJavaHttpRequest uses Java's HTTPURL library
  *   - sendCurlRequest uses curl
+ *
+ * Utility methods for running a CLI command in a separate process and reading in the expected response from a file.
+ *   - callCLICommand uses Java's ProcessBuilder class
+ *   - readCLIExpectedOutput read from a file in the resources/CLICommandTests directory
  */
 public final class EndpointUtils {
 
     private EndpointUtils() { }
 
     /**
+     * Call a CLI command in a separate process.
+     * @param cmdArgs a list of the command line arguments=
+     * @return a List of the lines written to stdout
+     * @throws IOException
+     */
+    public static List<String> callCLICommand(List<String> cmdArgs) throws IOException {
+        // build and run process
+        cmdArgs.add(0, "./build/install/jadecli/bin/jadecli");
+        ProcessBuilder procBuilder = new ProcessBuilder(cmdArgs);
+        Process proc = procBuilder.start();
+
+        // read in all lines written to stdout
+        BufferedReader bufferedReader =
+                new BufferedReader(new InputStreamReader(proc.getInputStream(), Charset.defaultCharset()));
+        String outputLine;
+        List<String> outputLines = new ArrayList<>();
+        while ((outputLine = bufferedReader.readLine()) != null) {
+            outputLines.add(outputLine);
+        }
+        bufferedReader.close();
+
+        return outputLines;
+    }
+
+    /**
+     * Read from a file in the resources/CLICommandTests directory.
+     * @param fileName does not include the directory path
+     * @return a List of the lines in the file
+     * @throws IOException
+     */
+    public static List<String> readCLIExpectedOutput(String fileName) throws IOException {
+        // open file
+        String dirName = "src/test/resources/CLICommandTests/";
+        File expectedOutputFile = new File(dirName, fileName);
+
+        // read in all lines
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(expectedOutputFile));
+        String outputLine;
+        List<String> outputLines = new ArrayList<>();
+        while ((outputLine = bufferedReader.readLine()) != null) {
+            outputLines.add(outputLine);
+        }
+        bufferedReader.close();
+
+        return outputLines;
+    }
+
+    /**
      * Sends an HTTP request using Java's HTTPURLConnection class.
      * @param urlStr where to direct the request
      * @param requestType the type of request, GET/PUT/POST/DELETE
      * @param accessToken the bearer token to include in the request, null if not required
+     * @param params map of request parameters
      * @return a Java Map that includes the HTTP status code (under statusCode key) and the parsed JSON response
      * @throws IOException
      */
-    public static Map<String, Object> sendJavaHttpRequest(String urlStr, String requestType, String accessToken)
-            throws IOException {
-        // open HTTP connection, make request
+    public static Map<String, Object> sendJavaHttpRequest(
+            String urlStr, String requestType, String accessToken, Map<String, String> params) throws IOException {
+        // build parameter string
+        String paramsStr = "";
+        if (params != null && params.size() > 0) {
+            StringBuilder paramsStrBuilder = new StringBuilder();
+            for (Map.Entry<String, String> mapEntry : params.entrySet()) {
+                paramsStrBuilder.append(URLEncoder.encode(mapEntry.getKey(), "UTF-8"));
+                paramsStrBuilder.append("=");
+                paramsStrBuilder.append(URLEncoder.encode(mapEntry.getValue(), "UTF-8"));
+                paramsStrBuilder.append("&");
+            }
+            paramsStr = paramsStrBuilder.toString();
+        }
+
+        // for GET requests, append the parameters to the URL
+        if (requestType == "GET") {
+            urlStr += "?" + paramsStr;
+        }
+
+        // open HTTP connection
         URL url = new URL(urlStr);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+        // set header properties
         con.setRequestProperty("Content-Type", "application/json");
         con.setRequestMethod(requestType);
         if (accessToken != null) {
             con.setRequestProperty("Authorization", "Bearer " + accessToken);
         }
 
-        // read the status code
+        // for other request types, write the parameters to the request body
+        if (requestType != "GET") {
+            con.setDoOutput(true);
+            DataOutputStream outputStream = new DataOutputStream(con.getOutputStream());
+            outputStream.writeBytes(paramsStr);
+            outputStream.flush();
+            outputStream.close();
+        }
+
+        // send the request and read the returned status code
         int statusCode = con.getResponseCode();
 
         // select the appropriate input stream depending on the status code
