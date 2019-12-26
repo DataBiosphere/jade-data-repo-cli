@@ -23,7 +23,7 @@ createdDate: %createdDate%
   Asset: sample
     root: sample.id
     tables:
-      sample
-      participant
+      %assetTable0%
+      %assetTable1%
     follow:
       participant_sample
