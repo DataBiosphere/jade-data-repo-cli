@@ -10,7 +10,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.nio.file.NoSuchFileException;
 import java.util.*;
 
 /**
@@ -23,6 +22,8 @@ import java.util.*;
  *   - readCLIExpectedOutput read from a file in the resources/CLICommandTests directory
  */
 public final class EndpointUtils {
+
+    public static String dirName = "src/test/resources/CLICommandTests/";
 
     private EndpointUtils() { }
 
@@ -59,7 +60,6 @@ public final class EndpointUtils {
      */
     public static List<String> readCLIExpectedOutput(String fileName) throws IOException {
         // open file
-        String dirName = "src/test/resources/CLICommandTests/";
         File expectedOutputFile = new File(dirName, fileName);
 
         // read in all lines
@@ -72,6 +72,28 @@ public final class EndpointUtils {
         bufferedReader.close();
 
         return outputLines;
+    }
+
+    /**
+     * Read from a JSON format file in the resources/CLICommandTests directory.
+     * @param fileName does not include the directory path
+     * @return a Map of the input object
+     * @throws IOException
+     */
+    public static Map<String, Object> readCLIInput(String fileName) throws IOException {
+        // open file
+        File inputFile = new File(dirName, fileName);
+
+        // read in all lines
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(inputFile));
+        StringBuilder inputFileStr = new StringBuilder();
+        String inputLine;
+        while ((inputLine = bufferedReader.readLine()) != null) {
+            inputFileStr.append(inputLine);
+        }
+        bufferedReader.close();
+
+        return buildMapFromJSON(inputFileStr.toString(), null);
     }
 
     /**
@@ -148,7 +170,7 @@ public final class EndpointUtils {
         con.disconnect();
 
         // build and return the response map
-        return buildResponseMap(responseBody.toString(), statusCode);
+        return buildMapFromJSON(responseBody.toString(), statusCode);
     }
 
     /**
@@ -207,18 +229,18 @@ public final class EndpointUtils {
         bufferedReader.close();
 
         // build and return the response map
-        return buildResponseMap(responseBody.toString(), statusCode);
+        return buildMapFromJSON(responseBody.toString(), statusCode);
     }
 
     /**
      * Parses the HTTP response body from a Java String that uses JSON format into a Java key/value Map.
      * This method uses the Jackson JSON mapping library (ObjectMapper).
      * @param responseBody the response body as a String that uses JSON format
-     * @param statusCode the HTTP status code as an int
+     * @param statusCode the HTTP status code as an Integer, ignored if null
      * @return a Java Map that includes the HTTP status code (under statusCode key) and the parsed JSON response
      * @throws JsonProcessingException
      */
-    private static Map<String, Object> buildResponseMap(String responseBody, int statusCode)
+    private static Map<String, Object> buildMapFromJSON(String responseBody, Integer statusCode)
             throws JsonProcessingException {
         // JSON parse the response body into a Java Map
         Map<String, Object> map;
@@ -232,8 +254,10 @@ public final class EndpointUtils {
             });
         }
 
-        // put the status code into the response map
-        map.put("statusCode", statusCode);
+        if (statusCode != null) {
+            // put the status code into the response map
+            map.put("statusCode", statusCode);
+        }
 
         return map;
     }

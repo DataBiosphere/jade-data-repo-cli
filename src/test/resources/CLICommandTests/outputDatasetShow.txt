@@ -1,4 +1,4 @@
-name       : MMdataset
+name       : CLITestDataset
 description: This is a sample dataset definition
 id         : %id%
 createdDate: %createdDate%
@@ -23,7 +23,7 @@ createdDate: %createdDate%
   Asset: sample
     root: sample.id
     tables:
-      participant
       sample
+      participant
     follow:
       participant_sample

@@ -1,0 +1,8 @@
+class DatasetSummaryModel {
+    id: %id%
+    name: CLITestDataset
+    description: This is a sample dataset definition
+    defaultProfileId: 0907c613-cec8-4e9f-938e-4906b7734018
+    additionalProfileIds: null
+    createdDate: %createdDate%
+}
