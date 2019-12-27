@@ -64,8 +64,6 @@ public final class Login {
             } else {
                 clientSecretsFile = new File(clientSecretsFilePath);
             }
-            // TODO: for reviewers, should this be the default charset or just hardcode to UTF-8?
-            // practically, I don't think this will make a difference on Mac or Linux, only Windows
             GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory,
                     new InputStreamReader(new FileInputStream(clientSecretsFile), Charset.defaultCharset()));
 

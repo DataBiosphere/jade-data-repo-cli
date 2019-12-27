@@ -2,10 +2,7 @@ package bio.terra.endpoints;
 
 import bio.terra.common.category.CLIIntegrated;
 import bio.terra.context.Login;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -99,7 +96,7 @@ public class JavaHTTPRequestTests {
      * Repository API : GET : enumerateDatasets
      * @throws IOException
      */
-    @Test
+    @Ignore
     public void enumerateDatasetsTest() throws IOException {
         // fetch access token in the same way that the CLI does
         // this depends on the jadecli_client_secret.json file
