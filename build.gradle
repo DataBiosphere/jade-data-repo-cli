@@ -101,7 +101,7 @@ test {
         showStandardStreams = true // set to true to disable stdout & stderr redirection
     }
     // TODO: uncomment this once we have a solution for Travis running integration tests that require authentication
-    exclude '**/RepositoryEndpointTests.class'
+    exclude '**/CLICommandTests.class'
 }
 
 // -- Swagger Client Generation --
