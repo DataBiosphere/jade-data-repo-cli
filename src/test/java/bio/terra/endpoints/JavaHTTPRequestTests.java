@@ -96,7 +96,7 @@ public class JavaHTTPRequestTests {
      * Repository API : GET : enumerateDatasets
      * @throws IOException
      */
-    @Test
+    @Ignore
     public void enumerateDatasetsTest() throws IOException {
         // fetch access token in the same way that the CLI does
         // this depends on the jadecli_client_secret.json file
