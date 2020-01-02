@@ -112,18 +112,14 @@ public class JavaHTTPRequestTests {
                 CLITestingConfig.dataRepoURL + endpointName, endpointType, token, null);
 
         // make request using curl in a separate process
-        Map<String, Object> curlResponse =
-                CLITestingUtils.sendCurlRequest(CLITestingConfig.dataRepoURL + endpointName, endpointType, token);
+        //Map<String, Object> curlResponse =
+        //        CLITestingUtils.sendCurlRequest(CLITestingConfig.dataRepoURL + endpointName, endpointType, token);
 
-        // log the response maps to stdout
+        // log the response to stdout
         System.out.println("javaHttpResponse: " + javaHttpResponse);
-        System.out.println("curlResponse: " + curlResponse);
-
-        // check that the responses match
-        Assert.assertEquals(javaHttpResponse, curlResponse);
 
         // check that the status code is success
-        Assert.assertEquals(200, curlResponse.get("statusCode"));
+        Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
     }
 
 }
