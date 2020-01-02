@@ -31,6 +31,8 @@ before_install:
   - gcloud auth activate-service-account --key-file /tmp/jade-dev-account.json
   - gcloud auth list
   - ls -la
+  - gcloud info
+  - ls -la ~/.config/gcloud
 
 script:
   - ./gradlew :assemble
