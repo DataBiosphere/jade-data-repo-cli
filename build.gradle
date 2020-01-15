@@ -50,6 +50,11 @@ configurations {
     }
 }
 
+// Exclude the Spring logger, so everything will use SLF4J
+configurations.all {
+    exclude group: "commons-logging", module: "commons-logging"
+}
+
 dependencies {
     ext {
         commonsLang3 = "3.9"
@@ -74,6 +79,8 @@ dependencies {
     generatedCompile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${jackson}"
 
     compile "org.apache.commons:commons-lang3:${commonsLang3}"
+    compile 'ch.qos.logback:logback-classic:1.2.3'       // Logger
+    compile 'org.slf4j:slf4j-api:1.7.28'                 // Logging facade
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${jackson}"
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${jackson}"

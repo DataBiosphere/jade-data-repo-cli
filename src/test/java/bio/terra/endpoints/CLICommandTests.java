@@ -9,10 +9,14 @@ import org.junit.runners.JUnit4;
 
 import java.io.IOException;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(JUnit4.class)
 @Category(CLIIntegrated.class)
 public class CLICommandTests {
+
+    private final Logger logger = LoggerFactory.getLogger(CLICommandTests.class);
 
     @BeforeClass
     public static void setup() {
@@ -58,8 +62,8 @@ public class CLICommandTests {
      */
     public Map<String, Object> datasetCreateTest(String token, String inputJSONFilename, String expectedOutputFilename)
             throws IOException {
-        System.out.println("***********************************************");
-        System.out.println("jc dataset create --input-json inputDatasetCreate.txt");
+        logger.info("***********************************************");
+        logger.info("jc dataset create --input-json inputDatasetCreate.txt");
 
         // build path to input file
         String inputJSON = CLITestingConfig.dirName + inputJSONFilename;
@@ -73,7 +77,13 @@ public class CLICommandTests {
         List<String> cliCmdExpectedResponse = CLITestingUtils.readCLIExpectedOutput(expectedOutputFilename);
 
         // log the response to stdout
-        System.out.println("cliCmdResponse: " + cliCmdResponse + "\n");
+        logger.info("cliCmdResponse: " + cliCmdResponse + "\n");
+
+        // TODO: sometimes the dataset isn't returned if you query immediately after creation. add polling/retry here.
+        logger.info("sleeping for 1 second...");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) { }
 
         // fetch the dataset summary and details over HTTP
         Map<String, Object> inputJSONMap = CLITestingUtils.readCLIInput(inputJSONFilename);
@@ -103,8 +113,8 @@ public class CLICommandTests {
      * @throws IOException
      */
     public Map<String, Object> enumerateDatasetHttpGET(String token, String datasetName) throws IOException {
-        System.out.println("***********************************************");
-        System.out.println("HTTP request api/repository/v1/datasets");
+        logger.info("***********************************************");
+        logger.info("HTTP request api/repository/v1/datasets");
 
         // endpoint information
         String endpointName = "api/repository/v1/datasets";
@@ -119,7 +129,7 @@ public class CLICommandTests {
                 CLITestingConfig.dataRepoURL + endpointName, endpointType, token, params);
 
         // log the response to stdout
-        System.out.println("javaHttpResponse: " + javaHttpResponse + "\n");
+        logger.info("javaHttpResponse: " + javaHttpResponse + "\n");
 
         // check that the status code is success
         Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
@@ -139,8 +149,8 @@ public class CLICommandTests {
      * @throws IOException
      */
     public Map<String, Object> retrieveDatasetHttpGET(String token, String datasetId) throws IOException {
-        System.out.println("***********************************************");
-        System.out.println("HTTP request api/repository/v1/datasets/{id}");
+        logger.info("***********************************************");
+        logger.info("HTTP request api/repository/v1/datasets/{id}");
 
         // endpoint information
         String endpointName = "api/repository/v1/datasets/" + datasetId;
@@ -151,7 +161,7 @@ public class CLICommandTests {
                 CLITestingConfig.dataRepoURL + endpointName, endpointType, token, null);
 
         // log the response to stdout
-        System.out.println("javaHttpResponse: " + javaHttpResponse + "\n");
+        logger.info("javaHttpResponse: " + javaHttpResponse + "\n");
 
         // check that the status code is success
         Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
@@ -168,8 +178,8 @@ public class CLICommandTests {
     public void datasetShowTest(Map<String, Object> datasetDetails, String expectedOutputFilename)
             throws IOException {
         String datasetName = datasetDetails.get("name").toString();
-        System.out.println("***********************************************");
-        System.out.println("jc dataset show " + datasetName);
+        logger.info("***********************************************");
+        logger.info("jc dataset show " + datasetName);
 
         // call CLI command in a separate process
         List<String> cmdArgs = new ArrayList<String>(new ArrayList<>(Arrays.asList(
@@ -180,7 +190,7 @@ public class CLICommandTests {
         List<String> cliCmdExpectedResponse = CLITestingUtils.readCLIExpectedOutput(expectedOutputFilename);
 
         // log the response to stdout
-        System.out.println("cliCmdResponse: " + cliCmdResponse + "\n");
+        logger.info("cliCmdResponse: " + cliCmdResponse + "\n");
 
         // need to replace %xyz% variables in the CLI expected response with values from the Java HTTP response
         String id = datasetDetails.get("id").toString();
@@ -214,8 +224,8 @@ public class CLICommandTests {
     public void drDescribeTest(Map<String, Object> datasetDetails, String expectedOutputFilename)
             throws IOException {
         String datasetName = datasetDetails.get("name").toString();
-        System.out.println("***********************************************");
-        System.out.println("jc dr describe " + datasetName);
+        logger.info("***********************************************");
+        logger.info("jc dr describe " + datasetName);
 
         // call CLI command in a separate process
         List<String> cmdArgs = new ArrayList<String>(new ArrayList<>(Arrays.asList(
@@ -226,7 +236,7 @@ public class CLICommandTests {
         List<String> cliCmdExpectedResponse = CLITestingUtils.readCLIExpectedOutput(expectedOutputFilename);
 
         // log the response to stdout
-        System.out.println("cliCmdResponse: " + cliCmdResponse + "\n");
+        logger.info("cliCmdResponse: " + cliCmdResponse + "\n");
 
         // need to replace %xyz% variables in the CLI expected response with values from the Java HTTP response
         String id = datasetDetails.get("id").toString();
@@ -260,8 +270,8 @@ public class CLICommandTests {
     public void datasetDeleteTest(Map<String, Object> datasetDetails, String expectedOutputFilename)
             throws IOException {
         String datasetName = datasetDetails.get("name").toString();
-        System.out.println("***********************************************");
-        System.out.println("jc dataset delete " + datasetName);
+        logger.info("***********************************************");
+        logger.info("jc dataset delete " + datasetName);
 
         // call CLI command in a separate process
         List<String> cmdArgs = new ArrayList<String>(new ArrayList<>(Arrays.asList(
@@ -272,7 +282,7 @@ public class CLICommandTests {
         List<String> cliCmdExpectedResponse = CLITestingUtils.readCLIExpectedOutput(expectedOutputFilename);
 
         // log the response to stdout
-        System.out.println("cliCmdResponse: " + cliCmdResponse + "\n");
+        logger.info("cliCmdResponse: " + cliCmdResponse + "\n");
 
         // check that the responses match
         for (int ctr = 0; ctr < cliCmdResponse.size(); ctr++) {

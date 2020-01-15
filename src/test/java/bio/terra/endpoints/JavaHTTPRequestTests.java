@@ -6,6 +6,8 @@ import org.junit.*;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ import java.util.Map;
  * unauthenticated and authenticated HTTP requests. These tests are just intended to help with debugging CLI failures.
  */
 public class JavaHTTPRequestTests {
+
+    private final Logger logger = LoggerFactory.getLogger(JavaHTTPRequestTests.class);
 
     @BeforeClass
     public static void setup() {
@@ -48,7 +52,7 @@ public class JavaHTTPRequestTests {
         //        EndpointUtils.sendCurlRequest(dataRepoURL + endpointName, endpointType, null);
 
         // log the response to stdout
-        System.out.println("javaHttpResponse: " + javaHttpResponse);
+        logger.info("javaHttpResponse: " + javaHttpResponse);
 
         // check that the status code is success
         Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
@@ -76,7 +80,7 @@ public class JavaHTTPRequestTests {
         //        EndpointUtils.sendCurlRequest(dataRepoURL + endpointName, endpointType, null);
 
         // log the response to stdout
-        System.out.println("javaHttpResponse: " + javaHttpResponse);
+        logger.info("javaHttpResponse: " + javaHttpResponse);
 
         // check that the status code is success
         Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
@@ -116,7 +120,7 @@ public class JavaHTTPRequestTests {
         //        CLITestingUtils.sendCurlRequest(CLITestingConfig.dataRepoURL + endpointName, endpointType, token);
 
         // log the response to stdout
-        System.out.println("javaHttpResponse: " + javaHttpResponse);
+        logger.info("javaHttpResponse: " + javaHttpResponse);
 
         // check that the status code is success
         Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
