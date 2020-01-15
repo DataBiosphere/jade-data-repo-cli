@@ -29,10 +29,6 @@ before_install:
   - gcloud config set project broad-jade-dd
   - ./render-configs.sh $TRAVIS_TOKEN
   - gcloud auth activate-service-account --key-file /tmp/jade-dev-account.json
-  - gcloud auth list
-  - ls -la
-  - gcloud info
-  - ls -la ~/.config/gcloud
 
 script:
   - ./gradlew :assemble
