@@ -1,6 +1,8 @@
 package bio.terra.parser;
 
+import bio.terra.common.category.CLIUnit;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -11,6 +13,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnit4.class)
+@Category(CLIUnit.class)
 public class ParserTest {
 
     @Test

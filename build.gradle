@@ -50,6 +50,11 @@ configurations {
     }
 }
 
+// Exclude the Spring logger, so everything will use SLF4J
+configurations.all {
+    exclude group: "commons-logging", module: "commons-logging"
+}
+
 dependencies {
     ext {
         commonsLang3 = "3.9"
@@ -74,6 +79,8 @@ dependencies {
     generatedCompile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${jackson}"
 
     compile "org.apache.commons:commons-lang3:${commonsLang3}"
+    compile 'ch.qos.logback:logback-classic:1.2.3'       // Logger
+    compile 'org.slf4j:slf4j-api:1.7.28'                 // Logging facade
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${jackson}"
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${jackson}"
@@ -94,6 +101,14 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: "${junit}"
     testCompile group: 'org.hamcrest', name: 'hamcrest', version: "${hamcrest}"
+}
+
+test {
+    testLogging {
+        showStandardStreams = true // set to true to disable stdout & stderr redirection
+    }
+    // TODO: uncomment this once we have a solution for Travis running integration tests that require authentication
+    exclude '**/CLICommandTests.class'
 }
 
 // -- Swagger Client Generation --
@@ -130,8 +145,22 @@ task generateApi {
 clean.doFirst {
     delete("${projectDir}/$openapiTargetFolder")
 }
-
 // -- End of Swagger Client Generation --
+
+
+task testCLIUnit(type: Test) {
+    useJUnit {
+        includeCategories 'bio.terra.common.category.CLIUnit'
+    }
+    outputs.upToDateWhen { false }
+}
+
+task testCLIIntegrated(type: Test) {
+    useJUnit {
+        includeCategories 'bio.terra.common.category.CLIIntegrated'
+    }
+    outputs.upToDateWhen { false }
+}
 
 sourceSets {
     generated {
