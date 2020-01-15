@@ -2,7 +2,11 @@ package bio.terra.endpoints;
 
 import bio.terra.common.category.CLIIntegrated;
 import bio.terra.context.Login;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
