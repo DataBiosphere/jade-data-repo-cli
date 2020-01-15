@@ -99,17 +99,12 @@ public class CLICommandTests {
         Map<String, Object> datasetDetails = retrieveDatasetHttpGET(token, datasetSummary.get("id").toString());
 
         // need to replace %xyz% variables in the CLI expected response with values from the Java HTTP response
-        String id = datasetSummary.get("id").toString();
-        String createdDate = datasetSummary.get("createdDate").toString();
+        Map<String, String> variablesMap = new HashMap<>();
+        variablesMap.put("%id%", datasetSummary.get("id").toString());
+        variablesMap.put("%createdDate%", datasetSummary.get("createdDate").toString());
 
-        // check that the responses match
-        for (int ctr = 0; ctr < cliCmdResponse.size(); ctr++) {
-            String expectedLine = cliCmdExpectedResponse.get(ctr);
-            expectedLine = expectedLine.replace("%id%", id);
-            expectedLine = expectedLine.replace("%createdDate%", createdDate);
-
-            Assert.assertEquals(expectedLine, cliCmdResponse.get(ctr));
-        }
+        // then do the expected to actual comparison, line by line
+        CLITestingUtils.compareCLIExpectedOutput(cliCmdResponse, cliCmdExpectedResponse, variablesMap);
 
         return datasetDetails;
     }
@@ -201,27 +196,10 @@ public class CLICommandTests {
         logger.info("cliCmdResponse: " + cliCmdResponse + "\n");
 
         // need to replace %xyz% variables in the CLI expected response with values from the Java HTTP response
-        String id = datasetDetails.get("id").toString();
-        String createdDate = datasetDetails.get("createdDate").toString();
-        ArrayList<Object> assets =
-                (ArrayList<Object>)((Map<String, Object>)datasetDetails.get("schema")).get("assets");
-        ArrayList<Object> assetTables = (ArrayList<Object>)((Map<String, Object>)assets.get(0)).get("tables");
-        ArrayList<String> assetTableNames = new ArrayList<>();
-        for (int ctr = 0; ctr < assetTables.size(); ctr++) {
-            String tableName = ((Map<String, Object>)assetTables.get(ctr)).get("name").toString();
-            assetTableNames.add(tableName);
-        }
+        Map<String, String> variablesMap = CLITestingUtils.buildMapOfDatasetVariablesToSwap(datasetDetails);
 
-        // check that the responses match
-        for (int ctr = 0; ctr < cliCmdResponse.size(); ctr++) {
-            String expectedLine = cliCmdExpectedResponse.get(ctr);
-            expectedLine = expectedLine.replace("%id%", id);
-            expectedLine = expectedLine.replace("%createdDate%", createdDate);
-            expectedLine = expectedLine.replace("%assetTable0%", assetTableNames.get(0));
-            expectedLine = expectedLine.replace("%assetTable1%", assetTableNames.get(1));
-
-            Assert.assertEquals(expectedLine, cliCmdResponse.get(ctr));
-        }
+        // then do the expected to actual comparison, line by line
+        CLITestingUtils.compareCLIExpectedOutput(cliCmdResponse, cliCmdExpectedResponse, variablesMap);
     }
 
     /**
@@ -247,27 +225,10 @@ public class CLICommandTests {
         logger.info("cliCmdResponse: " + cliCmdResponse + "\n");
 
         // need to replace %xyz% variables in the CLI expected response with values from the Java HTTP response
-        String id = datasetDetails.get("id").toString();
-        String createdDate = datasetDetails.get("createdDate").toString();
-        ArrayList<Object> assets =
-                (ArrayList<Object>)((Map<String, Object>)datasetDetails.get("schema")).get("assets");
-        ArrayList<Object> assetTables = (ArrayList<Object>)((Map<String, Object>)assets.get(0)).get("tables");
-        ArrayList<String> assetTableNames = new ArrayList<>();
-        for (int ctr = 0; ctr < assetTables.size(); ctr++) {
-            String tableName = ((Map<String, Object>)assetTables.get(ctr)).get("name").toString();
-            assetTableNames.add(tableName);
-        }
+        Map<String, String> variablesMap = CLITestingUtils.buildMapOfDatasetVariablesToSwap(datasetDetails);
 
-        // check that the responses match
-        for (int ctr = 0; ctr < cliCmdResponse.size(); ctr++) {
-            String expectedLine = cliCmdExpectedResponse.get(ctr);
-            expectedLine = expectedLine.replace("%id%", id);
-            expectedLine = expectedLine.replace("%createdDate%", createdDate);
-            expectedLine = expectedLine.replace("%assetTable0%", assetTableNames.get(0));
-            expectedLine = expectedLine.replace("%assetTable1%", assetTableNames.get(1));
-
-            Assert.assertEquals(expectedLine, cliCmdResponse.get(ctr));
-        }
+        // then do the expected to actual comparison, line by line
+        CLITestingUtils.compareCLIExpectedOutput(cliCmdResponse, cliCmdExpectedResponse, variablesMap);
     }
 
     /**
@@ -292,11 +253,12 @@ public class CLICommandTests {
         // log the response to stdout
         logger.info("cliCmdResponse: " + cliCmdResponse + "\n");
 
-        // check that the responses match
-        for (int ctr = 0; ctr < cliCmdResponse.size(); ctr++) {
-            String expectedLine = cliCmdExpectedResponse.get(ctr);
-            Assert.assertEquals(expectedLine, cliCmdResponse.get(ctr));
-        }
+        // no %xyz% variables to replace in the expected response before doing the comparison
+        // so just build an empty map
+        Map<String, String> variablesMap = new HashMap<>();
+
+        // then do the expected to actual comparison, line by line
+        CLITestingUtils.compareCLIExpectedOutput(cliCmdResponse, cliCmdExpectedResponse, variablesMap);
     }
 
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpStatusCodes;
+import org.junit.Assert;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -81,6 +82,67 @@ public final class CLITestingUtils {
         bufferedReader.close();
 
         return outputLines;
+    }
+
+    /**
+     * For the Dataset details case, build a map of %xyz% variable names to values.
+     * These variables are part of the CLI expected response and need to be replaced with the value from
+     * the Java HTTP response before comparing them in the test.
+     *
+     * Other tests build this map inline, but there are two CLI commands (dataset show, dr describe) that
+     * build the same map, and the logic for fetching the asset names is fairly verbose, so pulled out to a separate
+     * method here.
+     * @param datasetDetails Map of values from the Java HTTP response
+     * @return Map of %xyz% variable names to values
+     */
+    public static Map<String, String> buildMapOfDatasetVariablesToSwap(Map<String, Object> datasetDetails) {
+        // pull the variable values from the Dataset details map
+        String id = datasetDetails.get("id").toString();
+        String createdDate = datasetDetails.get("createdDate").toString();
+
+        // note the reason we need to pull the Asset table names is because there is no guaranteed order they are
+        // created in. this means that we can't control the order they are listed in when describing a Dataset.
+        // to get around this, I pull the order from the HTTP request and swap in the names to the expected CLI response
+        ArrayList<Object> assets =
+                (ArrayList<Object>) ((Map<String, Object>) datasetDetails.get("schema")).get("assets");
+        ArrayList<Object> assetTables = (ArrayList<Object>) ((Map<String, Object>) assets.get(0)).get("tables");
+        ArrayList<String> assetTableNames = new ArrayList<>();
+        for (int ctr = 0; ctr < assetTables.size(); ctr++) {
+            String tableName = ((Map<String, Object>) assetTables.get(ctr)).get("name").toString();
+            assetTableNames.add(tableName);
+        }
+
+        // build the variable map
+        Map<String, String> variablesMap = new HashMap<>();
+        variablesMap.put("%id%", id);
+        variablesMap.put("%createdDate%", createdDate);
+        variablesMap.put("%assetTable0%", assetTableNames.get(0));
+        variablesMap.put("%assetTable1%", assetTableNames.get(1));
+
+        return variablesMap;
+    }
+
+    /**
+     * Assert that the CLI command expected response matches the actual response, after swapping out the %xyz% variable
+     * names with their values. Compare line by line.
+     * @param cliCmdResponse actual response, as a List of Strings, one for each line
+     * @param cliCmdExpectedResponse expected response, as a List of Strings, one for each line
+     * @param variablesMap Map of %xyz% variable names to values to swap out before comparing
+     */
+    public static void compareCLIExpectedOutput(
+            List<String> cliCmdResponse, List<String> cliCmdExpectedResponse, Map<String, String> variablesMap) {
+
+        // check that the responses match, line by line
+        for (int ctr = 0; ctr < cliCmdResponse.size(); ctr++) {
+            String expectedLine = cliCmdExpectedResponse.get(ctr);
+
+            // replace all the %xyz% variables before doing the comparison
+            for (Map.Entry<String, String> variablesMapEntry : variablesMap.entrySet()) {
+                expectedLine = expectedLine.replace(variablesMapEntry.getKey(), variablesMapEntry.getValue());
+            }
+
+            Assert.assertEquals(expectedLine, cliCmdResponse.get(ctr));
+        }
     }
 
     /**
