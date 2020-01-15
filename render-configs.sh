@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## This script is specific to the Broad deployment.
+## It fetches secrets from Vault.
+
 LOCAL_TOKEN=$(cat ~/.vault-token)
 VAULT_TOKEN=${1:-$LOCAL_TOKEN}
 
