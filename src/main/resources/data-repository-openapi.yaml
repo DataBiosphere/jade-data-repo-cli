@@ -824,6 +824,84 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
 
+  '/api/repository/v1/datasets/{id}/assets':
+    post:
+      description: Add an asset definiion to a dataset
+      operationId: addDatasetAssetSpecifications
+      tags:
+      - repository
+      consumes:
+      - application/json
+      parameters:
+      - $ref: '#/parameters/Id'
+      - in: body
+        name: assetModel
+        description: Asset definition to add to the dataset
+        schema:
+          $ref: '#/definitions/AssetModel'
+      responses:
+        202:
+          description: Job status of ingest job & url for polling in the response header
+          schema:
+            $ref: '#/definitions/JobModel'
+          headers:
+            location:
+              type: string
+              description: url for the job polling
+        200:
+          description: Redirect for ingest complete
+          schema:
+            $ref: '#/definitions/JobModel'
+          headers:
+            location:
+              type: string
+              description: url for the job result
+        400:
+          description: Bad request - invalid ingest request, badly formed
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        403:
+          description: No permission to add an asset to a dataset
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  '/api/repository/v1/datasets/{id}/assets/{assetId}':
+    delete:
+      description: Remove an asset definiion from a dataset
+      operationId: removeDatasetAssetSpecifications
+      tags:
+      - repository
+      consumes:
+      - application/json
+      parameters:
+      - $ref: '#/parameters/Id'
+      - $ref: '#/parameters/AssetId'
+      responses:
+        202:
+          description: Add new assets to a dataset
+          schema:
+            $ref: '#/definitions/JobModel'
+          headers:
+            location:
+              type: string
+              description: url for the job polling
+        200:
+          description: Redirect for ingest complete
+          schema:
+            $ref: '#/definitions/JobModel'
+          headers:
+            location:
+              type: string
+              description: url for the job result
+        400:
+          description: Bad request - invalid ingest request, badly formed
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        403:
+          description: No permission to remove an asset from a dataset
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
   '/api/repository/v1/register/user':
     get:
       description: |
@@ -1109,7 +1187,7 @@ paths:
         - repository
       parameters:
         - name: name
-          description: name of the configuration to 
+          description: name of the configuration to
           required: true
           in: path
           type: string
@@ -1377,6 +1455,18 @@ parameters:
     type: integer
     default: 0
     in: query
+  LoadTag:
+    name: loadtag
+    description: a load tag
+    required: true
+    type: string
+    in: path
+  AssetId:
+    name: assetid
+    description: An asset id
+    required: true
+    type: string
+    in: path
 
 ##########################################################################################
 # DEFINITIONS
@@ -1727,10 +1817,7 @@ definitions:
           - upsert
           - append
       load_tag:
-        type: string
-        description: |
-          client-specified tag for this load. If no id is specified, we use the
-          string form of the job create time as the tag.
+        $ref: '#/definitions/LoadTagModel'
       max_bad_records:
         type: integer
         default: 0
@@ -1779,7 +1866,7 @@ definitions:
       path:
         type: string
       load_tag:
-        type: string
+        $ref: '#/definitions/LoadTagModel'
       row_count:
         type: integer
         format: int64
@@ -1818,6 +1905,8 @@ definitions:
       profileId:
         $ref: '#/definitions/UniqueIdProperty'
         description: The profile id to use for this file
+      loadTag:
+        $ref: '#/definitions/LoadTagModel'
       description:
         type: string
         description: |-
@@ -1881,6 +1970,8 @@ definitions:
       accessUrl:
         type: string
         description: URL of the file in cloud storage
+      loadTag:
+        $ref: '#/definitions/LoadTagModel'
 
   DirectoryDetailModel:
     description: Directory in the data repository
@@ -1897,6 +1988,12 @@ definitions:
         description: Array of directory contents
         items:
           $ref: '#/definitions/FileModel'
+
+  LoadTagModel:
+    type: string
+    description: |
+      client-specified tag for a data or file load. If no id is specified, we use the
+      string form of the job create time as the tag.
 
   ## Snapshot Definitions ##
 
@@ -2210,7 +2307,7 @@ definitions:
       Counted fault is used to insert a fixed number of faults. A "fault test" is one
       call to the fault manager for a named fault. The skipFor lets you get the system to
       a certain stable point where you want to begin inserting faults. Insert gives the
-      total number of faults to trigger. The rate gives the percentage of the time to 
+      total number of faults to trigger. The rate gives the percentage of the time to
       insert the fault. A value of 50 would insert the fault half
       the time. A value of 20 would insert the fault 20% of the time . The rateStyle
       describes whether the fault will be fixed or random. In our 20 example, if the rate style
