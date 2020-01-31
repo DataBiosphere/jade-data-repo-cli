@@ -521,11 +521,11 @@ public final class DatasetCommands {
                 CommandUtils.printErrorAndExit("Invalid format; only text and json are supported");
             }
         }
-        
+
         DatasetSummaryModel datasetSummary = CommandUtils.findDatasetByName(datasetName);
 
         try {
-            if (filePath == null) {
+            if (filePath != null) {
                 String[] pathParts = StringUtils.split(filePath, '/');
                 if (pathParts.length < 3) {
                     CommandUtils.printErrorAndExit("Invalid file or directory path");
