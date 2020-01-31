@@ -170,7 +170,7 @@ public final class DatasetCommands {
                                 .hasArgument(true)
                                 .optional(true)
                                 .help("Enumeration depth. -1 means fully expand; 0 means no expansion;" +
-                                        "1…N expands that many subdirectories"))
+                                        "1…N expands that many subdirectories. Default value is 0."))
                         .addOption(new Option()
                                 .longName("format")
                                 .hasArgument(true)
@@ -503,14 +503,15 @@ public final class DatasetCommands {
                                         String filePath,
                                         String depth,
                                         String format) {
-        Integer depthInt = 0;
-        if (depth == null) {
-            depthInt = -1;
-        } else {
+        Integer depthInt = 0; // default depth value is 0
+        if (depth != null) {
             try {
                 depthInt = Integer.valueOf(depth);
             } catch (NumberFormatException nfEx) {
                 CommandUtils.printErrorAndExit("Invalid depth; only integer values are supported");
+            }
+            if (depthInt < -1) {
+                CommandUtils.printErrorAndExit("Invalid depth; only integer values >= -1 are supported");
             }
         }
 

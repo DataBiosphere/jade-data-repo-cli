@@ -28,7 +28,6 @@ before_install:
   - source $HOME/google-cloud-sdk/path.bash.inc
   - gcloud config set project broad-jade-dd
   - ./render-configs.sh $TRAVIS_TOKEN
-#  - gcloud auth activate-service-account --key-file /tmp/jade-dev-account.json
 
 script:
   - ./gradlew :assemble
