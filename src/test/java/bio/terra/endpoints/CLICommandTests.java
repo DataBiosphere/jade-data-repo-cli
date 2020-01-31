@@ -88,9 +88,9 @@ public class CLICommandTests {
         logger.info("cliCmdResponse: " + cliCmdResponse + "\n");
 
         // TODO: sometimes the dataset isn't returned if you query immediately after creation. add polling/retry here.
-        logger.info("sleeping for 1 second...");
+        logger.info("sleeping for 3 second...");
         try {
-            Thread.sleep(1000);
+            Thread.sleep(3000);
         } catch (InterruptedException ex) { }
 
         // fetch the dataset summary and details over HTTP
