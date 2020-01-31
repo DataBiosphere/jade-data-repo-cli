@@ -63,6 +63,23 @@ You can generate a distribution as tar or zip with the commands:
 * `./gradlew distTar`
 * `./gradlew distZip`
 
+### Keeping OpenAPI file insync with the Data Repo API repository
+First, update the Data Repo API submodule:
+1. Switch to the submodule directory `cd ./jade-data-repo`
+2. Checkout the develop branch `git checkout develop`
+3. Pull down the latest commit `git pull`
+4. Return to the CLI root directory `cd ..`
+5. Check for any changes and commit them if found `git status` `git commit -m "update Data Repo API"`
+
+Then, check if the OpenAPI file changed in the Data Repo API repository.
+6. Run the checkApiUpToDate Gradle task `./gradlew :checkApiUpToDate`
+7. Update the OpenAPI file if the Gradle task returned "API is NOT up to date"
+`cp ./jade-data-repo/src/main/resources/data-repository-openapi.yaml ./src/main/resources/data-repository-openapi.yaml`
+8. Run the unit and integrated tests to make sure the changes haven't broken anything.
+`./gradlew :testCLIUnit --console=verbose --info`
+`./gradlew :testCLIIntegrated --console=verbose --info`
+9. Check for any changes and commit them if found `git status` `git commit -m "update Data Repo OpenAPI file copy"`
+
 ## Implementation Notes
 
 ### Parsing
