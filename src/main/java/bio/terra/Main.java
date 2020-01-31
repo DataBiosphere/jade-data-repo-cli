@@ -38,6 +38,7 @@ public final class Main {
                 case COMMAND_DATASET_SHOW:
                 case COMMAND_DATASET_DELETE:
                 case COMMAND_DATASET_FILE:
+                case COMMAND_DATASET_FILE_LOOKUP:
                 case COMMAND_DATASET_TABLE:
                 case COMMAND_DATASET_POLICY_ADD:
                 case COMMAND_DATASET_POLICY_REMOVE:

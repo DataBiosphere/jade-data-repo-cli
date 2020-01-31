@@ -151,6 +151,32 @@ public final class DatasetCommands {
                                 .optional(true)
                                 .help("Choose format; 'text' is the default; 'json' is supported")))
                 .addCommand(new Command()
+                        .primaryNames(new String[]{"dataset", "file", "lookup"})
+                        .commandId(CommandEnum.COMMAND_DATASET_FILE_LOOKUP.getCommandId())
+                        .help("Lookup metadata for one file or directory in a dataset")
+                        .addArgument(new Argument()
+                                .name("dataset-name")
+                                .optional(false)
+                                .help("Name of the dataset that contains the file or directory"))
+                        .addOption(new Option()
+                                .shortName("f")
+                                .longName("file-path")
+                                .hasArgument(true)
+                                .optional(false)
+                                .help("The full path to a file or directory."))
+                        .addOption(new Option()
+                                .shortName("e")
+                                .longName("depth")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Enumeration depth. -1 means fully expand; 0 means no expansion;" +
+                                        "1…N expands that many subdirectories"))
+                        .addOption(new Option()
+                                .longName("format")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Choose format; 'text' is the default; 'json' is supported")))
+                .addCommand(new Command()
                         .primaryNames(new String[]{"dataset", "policy", "show"})
                         .commandId(CommandEnum.COMMAND_DATASET_POLICY_SHOW.getCommandId())
                         .help("Show policies")
@@ -222,6 +248,13 @@ public final class DatasetCommands {
                         result.getArgument("target-path"),
                         result.getArgument("mime-type"),
                         result.getArgument("description"),
+                        result.getArgument("format"));
+                break;
+            case COMMAND_DATASET_FILE_LOOKUP:
+                datasetFileLookup(
+                        result.getArgument("dataset-name"),
+                        result.getArgument("file-path"),
+                        result.getArgument("depth"),
                         result.getArgument("format"));
                 break;
             case COMMAND_DATASET_TABLE:
@@ -460,6 +493,63 @@ public final class DatasetCommands {
             CommandUtils.printErrorAndExit("Conversion to JSON string failed: " + ex.getMessage());
         } catch (ApiException ex) {
             System.out.println("Error processing file ingest: ");
+            CommandUtils.printError(ex);
+        } catch (UnsupportedEncodingException e) {
+            CommandUtils.printErrorAndExit("Error decoding gspath into target URI:\n" + e.getMessage());
+        }
+    }
+
+    private static void datasetFileLookup(String datasetName,
+                                        String filePath,
+                                        String depth,
+                                        String format) {
+        Integer depthInt = 0;
+        if (depth == null) {
+            depthInt = -1;
+        } else {
+            try {
+                depthInt = Integer.valueOf(depth);
+            } catch (NumberFormatException nfEx) {
+                CommandUtils.printErrorAndExit("Invalid depth; only integer values are supported");
+            }
+        }
+
+        if (format == null) {
+            format = "text";
+        } else {
+            if (!StringUtils.equalsIgnoreCase(format, "text") && !StringUtils.equalsIgnoreCase(format, "json")) {
+                CommandUtils.printErrorAndExit("Invalid format; only text and json are supported");
+            }
+        }
+        
+        DatasetSummaryModel datasetSummary = CommandUtils.findDatasetByName(datasetName);
+
+        try {
+            if (filePath == null) {
+                String[] pathParts = StringUtils.split(filePath, '/');
+                if (pathParts.length < 3) {
+                    CommandUtils.printErrorAndExit("Invalid file or directory path");
+                }
+                String encodedPath = '/' + StringUtils.join(pathParts, '/', 2, pathParts.length);
+                filePath = URLDecoder.decode(encodedPath, "UTF-8");
+            }
+
+            RepositoryApi api = DRApis.getRepositoryApi();
+            FileModel fileModel = api.lookupFileByPath(datasetSummary.getId(), filePath, depthInt);
+
+            if (StringUtils.equalsIgnoreCase(format, "text")) {
+                DRFile drFile = new DRFile(DRCollectionType.COLLECTION_TYPE_DATASET, fileModel);
+                drFile.describe();
+            } else {
+                // json format
+                String json = CommandUtils.getObjectMapper().writeValueAsString(fileModel);
+                System.out.println(json);
+            }
+
+        } catch (JsonProcessingException ex) {
+            CommandUtils.printErrorAndExit("Conversion to JSON string failed: " + ex.getMessage());
+        } catch (ApiException ex) {
+            System.out.println("Error processing file lookup: ");
             CommandUtils.printError(ex);
         } catch (UnsupportedEncodingException e) {
             CommandUtils.printErrorAndExit("Error decoding gspath into target URI:\n" + e.getMessage());
