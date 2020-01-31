@@ -525,15 +525,6 @@ public final class DatasetCommands {
         DatasetSummaryModel datasetSummary = CommandUtils.findDatasetByName(datasetName);
 
         try {
-            if (filePath != null) {
-                String[] pathParts = StringUtils.split(filePath, '/');
-                if (pathParts.length < 3) {
-                    CommandUtils.printErrorAndExit("Invalid file or directory path");
-                }
-                String encodedPath = '/' + StringUtils.join(pathParts, '/', 2, pathParts.length);
-                filePath = URLDecoder.decode(encodedPath, "UTF-8");
-            }
-
             RepositoryApi api = DRApis.getRepositoryApi();
             FileModel fileModel = api.lookupFileByPath(datasetSummary.getId(), filePath, depthInt);
 
@@ -551,8 +542,6 @@ public final class DatasetCommands {
         } catch (ApiException ex) {
             System.out.println("Error processing file lookup: ");
             CommandUtils.printError(ex);
-        } catch (UnsupportedEncodingException e) {
-            CommandUtils.printErrorAndExit("Error decoding gspath into target URI:\n" + e.getMessage());
         }
     }
 }
