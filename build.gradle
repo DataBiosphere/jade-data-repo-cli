@@ -162,6 +162,11 @@ task testCLIIntegrated(type: Test) {
     outputs.upToDateWhen { false }
 }
 
+task checkApiUpToDate(type: Exec) {
+    commandLine 'sh'
+    args './checkApiUpToDate.sh'
+}
+
 sourceSets {
     generated {
         compileClasspath = configurations.generatedCompile
