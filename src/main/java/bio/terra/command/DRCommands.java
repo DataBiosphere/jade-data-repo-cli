@@ -73,7 +73,12 @@ public final class DRCommands {
                         .addArgument(new Argument()
                                 .name("path")
                                 .optional(true)
-                                .help("Path to an object - sorry, no wildcards yet")))
+                                .help("Path to an object - sorry, no wildcards yet"))
+                        .addOption(new Option()
+                                .longName("format")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Choose format; 'text' is the default; 'json' is supported")))
                 .addCommand(new Command()
                         .primaryNames(new String[]{"dr", "stream"})
                         .alternateNames(new String[]{"cat"})
@@ -95,7 +100,7 @@ public final class DRCommands {
                 DRCommands.drTree(result.getArgument("path"), depth);
                 break;
             case COMMAND_DR_DESCRIBE:
-                DRCommands.drDescribe(result.getArgument("path"));
+                DRCommands.drDescribe(result.getArgument("path"), result.getArgument("format"));
                 break;
             case COMMAND_DR_STREAM:
                 DRCommands.drStream(result.getArgument("path"));
@@ -107,9 +112,10 @@ public final class DRCommands {
         return true;
     }
 
-    private static void drDescribe(String inPath) {
+    private static void drDescribe(String inPath, String format) {
+        format = CommandUtils.validateFormat(format);
         DRElement element = lookup(inPath);
-        element.describe();
+        element.describe(format);
     }
 
     private static void drList(String inPath, boolean recurse) {

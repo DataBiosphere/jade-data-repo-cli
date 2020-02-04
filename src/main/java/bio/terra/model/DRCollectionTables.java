@@ -1,6 +1,8 @@
 package bio.terra.model;
 
+import bio.terra.command.CommandUtils;
 import bio.terra.datarepo.model.TableModel;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -74,11 +76,17 @@ public class DRCollectionTables extends DRElement {
 
 // TODO: Do I want to dump all of the tables on a describe of the tables?
     @Override
-    public void describe() {
-        super.describe();
+    protected void describeText() {
+        super.describeText();
         for (TableModel table : tables) {
-            new DRTable(table, created).describe();
+            new DRTable(table, created).describeText();
         }
+    }
+
+    @Override
+    protected void describeJson() throws JsonProcessingException {
+        String json = CommandUtils.getObjectMapper().writeValueAsString(tables);
+        System.out.println(json);
     }
 
 }

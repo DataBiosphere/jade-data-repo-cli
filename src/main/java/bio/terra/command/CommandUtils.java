@@ -186,4 +186,22 @@ public final class CommandUtils {
         }
     }
 
+    /**
+     * Checks for valid format values (text and json are supported currently).
+     * Sets the default value to text if the format is null.
+     * Prints an error message to stdout and terminates the process if format is invalid.
+     * @param format typically the argument passed in on the command line
+     * @return the validated format value, which will only be changed if the default value is used
+     */
+    public static String validateFormat(String format) {
+        if (format == null) {
+            // set the default value to text
+            format = "text";
+        } else {
+            if (!StringUtils.equalsIgnoreCase(format, "text") && !StringUtils.equalsIgnoreCase(format, "json")) {
+                CommandUtils.printErrorAndExit("Invalid format; only text and json are supported");
+            }
+        }
+        return format;
+    }
 }

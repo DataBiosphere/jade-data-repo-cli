@@ -10,6 +10,7 @@ import bio.terra.datarepo.model.DatasetSummaryModel;
 import bio.terra.datarepo.model.RelationshipModel;
 import bio.terra.datarepo.model.RelationshipTermModel;
 import bio.terra.datarepo.model.TableModel;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -84,7 +85,7 @@ public class DRDataset extends DRElement {
     }
 
     @Override
-    public void describe() {
+    protected void describeText() {
         try {
             DatasetModel dataset = DRApis.getRepositoryApi().retrieveDataset(summary.getId());
 
@@ -94,14 +95,28 @@ public class DRDataset extends DRElement {
             System.out.println("createdDate: " + dataset.getCreatedDate());
             System.out.println("..Tables");
             for (TableModel table : dataset.getSchema().getTables()) {
-                new DRTable(table, dataset.getCreatedDate()).describe();
+                new DRTable(table, dataset.getCreatedDate()).describeText();
             }
             System.out.println("..Relationships");
             printRelationships(dataset.getSchema().getRelationships());
             System.out.println("..Assets");
             printAssets(dataset.getSchema().getAssets());
         } catch (ApiException ex) {
-            System.out.println("Error processing dataset show:");
+            System.out.println("Error processing dataset describe:");
+            CommandUtils.printError(ex);
+        }
+    }
+
+    @Override
+    protected void describeJson() throws JsonProcessingException {
+        try {
+            // fetch the full Dataset model, instead of using the summary model that is a property of this class
+            DatasetModel dataset = DRApis.getRepositoryApi().retrieveDataset(summary.getId());
+
+            String json = CommandUtils.getObjectMapper().writeValueAsString(dataset);
+            System.out.println(json);
+        } catch (ApiException ex) {
+            System.out.println("Error processing dataset describe:");
             CommandUtils.printError(ex);
         }
     }

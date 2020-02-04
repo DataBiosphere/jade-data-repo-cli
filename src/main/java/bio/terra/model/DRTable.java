@@ -1,9 +1,11 @@
 package bio.terra.model;
 
+import bio.terra.command.CommandUtils;
 import bio.terra.datarepo.model.ColumnModel;
 import bio.terra.datarepo.model.TableModel;
 import bio.terra.formatting.FormatColumn;
 import bio.terra.formatting.TableFormatter;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -56,7 +58,7 @@ public class DRTable extends DRElement {
     }
 
     @Override
-    public void describe() {
+    protected void describeText() {
         System.out.println("  Table: " + tableModel.getName());
 
         List<FormatColumn> formatColumns = new ArrayList<>();
@@ -66,6 +68,12 @@ public class DRTable extends DRElement {
         TableFormatter<FormatColumn> formatter = new TableFormatter<>(formatColumns, System.out, 4);
         formatter.printTable();
         System.out.println(StringUtils.EMPTY);
+    }
+
+    @Override
+    protected void describeJson() throws JsonProcessingException {
+        String json = CommandUtils.getObjectMapper().writeValueAsString(tableModel);
+        System.out.println(json);
     }
 
     @Override

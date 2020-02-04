@@ -7,6 +7,7 @@ import bio.terra.datarepo.model.DRSChecksum;
 import bio.terra.datarepo.model.DirectoryDetailModel;
 import bio.terra.datarepo.model.FileModel;
 import bio.terra.datarepo.model.FileModelType;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -90,8 +91,8 @@ public class DRFile extends DRElement {
     }
 
     @Override
-    public void describe() {
-        super.describe();
+    protected void describeText() {
+        super.describeText();
         System.out.printf(DESCRIBE_FORMAT, "collectionId", fileModel.getCollectionId());
         System.out.printf(DESCRIBE_FORMAT, "path", fileModel.getPath());
         System.out.printf(DESCRIBE_FORMAT, "size", fileModel.getSize());
@@ -108,6 +109,12 @@ public class DRFile extends DRElement {
                 System.out.printf(DESCRIBE_FORMAT, "file count", contents.size());
             }
         }
+    }
+
+    @Override
+    protected void describeJson() throws JsonProcessingException {
+        String json = CommandUtils.getObjectMapper().writeValueAsString(fileModel);
+        System.out.println(json);
     }
 
     public FileModel getFileModel() {

@@ -1,7 +1,14 @@
 package bio.terra.model;
 
+import bio.terra.command.CommandUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.api.client.json.Json;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public abstract class DRElement {
     public static final String DESCRIBE_FORMAT = "%-12s: %s%n";
@@ -34,7 +41,17 @@ public abstract class DRElement {
 
     // Describe generates output formatted by the object. This doesn't separate presentation from logic,
     // but it is simple. The default version displays the default information.
-    public void describe() {
+    public void describe(String format) {
+        if (StringUtils.equalsIgnoreCase(format, "text")) {
+            describeText();
+        } else try {
+            describeJson();
+        } catch (JsonProcessingException ex) {
+            CommandUtils.printErrorAndExit("Conversion to JSON string failed: " + ex.getMessage());
+        }
+    }
+
+    protected void describeText() {
         System.out.printf(DESCRIBE_FORMAT, "name", getObjectName());
         System.out.printf(DESCRIBE_FORMAT, "type", getObjectType().getName());
         System.out.printf(DESCRIBE_FORMAT, "description", getDescription());
@@ -42,4 +59,15 @@ public abstract class DRElement {
         System.out.printf(DESCRIBE_FORMAT, "createdDate", getCreated());
     }
 
+    protected void describeJson() throws JsonProcessingException {
+        Map<String, String> objectValues = new HashMap<>();
+        objectValues.put("name", getObjectName());
+        objectValues.put("type", getObjectType().getName());
+        objectValues.put("description", getDescription());
+        objectValues.put("id", getId());
+        objectValues.put("createdDate", getCreated());
+
+        String json = CommandUtils.getObjectMapper().writeValueAsString(objectValues);
+        System.out.println(json);
+    }
 }

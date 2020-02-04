@@ -21,7 +21,6 @@ import bio.terra.parser.Command;
 import bio.terra.parser.Option;
 import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -64,7 +63,12 @@ public final class DatasetCommands {
                         .addArgument(new Argument()
                                 .name("dataset-name")
                                 .optional(false)
-                                .help("name of the dataset to show")))
+                                .help("name of the dataset to show"))
+                        .addOption(new Option()
+                                .longName("format")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Choose format; 'text' is the default; 'json' is supported")))
                 .addCommand(new Command()
                         .primaryNames(new String[]{"dataset", "delete"})
                         .commandId(CommandEnum.COMMAND_DATASET_DELETE.getCommandId())
@@ -151,9 +155,9 @@ public final class DatasetCommands {
                                 .optional(true)
                                 .help("Choose format; 'text' is the default; 'json' is supported")))
                 .addCommand(new Command()
-                        .primaryNames(new String[]{"dataset", "file", "lookup"})
-                        .commandId(CommandEnum.COMMAND_DATASET_FILE_LOOKUP.getCommandId())
-                        .help("Lookup metadata for one file or directory in a dataset")
+                        .primaryNames(new String[]{"dataset", "file", "show"})
+                        .commandId(CommandEnum.COMMAND_DATASET_FILE_SHOW.getCommandId())
+                        .help("List one file or directory in a dataset")
                         .addArgument(new Argument()
                                 .name("dataset-name")
                                 .optional(false)
@@ -163,7 +167,7 @@ public final class DatasetCommands {
                                 .longName("file-path")
                                 .hasArgument(true)
                                 .optional(false)
-                                .help("The full path to a file or directory."))
+                                .help("Full path to a file or directory."))
                         .addOption(new Option()
                                 .shortName("e")
                                 .longName("depth")
@@ -235,7 +239,7 @@ public final class DatasetCommands {
                         result.getArgument("profile"));
                 break;
             case COMMAND_DATASET_SHOW:
-                datasetShow(result.getArgument("dataset-name"));
+                datasetShow(result.getArgument("dataset-name"), result.getArgument("format"));
                 break;
             case COMMAND_DATASET_DELETE:
                 datasetDelete(result.getArgument("dataset-name"));
@@ -250,8 +254,8 @@ public final class DatasetCommands {
                         result.getArgument("description"),
                         result.getArgument("format"));
                 break;
-            case COMMAND_DATASET_FILE_LOOKUP:
-                datasetFileLookup(
+            case COMMAND_DATASET_FILE_SHOW:
+                datasetFileShow(
                         result.getArgument("dataset-name"),
                         result.getArgument("file-path"),
                         result.getArgument("depth"),
@@ -325,11 +329,13 @@ public final class DatasetCommands {
         }
     }
 
-    private static void datasetShow(String datasetName) {
+    private static void datasetShow(String datasetName, String format) {
+        format = CommandUtils.validateFormat(format);
+
         // Show dataset is the same as describe
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
         DRDataset datasetElement = new DRDataset(summary);
-        datasetElement.describe();
+        datasetElement.describe(format);
     }
 
     private static void datasetPolicyShow(String datasetName) {
@@ -427,13 +433,7 @@ public final class DatasetCommands {
                                        String mimeType,
                                        String description,
                                        String format) {
-        if (format == null) {
-            format = "text";
-        } else {
-            if (!StringUtils.equalsIgnoreCase(format, "text") && !StringUtils.equalsIgnoreCase(format, "json")) {
-                CommandUtils.printErrorAndExit("Invalid format; only text and json are supported");
-            }
-        }
+        format = CommandUtils.validateFormat(format);
 
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
 
@@ -480,17 +480,8 @@ public final class DatasetCommands {
                         1,
                         FileModel.class);
 
-            if (StringUtils.equalsIgnoreCase(format, "text")) {
-                DRFile drFile = new DRFile(DRCollectionType.COLLECTION_TYPE_DATASET, fileModel);
-                drFile.describe();
-            } else {
-                // json format
-                String json = CommandUtils.getObjectMapper().writeValueAsString(fileModel);
-                System.out.println(json);
-            }
-
-        } catch (JsonProcessingException ex) {
-            CommandUtils.printErrorAndExit("Conversion to JSON string failed: " + ex.getMessage());
+            DRFile drFile = new DRFile(DRCollectionType.COLLECTION_TYPE_DATASET, fileModel);
+            drFile.describe(format);
         } catch (ApiException ex) {
             System.out.println("Error processing file ingest: ");
             CommandUtils.printError(ex);
@@ -499,10 +490,12 @@ public final class DatasetCommands {
         }
     }
 
-    private static void datasetFileLookup(String datasetName,
+    private static void datasetFileShow(String datasetName,
                                         String filePath,
                                         String depth,
                                         String format) {
+        format = CommandUtils.validateFormat(format);
+
         Integer depthInt = 0; // default depth value is 0
         if (depth != null) {
             try {
@@ -515,34 +508,17 @@ public final class DatasetCommands {
             }
         }
 
-        if (format == null) {
-            format = "text";
-        } else {
-            if (!StringUtils.equalsIgnoreCase(format, "text") && !StringUtils.equalsIgnoreCase(format, "json")) {
-                CommandUtils.printErrorAndExit("Invalid format; only text and json are supported");
-            }
-        }
-
+        // Show dataset file is the same as describe
         DatasetSummaryModel datasetSummary = CommandUtils.findDatasetByName(datasetName);
-
+        RepositoryApi api = DRApis.getRepositoryApi();
+        FileModel fileModel = null;
         try {
-            RepositoryApi api = DRApis.getRepositoryApi();
-            FileModel fileModel = api.lookupFileByPath(datasetSummary.getId(), filePath, depthInt);
-
-            if (StringUtils.equalsIgnoreCase(format, "text")) {
-                DRFile drFile = new DRFile(DRCollectionType.COLLECTION_TYPE_DATASET, fileModel);
-                drFile.describe();
-            } else {
-                // json format
-                String json = CommandUtils.getObjectMapper().writeValueAsString(fileModel);
-                System.out.println(json);
-            }
-
-        } catch (JsonProcessingException ex) {
-            CommandUtils.printErrorAndExit("Conversion to JSON string failed: " + ex.getMessage());
+            fileModel = api.lookupFileByPath(datasetSummary.getId(), filePath, depthInt);
         } catch (ApiException ex) {
-            System.out.println("Error processing file lookup: ");
-            CommandUtils.printError(ex);
+            CommandUtils.printErrorAndExit("Error processing file lookup: " + ex.getMessage());
         }
+
+        DRFile drFile = new DRFile(DRCollectionType.COLLECTION_TYPE_DATASET, fileModel);
+        drFile.describe(format);
     }
 }
