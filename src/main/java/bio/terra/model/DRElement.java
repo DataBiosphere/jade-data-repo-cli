@@ -2,7 +2,6 @@ package bio.terra.model;
 
 import bio.terra.command.CommandUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.api.client.json.Json;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -44,10 +43,12 @@ public abstract class DRElement {
     public void describe(String format) {
         if (StringUtils.equalsIgnoreCase(format, "text")) {
             describeText();
-        } else try {
-            describeJson();
-        } catch (JsonProcessingException ex) {
-            CommandUtils.printErrorAndExit("Conversion to JSON string failed: " + ex.getMessage());
+        } else {
+            try {
+                describeJson();
+            } catch (JsonProcessingException ex) {
+                CommandUtils.printErrorAndExit("Conversion to JSON string failed: " + ex.getMessage());
+            }
         }
     }
 
