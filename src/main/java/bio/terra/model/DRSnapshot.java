@@ -5,6 +5,7 @@ import bio.terra.command.DRApis;
 import bio.terra.datarepo.client.ApiException;
 import bio.terra.datarepo.model.SnapshotModel;
 import bio.terra.datarepo.model.SnapshotSummaryModel;
+import bio.terra.datarepo.model.TableModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -80,6 +81,39 @@ public class DRSnapshot extends DRElement {
                 snapshot.getCreatedDate(),
                 snapshot.getTables()));
         return elementList;
+    }
+
+
+    @Override
+    protected void describeText() {
+        try {
+            SnapshotModel snapshot = DRApis.getRepositoryApi().retrieveSnapshot(summary.getId());
+
+            System.out.println("name       : " + snapshot.getName());
+            System.out.println("description: " + snapshot.getDescription());
+            System.out.println("id         : " + snapshot.getId());
+            System.out.println("createdDate: " + snapshot.getCreatedDate());
+            System.out.println("..Tables");
+            for (TableModel table : snapshot.getTables()) {
+                new DRTable(table, snapshot.getCreatedDate()).describeText();
+            }
+        } catch (ApiException ex) {
+            System.out.println("Error processing snapshot describe:");
+            CommandUtils.printError(ex);
+        }
+    }
+
+    @Override
+    protected void describeJson() {
+        try {
+            // fetch the full Snapshot model, instead of using the summary model that is a property of this class
+            SnapshotModel snapshot = DRApis.getRepositoryApi().retrieveSnapshot(summary.getId());
+
+            CommandUtils.outputPrettyJson(snapshot);
+        } catch (ApiException ex) {
+            System.out.println("Error processing snapshot describe:");
+            CommandUtils.printError(ex);
+        }
     }
 
     @Override

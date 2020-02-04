@@ -86,6 +86,7 @@ public class DRDataset extends DRElement {
     @Override
     protected void describeText() {
         try {
+            // fetch the full Dataset model, instead of using the summary model that is a property of this class
             DatasetModel dataset = DRApis.getRepositoryApi().retrieveDataset(summary.getId());
 
             System.out.println("name       : " + dataset.getName());
