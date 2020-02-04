@@ -205,6 +205,11 @@ public final class CommandUtils {
         return format;
     }
 
+    /**
+     * Print the object to stdout using the Jackson object mapper default pretty printer.
+     * Prints an error message to stdout and terminates the process if it encounters a JSON exception.
+     * @param val the object to print
+     */
     public static void outputPrettyJson(Object val) {
         try {
             String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(val);
