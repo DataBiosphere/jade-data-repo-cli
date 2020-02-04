@@ -2,7 +2,6 @@ package bio.terra.model;
 
 import bio.terra.command.CommandUtils;
 import bio.terra.datarepo.model.TableModel;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -84,9 +83,8 @@ public class DRCollectionTables extends DRElement {
     }
 
     @Override
-    protected void describeJson() throws JsonProcessingException {
-        String json = CommandUtils.getObjectMapper().writeValueAsString(tables);
-        System.out.println(json);
+    protected void describeJson() {
+        CommandUtils.outputPrettyJson(tables);
     }
 
 }

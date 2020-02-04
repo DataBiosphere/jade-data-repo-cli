@@ -1,7 +1,6 @@
 package bio.terra.model;
 
 import bio.terra.command.CommandUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -43,12 +42,10 @@ public abstract class DRElement {
     public void describe(String format) {
         if (StringUtils.equalsIgnoreCase(format, "text")) {
             describeText();
+        } else if (StringUtils.equalsIgnoreCase(format, "json")) {
+            describeJson();
         } else {
-            try {
-                describeJson();
-            } catch (JsonProcessingException ex) {
-                CommandUtils.printErrorAndExit("Conversion to JSON string failed: " + ex.getMessage());
-            }
+            CommandUtils.printErrorAndExit("Invalid format; only text and json are supported");
         }
     }
 
@@ -60,7 +57,7 @@ public abstract class DRElement {
         System.out.printf(DESCRIBE_FORMAT, "createdDate", getCreated());
     }
 
-    protected void describeJson() throws JsonProcessingException {
+    protected void describeJson() {
         Map<String, String> objectValues = new HashMap<>();
         objectValues.put("name", getObjectName());
         objectValues.put("type", getObjectType().getName());
@@ -68,7 +65,6 @@ public abstract class DRElement {
         objectValues.put("id", getId());
         objectValues.put("createdDate", getCreated());
 
-        String json = CommandUtils.getObjectMapper().writeValueAsString(objectValues);
-        System.out.println(json);
+        CommandUtils.outputPrettyJson(objectValues);
     }
 }

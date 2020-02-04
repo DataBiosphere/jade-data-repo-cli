@@ -7,7 +7,6 @@ import bio.terra.datarepo.model.DRSChecksum;
 import bio.terra.datarepo.model.DirectoryDetailModel;
 import bio.terra.datarepo.model.FileModel;
 import bio.terra.datarepo.model.FileModelType;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -112,9 +111,8 @@ public class DRFile extends DRElement {
     }
 
     @Override
-    protected void describeJson() throws JsonProcessingException {
-        String json = CommandUtils.getObjectMapper().writeValueAsString(fileModel);
-        System.out.println(json);
+    protected void describeJson() {
+        CommandUtils.outputPrettyJson(fileModel);
     }
 
     public FileModel getFileModel() {

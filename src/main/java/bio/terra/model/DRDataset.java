@@ -10,7 +10,6 @@ import bio.terra.datarepo.model.DatasetSummaryModel;
 import bio.terra.datarepo.model.RelationshipModel;
 import bio.terra.datarepo.model.RelationshipTermModel;
 import bio.terra.datarepo.model.TableModel;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -108,13 +107,12 @@ public class DRDataset extends DRElement {
     }
 
     @Override
-    protected void describeJson() throws JsonProcessingException {
+    protected void describeJson() {
         try {
             // fetch the full Dataset model, instead of using the summary model that is a property of this class
             DatasetModel dataset = DRApis.getRepositoryApi().retrieveDataset(summary.getId());
 
-            String json = CommandUtils.getObjectMapper().writeValueAsString(dataset);
-            System.out.println(json);
+            CommandUtils.outputPrettyJson(dataset);
         } catch (ApiException ex) {
             System.out.println("Error processing dataset describe:");
             CommandUtils.printError(ex);

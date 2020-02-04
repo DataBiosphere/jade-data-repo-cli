@@ -5,7 +5,6 @@ import bio.terra.datarepo.model.ColumnModel;
 import bio.terra.datarepo.model.TableModel;
 import bio.terra.formatting.FormatColumn;
 import bio.terra.formatting.TableFormatter;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -71,9 +70,8 @@ public class DRTable extends DRElement {
     }
 
     @Override
-    protected void describeJson() throws JsonProcessingException {
-        String json = CommandUtils.getObjectMapper().writeValueAsString(tableModel);
-        System.out.println(json);
+    protected void describeJson() {
+        CommandUtils.outputPrettyJson(tableModel);
     }
 
     @Override

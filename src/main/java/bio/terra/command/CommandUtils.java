@@ -204,4 +204,13 @@ public final class CommandUtils {
         }
         return format;
     }
+
+    public static void outputPrettyJson(Object val) {
+        try {
+            String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(val);
+            System.out.println(json);
+        } catch (JsonProcessingException ex) {
+            CommandUtils.printErrorAndExit("Conversion to JSON string failed: " + ex.getMessage());
+        }
+    }
 }
