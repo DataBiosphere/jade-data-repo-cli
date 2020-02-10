@@ -63,7 +63,7 @@ dependencies {
         googleCloudStorage = "1.92.0"
         googleOauthClientJetty = "1.30.5"
         jackson = "2.10.0.2"
-        jersey = "2.29.1"
+        jersey = "2.30"
         junit = "4.13"
         swagger = "1.5.22"
         hamcrest = "2.2"
