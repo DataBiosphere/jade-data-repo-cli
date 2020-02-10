@@ -90,8 +90,8 @@ public class DRFile extends DRElement {
     }
 
     @Override
-    public void describe() {
-        super.describe();
+    protected void describeText() {
+        super.describeText();
         System.out.printf(DESCRIBE_FORMAT, "collectionId", fileModel.getCollectionId());
         System.out.printf(DESCRIBE_FORMAT, "path", fileModel.getPath());
         System.out.printf(DESCRIBE_FORMAT, "size", fileModel.getSize());
@@ -108,6 +108,11 @@ public class DRFile extends DRElement {
                 System.out.printf(DESCRIBE_FORMAT, "file count", contents.size());
             }
         }
+    }
+
+    @Override
+    protected void describeJson() {
+        CommandUtils.outputPrettyJson(fileModel);
     }
 
     public FileModel getFileModel() {

@@ -1,5 +1,6 @@
 package bio.terra.model;
 
+import bio.terra.command.CommandUtils;
 import bio.terra.datarepo.model.TableModel;
 import org.apache.commons.lang3.StringUtils;
 
@@ -74,11 +75,16 @@ public class DRCollectionTables extends DRElement {
 
 // TODO: Do I want to dump all of the tables on a describe of the tables?
     @Override
-    public void describe() {
-        super.describe();
+    protected void describeText() {
+        super.describeText();
         for (TableModel table : tables) {
-            new DRTable(table, created).describe();
+            new DRTable(table, created).describeText();
         }
+    }
+
+    @Override
+    protected void describeJson() {
+        CommandUtils.outputPrettyJson(tables);
     }
 
 }

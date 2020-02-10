@@ -54,7 +54,12 @@ public final class SnapshotCommands {
                         .addArgument(new Argument()
                                 .name("snapshot-name")
                                 .optional(false)
-                                .help("name of the snapshot to show")))
+                                .help("name of the snapshot to show"))
+                        .addOption(new Option()
+                                .longName("format")
+                                .hasArgument(true)
+                                .optional(true)
+                                .help("Choose format; 'text' is the default; 'json' is supported")))
                 .addCommand(new Command()
                         .primaryNames(new String[]{"snapshot", "delete"})
                         .commandId(CommandEnum.COMMAND_SNAPSHOT_DELETE.getCommandId())
@@ -122,7 +127,7 @@ public final class SnapshotCommands {
                         result.getArgument("profile"));
                 break;
             case COMMAND_SNAPSHOT_SHOW:
-                snapshotShow(result.getArgument("snapshot-name"));
+                snapshotShow(result.getArgument("snapshot-name"), result.getArgument("format"));
                 break;
             case COMMAND_SNAPSHOT_DELETE:
                 snapshotDelete(result.getArgument("snapshot-name"));
@@ -198,10 +203,13 @@ public final class SnapshotCommands {
         }
     }
 
-    public static void snapshotShow(String snapshotName) {
+    public static void snapshotShow(String snapshotName, String format) {
+        format = CommandUtils.validateFormat(format);
+
+        // Show snapshot is the same as describe
         SnapshotSummaryModel summary = CommandUtils.findSnapshotByName(snapshotName);
         DRSnapshot snapshotElement = new DRSnapshot(summary);
-        snapshotElement.describe();
+        snapshotElement.describe(format);
     }
 
     public static void snapshotPolicyShow(String snapshotName) {

@@ -84,8 +84,9 @@ public class DRDataset extends DRElement {
     }
 
     @Override
-    public void describe() {
+    protected void describeText() {
         try {
+            // fetch the full Dataset model, instead of using the summary model that is a property of this class
             DatasetModel dataset = DRApis.getRepositoryApi().retrieveDataset(summary.getId());
 
             System.out.println("name       : " + dataset.getName());
@@ -94,14 +95,27 @@ public class DRDataset extends DRElement {
             System.out.println("createdDate: " + dataset.getCreatedDate());
             System.out.println("..Tables");
             for (TableModel table : dataset.getSchema().getTables()) {
-                new DRTable(table, dataset.getCreatedDate()).describe();
+                new DRTable(table, dataset.getCreatedDate()).describeText();
             }
             System.out.println("..Relationships");
             printRelationships(dataset.getSchema().getRelationships());
             System.out.println("..Assets");
             printAssets(dataset.getSchema().getAssets());
         } catch (ApiException ex) {
-            System.out.println("Error processing dataset show:");
+            System.out.println("Error processing dataset describe:");
+            CommandUtils.printError(ex);
+        }
+    }
+
+    @Override
+    protected void describeJson() {
+        try {
+            // fetch the full Dataset model, instead of using the summary model that is a property of this class
+            DatasetModel dataset = DRApis.getRepositoryApi().retrieveDataset(summary.getId());
+
+            CommandUtils.outputPrettyJson(dataset);
+        } catch (ApiException ex) {
+            System.out.println("Error processing dataset describe:");
             CommandUtils.printError(ex);
         }
     }

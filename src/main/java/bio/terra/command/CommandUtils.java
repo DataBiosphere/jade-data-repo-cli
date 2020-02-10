@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public final class CommandUtils {
+
     public static final String SLASH = "/";
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -186,4 +187,55 @@ public final class CommandUtils {
         }
     }
 
+    /**
+     * Public Enum for the format flags used by CLI commands.
+     */
+    public enum CLIFormatFlags {
+        CLI_FORMAT_TEXT("text"),
+        CLI_FORMAT_JSON("json");
+
+        private String value;
+
+        CLIFormatFlags(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    /**
+     * Checks for valid format values (text and json are supported currently).
+     * Sets the default value to text if the format is null.
+     * Prints an error message to stdout and terminates the process if format is invalid.
+     * @param format typically the argument passed in on the command line
+     * @return the validated format value, which will only be changed if the default value is used
+     */
+    public static String validateFormat(String format) {
+        if (format == null) {
+            // set the default value to text
+            format = CLIFormatFlags.CLI_FORMAT_TEXT.getValue();
+        } else {
+            if (!StringUtils.equalsIgnoreCase(format, CLIFormatFlags.CLI_FORMAT_TEXT.getValue())
+                    && !StringUtils.equalsIgnoreCase(format, CLIFormatFlags.CLI_FORMAT_JSON.getValue())) {
+                CommandUtils.printErrorAndExit("Invalid format; only text and json are supported");
+            }
+        }
+        return format;
+    }
+
+    /**
+     * Print the object to stdout using the Jackson object mapper default pretty printer.
+     * Prints an error message to stdout and terminates the process if it encounters a JSON exception.
+     * @param val the object to print
+     */
+    public static void outputPrettyJson(Object val) {
+        try {
+            String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(val);
+            System.out.println(json);
+        } catch (JsonProcessingException ex) {
+            CommandUtils.printErrorAndExit("Conversion to JSON string failed: " + ex.getMessage());
+        }
+    }
 }

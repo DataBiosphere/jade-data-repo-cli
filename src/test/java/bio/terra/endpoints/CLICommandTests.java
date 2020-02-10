@@ -88,9 +88,9 @@ public class CLICommandTests {
         logger.info("cliCmdResponse: " + cliCmdResponse + "\n");
 
         // TODO: sometimes the dataset isn't returned if you query immediately after creation. add polling/retry here.
-        logger.info("sleeping for 1 second...");
+        logger.info("sleeping for 3 seconds...");
         try {
-            Thread.sleep(1000);
+            Thread.sleep(3000);
         } catch (InterruptedException ex) { }
 
         // fetch the dataset summary and details over HTTP
@@ -138,10 +138,13 @@ public class CLICommandTests {
         Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
 
         // check that we fetched exactly one dataset
-        Assert.assertEquals(1, javaHttpResponse.get("total"));
+        // note that this is not the same as checking the total property, which includes all datasets,
+        // even those that do not satisfy the filter.
+        ArrayList<Object> items = (ArrayList<Object>) javaHttpResponse.get("items");
+        Assert.assertEquals(1, items.size());
 
         // return the dataset summary as a map
-        Map<String, Object> items0 = (Map<String, Object>)((ArrayList<Object>) javaHttpResponse.get("items")).get(0);
+        Map<String, Object> items0 = (Map<String, Object>)items.get(0);
         return items0;
     }
 
