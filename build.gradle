@@ -64,7 +64,7 @@ dependencies {
         googleOauthClientJetty = "1.30.5"
         jackson = "2.10.0.pr3"
         jersey = "2.29.1"
-        junit = "4.12"
+        junit = "4.13"
         swagger = "1.5.22"
         hamcrest = "2.2"
     }
