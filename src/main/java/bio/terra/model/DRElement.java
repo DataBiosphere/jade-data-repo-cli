@@ -40,9 +40,9 @@ public abstract class DRElement {
     // Describe generates output formatted by the object. This doesn't separate presentation from logic,
     // but it is simple. The default version displays the default information.
     public void describe(String format) {
-        if (StringUtils.equalsIgnoreCase(format, "text")) {
+        if (StringUtils.equalsIgnoreCase(format, CommandUtils.CLIFormatFlags.CLI_FORMAT_TEXT.getValue())) {
             describeText();
-        } else if (StringUtils.equalsIgnoreCase(format, "json")) {
+        } else if (StringUtils.equalsIgnoreCase(format, CommandUtils.CLIFormatFlags.CLI_FORMAT_JSON.getValue())) {
             describeJson();
         } else {
             CommandUtils.printErrorAndExit("Invalid format; only text and json are supported");
