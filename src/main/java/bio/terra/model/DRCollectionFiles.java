@@ -100,7 +100,7 @@ public class DRCollectionFiles extends DRElement {
                 try {
                     // parse the response body to build a JSON object
                     Map<String, String> errorMap = CommandUtils.getObjectMapper()
-                            .readValue(ex.getMessage(), new TypeReference<Map<String, String>>() {});
+                            .readValue(ex.getResponseBody(), new TypeReference<Map<String, String>>() {});
                     // then extract the message property and check it matches the not found case
                     if (StringUtils.containsIgnoreCase(errorMap.get("message"), "File not found:")) {
 
