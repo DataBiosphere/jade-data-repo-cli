@@ -3,11 +3,18 @@ package bio.terra.model;
 import bio.terra.command.CommandUtils;
 import bio.terra.command.DRApis;
 import bio.terra.datarepo.client.ApiException;
+import bio.terra.datarepo.model.DirectoryDetailModel;
 import bio.terra.datarepo.model.FileModel;
+import bio.terra.datarepo.model.FileModelType;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.api.client.http.HttpStatusCodes;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static bio.terra.model.DRCollectionType.COLLECTION_TYPE_DATASET;
 
@@ -85,6 +92,30 @@ public class DRCollectionFiles extends DRElement {
         try {
             return pathLookup("/", 1);
         } catch (ApiException ex) {
+            // the pathLookup function above is checking the top-level files collection (path = "/")
+            // the code below checks for the case where this returns not found
+            // (status code = 404 not found, message property of response body = File not found)
+            if (ex.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
+
+                try {
+                    // parse the response body to build a JSON object
+                    Map<String, String> errorMap = CommandUtils.getObjectMapper()
+                            .readValue(ex.getResponseBody(), new TypeReference<Map<String, String>>() {});
+                    // then extract the message property and check it matches the not found case
+                    if (StringUtils.containsIgnoreCase(errorMap.get("message"), "File not found:")) {
+
+                        // now we've confirmed that this is the case where no files are found
+                        // create an empty directory object here and mark it as already enumerated
+                        // this will end the tree enumeration here, instead of hitting the API again to list the
+                        // directory contents. it also suppresses the API exception so it doesn't leak out to the caller
+                        DirectoryDetailModel directoryDetail = new DirectoryDetailModel()
+                                .contents(new ArrayList<FileModel>()).enumerated(true);
+                        return new FileModel().fileType(FileModelType.DIRECTORY).directoryDetail(directoryDetail);
+                    }
+                } catch (JsonProcessingException jsonEx) {
+                    // error parsing as json, ignore and fall through to the process exit
+                }
+            }
             CommandUtils.printErrorAndExit("Error getting root file object");
         }
         return null; // unreachable
