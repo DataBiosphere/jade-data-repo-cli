@@ -58,7 +58,7 @@ configurations.all {
 dependencies {
     ext {
         commonsLang3 = "3.9"
-        googleApiServicesOauth2 = "v2-rev20190313-1.30.1"
+        googleApiServicesOauth2 = "v2-rev20190313-1.30.8"
         googleClient = "1.30.7"
         googleCloudStorage = "1.103.1"
         googleOauthClientJetty = "1.30.5"
