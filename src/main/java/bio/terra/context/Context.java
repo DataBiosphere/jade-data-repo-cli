@@ -1,5 +1,6 @@
 package bio.terra.context;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -10,7 +11,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
-// Context for this run
 public final class Context {
     private static final String CONTEXT_STORE_PATH = ".jadecli/context.properties";
 
@@ -36,6 +36,9 @@ public final class Context {
         return theContext;
     }
 
+    @SuppressFBWarnings(
+            value = "OBL_UNSATISFIED_OBLIGATION",
+            justification = "Findbugs bug: not properly understanding the resource try")
     private void getContext() {
         try (FileInputStream fileInputStream = new FileInputStream(propertiesFile)) {
             properties.load(fileInputStream);

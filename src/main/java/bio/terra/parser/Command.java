@@ -122,7 +122,10 @@ public class Command {
     }
 
     public String[] getAlternateNames() {
-        return Arrays.copyOf(alternateNames, alternateNames.length);
+        if (alternateNames != null) {
+            return Arrays.copyOf(alternateNames, alternateNames.length);
+        }
+        return null;
     }
 
     public Command alternateNames(String[] alternateNames) {

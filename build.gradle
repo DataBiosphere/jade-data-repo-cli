@@ -63,7 +63,7 @@ dependencies {
         googleCloudStorage = "1.103.1"
         googleOauthClientJetty = "1.30.5"
         jackson = "2.10.2"
-        jersey = "2.30"
+        jersey = "2.30.1"
         junit = "4.13"
         swagger = "1.5.22"
         hamcrest = "2.2"
@@ -97,7 +97,7 @@ dependencies {
     compile group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: "${googleOauthClientJetty}"
 
     // Findbugs annotations, so we can selectively suppress findbugs findings
-    compileOnly 'com.google.code.findbugs:annotations:3.0.1u2'
+    compileOnly 'com.google.code.findbugs:annotations:3.0.1'
 
     testCompile group: 'junit', name: 'junit', version: "${junit}"
     testCompile group: 'org.hamcrest', name: 'hamcrest', version: "${hamcrest}"
@@ -164,7 +164,12 @@ task testCLIIntegrated(type: Test) {
 
 task checkApiUpToDate(type: Exec) {
     commandLine 'sh'
-    args './checkApiUpToDate.sh'
+    args './scripts/checkApiUpToDate.sh'
+}
+
+task updateApi(type: Exec) {
+    commandLine 'sh'
+    args './scripts/updateApi.sh'
 }
 
 sourceSets {

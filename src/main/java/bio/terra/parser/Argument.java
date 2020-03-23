@@ -16,7 +16,7 @@ public class Argument {
             context.getResult().setArgument(name, arg);
         } else {
             if (!optional) {
-                throw new ParserException("Required argugument " + name + " is missing");
+                throw new ParserException("Required argument " + name + " is missing");
             }
         }
     }

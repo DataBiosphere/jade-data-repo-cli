@@ -64,11 +64,7 @@ public final class DatasetCommands {
                                 .name("dataset-name")
                                 .optional(false)
                                 .help("name of the dataset to show"))
-                        .addOption(new Option()
-                                .longName("format")
-                                .hasArgument(true)
-                                .optional(true)
-                                .help("Choose format; 'text' is the default; 'json' is supported")))
+                        .addOption(CommandUtils.formatOption))
                 .addCommand(new Command()
                         .primaryNames(new String[]{"dataset", "delete"})
                         .commandId(CommandEnum.COMMAND_DATASET_DELETE.getCommandId())
@@ -97,12 +93,6 @@ public final class DatasetCommands {
                                 .hasArgument(true)
                                 .optional(false)
                                 .help("GCS URI to the source input file"))
-                        .addOption(new Option()
-                                .shortName("s")
-                                .longName("strategy")
-                                .hasArgument(true)
-                                .optional(true)
-                                .help("Load strategy: append or upsert; defaults to append"))
                         .addOption(new Option()
                                 .longName("input-format")
                                 .hasArgument(true)
@@ -149,11 +139,7 @@ public final class DatasetCommands {
                                 .hasArgument(true)
                                 .optional(true)
                                 .help("Description of the file being copied"))
-                        .addOption(new Option()
-                                .longName("format")
-                                .hasArgument(true)
-                                .optional(true)
-                                .help("Choose format; 'text' is the default; 'json' is supported")))
+                        .addOption(CommandUtils.formatOption))
                 .addCommand(new Command()
                         .primaryNames(new String[]{"dataset", "file", "show"})
                         .commandId(CommandEnum.COMMAND_DATASET_FILE_SHOW.getCommandId())
@@ -175,11 +161,7 @@ public final class DatasetCommands {
                                 .optional(true)
                                 .help("Enumeration depth. -1 means fully expand; 0 means no expansion;" +
                                         "1…N expands that many subdirectories. Default value is 0."))
-                        .addOption(new Option()
-                                .longName("format")
-                                .hasArgument(true)
-                                .optional(true)
-                                .help("Choose format; 'text' is the default; 'json' is supported")))
+                        .addOption(CommandUtils.formatOption))
                 .addCommand(new Command()
                         .primaryNames(new String[]{"dataset", "policy", "show"})
                         .commandId(CommandEnum.COMMAND_DATASET_POLICY_SHOW.getCommandId())
@@ -266,7 +248,6 @@ public final class DatasetCommands {
                         result.getArgument("dataset-name"),
                         result.getArgument("input-gspath"),
                         result.getArgument("table"),
-                        result.getArgument("strategy"),
                         result.getArgument("input-format"));
                 break;
             case COMMAND_DATASET_POLICY_ADD:
@@ -305,7 +286,14 @@ public final class DatasetCommands {
                     datasetRequestModel.defaultProfileId(profileModel.getId());
                 }
 
-                DatasetSummaryModel datasetSummary = DRApis.getRepositoryApi().createDataset(datasetRequestModel);
+                RepositoryApi api = DRApis.getRepositoryApi();
+                JobModel job = api.createDataset(datasetRequestModel);
+                DatasetSummaryModel datasetSummary = CommandUtils.waitForResponse(
+                        api,
+                        job,
+                        1,
+                        DatasetSummaryModel.class);
+
                 System.out.println(datasetSummary.toString());
             }
         } catch (IOException ex) {
@@ -384,28 +372,16 @@ public final class DatasetCommands {
         return IngestRequestModel.FormatEnum.JSON;
     }
 
-    private static IngestRequestModel.StrategyEnum lookupStrategyEnum(String strategy) {
-        if (strategy != null) {
-            IngestRequestModel.StrategyEnum strategyEnum = IngestRequestModel.StrategyEnum.fromValue(strategy);
-            if (strategyEnum != null) {
-                return strategyEnum;
-            }
-        }
-        return IngestRequestModel.StrategyEnum.APPEND;
-    }
-
     private static void datasetTableLoad(String datasetName,
                                          String inputGspath,
                                          String tableName,
-                                         String strategy,
                                          String inputFormat) {
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
 
         IngestRequestModel ingestRequest = new IngestRequestModel()
                 .table(tableName)
                 .path(inputGspath)
-                .format(lookupFormatEnum(inputFormat))
-                .strategy(lookupStrategyEnum(strategy));
+                .format(lookupFormatEnum(inputFormat));
 
         try {
             JobModel job = DRApis.getRepositoryApi().ingestDataset(summary.getId(), ingestRequest);

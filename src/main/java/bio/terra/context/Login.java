@@ -25,7 +25,9 @@ public final class Login {
     private static Credential userCredential;
     private static String clientSecretsFilePath;
 
-    private Login() { }
+
+    private Login() {
+    }
 
     public static void requiresLogin() {
         if (!isLoggedIn) {
@@ -40,6 +42,7 @@ public final class Login {
     public static Credential getUserCredential() {
         return userCredential;
     }
+
 
     // Google magic to authenticate the user and return the access token
     // Sets userCredential private member
@@ -94,10 +97,10 @@ public final class Login {
     /**
      * Setter for path to client secrets JSON file.
      * A null value means to use the default path ~/.jadecli/client/jadecli_client_secret.json
+     *
      * @param newPath new file path, may be null
      */
     public static void setClientSecretsFilePath(String newPath) {
         clientSecretsFilePath = newPath;
     }
-
 }

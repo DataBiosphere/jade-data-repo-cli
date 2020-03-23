@@ -29,7 +29,7 @@ public class JavaHTTPRequestTests {
 
     @BeforeClass
     public static void setup() {
-        Login.setClientSecretsFilePath(CLITestingConfig.clientSecretsFilePath);
+        Login.setClientSecretsFilePath(CLITestingConfig.config().getClientSecretsFilePath());
     }
 
     @AfterClass
@@ -49,7 +49,7 @@ public class JavaHTTPRequestTests {
 
         // make request using Java HTTP library
         Map<String, Object> javaHttpResponse = CLITestingUtils.sendJavaHttpRequest(
-                CLITestingConfig.dataRepoURL + endpointName, endpointType, null, null);
+                CLITestingConfig.config().getDataRepoURL() + endpointName, endpointType, null, null);
 
         // make request using curl in a separate process
         //Map<String, Object> curlResponse =
@@ -77,7 +77,7 @@ public class JavaHTTPRequestTests {
 
         // make request using Java HTTP library
         Map<String, Object> javaHttpResponse = CLITestingUtils.sendJavaHttpRequest(
-                CLITestingConfig.dataRepoURL + endpointName, endpointType, null, null);
+                CLITestingConfig.config().getDataRepoURL() + endpointName, endpointType, null, null);
 
         // make request using curl in a separate process
         //Map<String, Object> curlResponse =
@@ -117,7 +117,7 @@ public class JavaHTTPRequestTests {
 
         // make request using Java HTTP library
         Map<String, Object> javaHttpResponse = CLITestingUtils.sendJavaHttpRequest(
-                CLITestingConfig.dataRepoURL + endpointName, endpointType, token, null);
+                CLITestingConfig.config().getDataRepoURL() + endpointName, endpointType, token, null);
 
         // make request using curl in a separate process
         //Map<String, Object> curlResponse =
