@@ -14,6 +14,7 @@ import bio.terra.datarepo.model.JobModel;
 import bio.terra.datarepo.model.PolicyModel;
 import bio.terra.datarepo.model.PolicyResponse;
 import bio.terra.datarepo.model.SnapshotSummaryModel;
+import bio.terra.parser.Option;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +30,13 @@ public final class CommandUtils {
     public static final String SLASH = "/";
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    // Common format option
+    public static final Option formatOption = new Option()
+            .longName("format")
+            .hasArgument(true)
+            .optional(true)
+            .help("Output format; 'text' is the default; 'json' is supported");
 
     private CommandUtils() { }
 
@@ -202,6 +210,19 @@ public final class CommandUtils {
 
         public String getValue() {
             return value;
+        }
+
+        public static CLIFormatFlags lookup(String format) {
+            if (StringUtils.isEmpty(format)) {
+                return CLI_FORMAT_TEXT;
+            }
+            for (CLIFormatFlags flag : values()) {
+                if (StringUtils.equalsIgnoreCase(format, flag.getValue())) {
+                    return flag;
+                }
+            }
+            printErrorAndExit("Invalid format; only text and json are supported");
+            return CLI_FORMAT_TEXT; // just to make findbugs happy
         }
     }
 

@@ -604,7 +604,7 @@ paths:
             $ref: '#/definitions/EnumerateDatasetModel'
 
     post:
-      description: Create a new dataset
+      description: Create a new dataset asynchronously. The async result is DatasetSummaryModel.
       operationId: createDataset
       tags:
       - repository
@@ -617,10 +617,22 @@ paths:
         schema:
           $ref: '#/definitions/DatasetRequestModel'
       responses:
-        201:
-          description: Dataset created successfully and a summary is returned
+        202:
+          description: Job status of ingest job & url for polling in the response header
           schema:
-            $ref: '#/definitions/DatasetSummaryModel'
+            $ref: '#/definitions/JobModel'
+          headers:
+            location:
+              type: string
+              description: url for the job polling
+        200:
+          description: Redirect for ingest complete
+          schema:
+            $ref: '#/definitions/JobModel'
+          headers:
+            location:
+              type: string
+              description: url for the job result
         400:
           description: Bad request - duplicate name, invalid name, badly formed schema
           schema:
@@ -1872,16 +1884,69 @@ definitions:
     properties:
       name:
         $ref: '#/definitions/ObjectNameProperty'
-
       columns:
         type: array
         items:
           $ref: '#/definitions/ColumnModel'
-
       primaryKey:
         type: array
         items:
           $ref: '#/definitions/ObjectNameProperty'
+      partitionMode:
+        type: string
+        enum:
+          - none
+          - date
+          - int
+        default: none
+      datePartitionOptions:
+        $ref: '#/definitions/DatePartitionOptionsModel'
+      intPartitionOptions:
+        $ref: '#/definitions/IntPartitionOptionsModel'
+
+  DatePartitionOptionsModel:
+    description: Describes how a date partition should be configured.
+    type: object
+    required:
+      - column
+    properties:
+      column:
+        description: >
+          The DATE or TIMESTAMP column in the table to partition on,
+          or 'datarepo_ingest_date' to partition by ingest time.
+        $ref: '#/definitions/ObjectNameProperty'
+
+  IntPartitionOptionsModel:
+    description: Describes how an int partition should be configured.
+    type: object
+    required:
+      - column
+      - min
+      - max
+      - interval
+    properties:
+      column:
+        description: >
+          The INT64 or INTEGER column in the table to partition on.
+        $ref: '#/definitions/ObjectNameProperty'
+      min:
+        description: >
+          The smallest value to partition within the target column.
+          Any rows with a value smaller than this will be unpartitioned.
+        type: integer
+        format: int64
+      max:
+        description: >
+          The largest value to partition within the target column.
+          Any rows with a value larger than this will be unpartitioned.
+        type: integer
+        format: int64
+      interval:
+        description: >
+          The size to use when dividing the partitioning range into "buckets".
+          (max - min) / (this value) cannot be larger than 40,000.
+        type: integer
+        format: int64
 
   RelationshipTermModel:
     description: Describes a table and columns for a relationship
@@ -1961,7 +2026,6 @@ definitions:
     type: object
     required:
       - tables
-      - assets
     properties:
       tables:
         type: array
@@ -1987,7 +2051,6 @@ definitions:
       - table
       - path
       - format
-      - strategy
     properties:
       table:
         $ref: '#/definitions/ObjectNameProperty'
@@ -2000,11 +2063,6 @@ definitions:
         enum:
           - csv
           - json
-      strategy:
-        type: string
-        enum:
-          - upsert
-          - append
       load_tag:
         $ref: '#/definitions/LoadTagModel'
       max_bad_records:
@@ -2289,7 +2347,7 @@ definitions:
 
   BulkLoadArrayResultModel:
     description: |-
-      Returned when the bulk file load job finishes. 
+      Returned when the bulk file load job finishes.
     type: object
     properties:
       loadSummary:
@@ -2372,28 +2430,67 @@ definitions:
       TODO: field will move the asset object; it is here as a stepping stone
     type: object
     required:
-      - source
+      - datasetName
+      - mode
+    properties:
+      datasetName:
+        $ref: '#/definitions/ObjectNameProperty'
+      mode:
+        type: string
+        enum:
+          - byAsset
+          - byRowId
+      assetSpec:
+        $ref: '#/definitions/SnapshotRequestAssetModel'
+      rowIdSpec:
+        $ref: '#/definitions/SnapshotRequestRowIdModel'
+
+  SnapshotRequestAssetModel:
+    description: |
+      The datasource identifies the dataset and asset from which to source the data.
+    type: object
+    required:
+      - assetName
       - rootValues
     properties:
-      source:
-        $ref: '#/definitions/SnapshotRequestSourceModel'
+      assetName:
+        $ref: '#/definitions/ObjectNameProperty'
       rootValues:
         type: array
         items:
           type: string
 
-  SnapshotRequestSourceModel:
+  SnapshotRequestRowIdModel:
     description: |
-      The datasource identifies the dataset and asset from which to source the data.
+      Identifies the list of tables + columns along with the row ids to be included in the snapshot
     type: object
     required:
-      - datasetName
-      - assetName
+      - tables
     properties:
-      datasetName:
+      tables:
+        type: array
+        items:
+          $ref: '#/definitions/SnapshotRequestRowIdTableModel'
+
+  SnapshotRequestRowIdTableModel:
+    description: |
+      A specification of a table, columns, and row ids to go into a snapshot.
+    type: object
+    required:
+      - tableName
+      - columns
+      - rowIds
+    properties:
+      tableName:
         $ref: '#/definitions/ObjectNameProperty'
-      assetName:
-        $ref: '#/definitions/ObjectNameProperty'
+      columns:
+        type: array
+        items:
+          $ref: '#/definitions/ObjectNameProperty'
+      rowIds:
+        type: array
+        items:
+          $ref: '#/definitions/UniqueIdProperty'
 
   SnapshotSummaryModel:
     description: |

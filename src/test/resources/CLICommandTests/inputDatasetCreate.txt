@@ -1,7 +1,7 @@
 {
   "name":        "CLITestDataset",
   "description": "This is a sample dataset definition",
-  "defaultProfileId": "a003922d-a01f-4d95-8bc2-02719ceea1c5",
+  "defaultProfileId": "%profileId%",
   "schema":      {
     "tables":        [
       {
@@ -23,8 +23,8 @@
     "relationships": [
       {
         "name": "participant_sample",
-        "to":   {"table": "sample", "column": "participant_id", "cardinality": "many"},
-        "from": {"table": "participant", "column": "id", "cardinality": "one"}
+        "to":   {"table": "sample", "column": "participant_id"},
+        "from": {"table": "participant", "column": "id"}
       }
     ],
     "assets":        [

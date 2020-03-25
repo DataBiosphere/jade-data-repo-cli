@@ -54,6 +54,12 @@ You can run the code on a command line like this:
 2. In your IntelliJ terminal, make a convenience alias: `alias jc='./build/install/jadecli/bin/jadecli'`
 3. Run a command such as `jc help`
 
+### Testing
+There are two test targets for verifying the CLI:
+- `./gradlew :testCLIUnit --console=verbose --info`
+- `./gradlew :testCLIIntegrated --console=verbose --info`
+Note that you must do  `./gradlew installDist` before running the testCLIIntegrated task.
+
 ### Distribution
 The CLI is distributed in a directory structure. There is a `bin` directory containing scripts to
 launch the application. There is a `lib` directory containing all of the related jars. So it is
@@ -63,22 +69,11 @@ You can generate a distribution as tar or zip with the commands:
 * `./gradlew distTar`
 * `./gradlew distZip`
 
-### Keeping OpenAPI file insync with the Data Repo API repository
-First, update the Data Repo API submodule:
-1. Switch to the submodule directory `cd ./jade-data-repo`
-2. Checkout the develop branch `git checkout develop`
-3. Pull down the latest commit `git pull`
-4. Return to the CLI root directory `cd ..`
-5. Check for any changes and commit them if found `git status` `git commit -m "update Data Repo API"`
-
-Then, check if the OpenAPI file changed in the Data Repo API repository.
-6. Run the checkApiUpToDate Gradle task `./gradlew :checkApiUpToDate`
-7. Update the OpenAPI file if the Gradle task returned "API is NOT up to date"
-`cp ./jade-data-repo/src/main/resources/data-repository-openapi.yaml ./src/main/resources/data-repository-openapi.yaml`
-8. Run the unit and integrated tests to make sure the changes haven't broken anything.
-`./gradlew :testCLIUnit --console=verbose --info`
-`./gradlew :testCLIIntegrated --console=verbose --info`
-9. Check for any changes and commit them if found `git status` `git commit -m "update Data Repo OpenAPI file copy"`
+### Keeping OpenAPI file in sync with the Data Repo API repository
+There are two gradle tasks that can help with keeping the OpenAPI file in sync:
+- `checkApiUpToDate` - pulls the OpenAPI file from the jade-data-repo develop branch and diffs it against 
+the OpenAPI file in the CLI. It returns "API is NOT up to date" if there is skew.
+- `updateAPI` - pulls the OpenAPI file from the jade-data-repo develop branch and overwrites the CLI copy.
 
 ## Implementation Notes
 

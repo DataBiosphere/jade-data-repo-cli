@@ -7,12 +7,15 @@ import com.google.api.client.http.HttpStatusCodes;
 import org.junit.Assert;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -166,6 +169,40 @@ public final class CLITestingUtils {
         bufferedReader.close();
 
         return buildMapFromJSON(inputFileStr.toString(), null);
+    }
+
+
+    /**
+     * Read an input file, substituting values from the variables map. We need this to be able to
+     * inject ids into JSON files
+     *
+     * @param filename input file to read
+     * @param variablesMap map of tokens to substitute
+     * @return name of resulting temp file
+     * @throws IOException
+     */
+    public static String generateInputFile(String filename, Map<String, String> variablesMap) throws IOException {
+        File inputFile = new File(CLITestingConfig.dirName, filename);
+        File outputFile = File.createTempFile("clitest", ".txt");
+
+        try (BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(inputFile), Charset.defaultCharset()));
+             BufferedWriter bufferedWriter = new BufferedWriter(
+                     new OutputStreamWriter(new FileOutputStream(outputFile), Charset.defaultCharset()))) {
+            String inputLine;
+            String outputLine;
+            while ((inputLine = bufferedReader.readLine()) != null) {
+                // replace all the %xyz% variables and then write the line to the output file
+                outputLine = inputLine;
+                for (Map.Entry<String, String> variablesMapEntry : variablesMap.entrySet()) {
+                    outputLine = outputLine.replace(variablesMapEntry.getKey(), variablesMapEntry.getValue());
+                }
+                bufferedWriter.write(outputLine);
+                bufferedWriter.newLine();
+            }
+        }
+
+        return outputFile.getAbsolutePath();
     }
 
     /**

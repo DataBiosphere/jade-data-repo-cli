@@ -1,12 +1,13 @@
 package bio.terra.model;
 
-import bio.terra.command.CommandUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static bio.terra.command.CommandUtils.CLIFormatFlags;
+import static bio.terra.command.CommandUtils.outputPrettyJson;
+import static bio.terra.command.CommandUtils.printErrorAndExit;
 
 public abstract class DRElement {
     public static final String DESCRIBE_FORMAT = "%-12s: %s%n";
@@ -40,12 +41,17 @@ public abstract class DRElement {
     // Describe generates output formatted by the object. This doesn't separate presentation from logic,
     // but it is simple. The default version displays the default information.
     public void describe(String format) {
-        if (StringUtils.equalsIgnoreCase(format, CommandUtils.CLIFormatFlags.CLI_FORMAT_TEXT.getValue())) {
-            describeText();
-        } else if (StringUtils.equalsIgnoreCase(format, CommandUtils.CLIFormatFlags.CLI_FORMAT_JSON.getValue())) {
-            describeJson();
-        } else {
-            CommandUtils.printErrorAndExit("Invalid format; only text and json are supported");
+        switch (CLIFormatFlags.lookup(format)) {
+            case CLI_FORMAT_TEXT:
+                describeText();
+                break;
+
+            case CLI_FORMAT_JSON:
+                describeJson();
+                break;
+
+            default:
+                printErrorAndExit("Unknown format type");
         }
     }
 
@@ -65,6 +71,7 @@ public abstract class DRElement {
         objectValues.put("id", getId());
         objectValues.put("createdDate", getCreated());
 
-        CommandUtils.outputPrettyJson(objectValues);
+        outputPrettyJson(objectValues);
     }
+
 }
