@@ -7,6 +7,7 @@ import java.util.Map;
 
 import static bio.terra.command.CommandUtils.CLIFormatFlags;
 import static bio.terra.command.CommandUtils.outputPrettyJson;
+import static bio.terra.command.CommandUtils.printErrorAndExit;
 
 public abstract class DRElement {
     public static final String DESCRIBE_FORMAT = "%-12s: %s%n";
@@ -48,6 +49,9 @@ public abstract class DRElement {
             case CLI_FORMAT_JSON:
                 describeJson();
                 break;
+
+            default:
+                printErrorAndExit("Unknown format type");
         }
     }
 

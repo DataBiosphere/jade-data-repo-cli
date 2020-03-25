@@ -1,7 +1,7 @@
 {
   "name":        "CLITestDataset",
   "description": "This is a sample dataset definition",
-  "defaultProfileId": "%profileid%",
+  "defaultProfileId": "%profileId%",
   "schema":      {
     "tables":        [
       {

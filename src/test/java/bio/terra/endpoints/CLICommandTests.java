@@ -125,7 +125,7 @@ public class CLICommandTests {
         logger.info("jc dataset create --input-json inputDatasetCreate.txt");
 
         Map<String, String> inputVariablesMap = new HashMap<>();
-        inputVariablesMap.put("%profileid%", profileId);
+        inputVariablesMap.put("%profileId%", profileId);
 
         // Generate temp input file with the right profile id
         String inputJSON = CLITestingUtils.generateInputFile(inputJSONFilename, inputVariablesMap);
@@ -154,7 +154,7 @@ public class CLICommandTests {
         // need to replace %xyz% variables in the CLI expected response with values from the Java HTTP response
         Map<String, String> variablesMap = new HashMap<>();
         variablesMap.put("%id%", datasetSummary.get("id").toString());
-        variablesMap.put("%profileid%", profileId);
+        variablesMap.put("%profileId%", profileId);
         variablesMap.put("%createdDate%", datasetSummary.get("createdDate").toString());
 
         // then do the expected to actual comparison, line by line
