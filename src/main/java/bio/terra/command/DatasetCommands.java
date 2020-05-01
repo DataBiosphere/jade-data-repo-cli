@@ -309,7 +309,14 @@ public final class DatasetCommands {
         DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
 
         try {
-            DeleteResponseModel deleteResponse = DRApis.getRepositoryApi().deleteDataset(summary.getId());
+            RepositoryApi api = DRApis.getRepositoryApi();
+            JobModel job = api.deleteDataset(summary.getId());
+            DeleteResponseModel deleteResponse = CommandUtils.waitForResponse(
+                    api,
+                    job,
+                    1,
+                    DeleteResponseModel.class);
+
             System.out.printf("Dataset deleted: %s (%s)%n", datasetName, deleteResponse.getObjectState().getValue());
         } catch (ApiException ex) {
             System.out.println("Error processing dataset delete:");
