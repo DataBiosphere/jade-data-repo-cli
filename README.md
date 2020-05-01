@@ -29,16 +29,6 @@ navigate through the scary parts and accept some scopes; it does request scope f
  will request scope for BigQuery). When the application is further along, we will
 get an approval from Google and make the scary parts go away.
 
-## Development
-
-### Building the Jade client API
-The CLI codebase has its own copy of the Jade server's `data-repository-openapi.yaml` file.
-It uses that file to generate a java client API for calling a Jade instance. Obviously, that
-makes tracking interface changes a manual process.
-
-The good news is that the client and all related model classes are generated. That makes
-development of the CLI pretty straightforward.
-
 ### Debugging
 You can debug the CLI by creating an IntelliJ configuration like this:
 1. Add an Application configuration
@@ -68,12 +58,6 @@ not packaged as one fat jar.
 You can generate a distribution as tar or zip with the commands:
 * `./gradlew distTar`
 * `./gradlew distZip`
-
-### Keeping OpenAPI file in sync with the Data Repo API repository
-There are two gradle tasks that can help with keeping the OpenAPI file in sync:
-- `checkApiUpToDate` - pulls the OpenAPI file from the jade-data-repo develop branch and diffs it against 
-the OpenAPI file in the CLI. It returns "API is NOT up to date" if there is skew.
-- `updateAPI` - pulls the OpenAPI file from the jade-data-repo develop branch and overwrites the CLI copy.
 
 ## Implementation Notes
 

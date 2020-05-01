@@ -1,4 +1,3 @@
-
 buildscript {
     ext {
         swagger = "2.3.1"
@@ -7,6 +6,7 @@ buildscript {
     repositories {
         mavenCentral()
     }
+
     dependencies {
         classpath("io.swagger:swagger-codegen:${swagger}")
     }
@@ -15,7 +15,6 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'application'
-
 apply plugin: 'checkstyle'
 apply plugin: 'findbugs'
 
@@ -40,6 +39,9 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot-local/'
+    }
 }
 
 configurations {
@@ -68,16 +70,7 @@ dependencies {
         swagger = "1.5.22"
         hamcrest = "2.2"
     }
-
-    generatedCompile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: "${jackson}"
-    generatedCompile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${jackson}"
-    generatedCompile group: 'io.swagger', name: 'swagger-annotations', version: "${swagger}"
-    generatedCompile 'javax.ws.rs:javax.ws.rs-api:2.1.1'
-    generatedCompile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: "${jersey}"
-    generatedCompile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: "${jersey}"
-    generatedCompile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: "${jersey}"
-    generatedCompile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${jackson}"
-
+    compile 'bio.terra:datarepo-client:1.0.0-SNAPSHOT'
     compile "org.apache.commons:commons-lang3:${commonsLang3}"
     compile 'ch.qos.logback:logback-classic:1.2.3'       // Logger
     compile 'org.slf4j:slf4j-api:1.7.30'                 // Logging facade
@@ -111,43 +104,6 @@ test {
     exclude '**/CLICommandTests.class'
 }
 
-// -- Swagger Client Generation --
-import io.swagger.codegen.config.CodegenConfigurator
-import io.swagger.codegen.DefaultGenerator
-def openapiSourceFile = 'src/main/resources/data-repository-openapi.yaml'
-def openapiTargetFolder = 'src/generated/java'
-
-task generateApi {
-    // specify the task inputs and outputs so gradle knows what to rebuild based on what has changed
-    inputs.file("$projectDir/$openapiSourceFile")
-    outputs.dir("$projectDir/$openapiTargetFolder")
-    doLast {
-        def config = new CodegenConfigurator()
-        config.setInputSpec("file:///$projectDir/$openapiSourceFile")
-        config.setOutputDir("$projectDir")
-        config.setLang('java')
-        // These properties are not well documented. The only way I've found to figure them out is to
-        // locally install the swagger-codegen tool and invoke it to get the specific help for the
-        // spring boot options.
-        config.setAdditionalProperties([
-                'interfaceOnly' : 'true',                  // only generate the model and API interfaces
-                'library'       : 'jersey2',               // do jersey code generation
-                'dateLibrary'   : 'java8',                 // do java8 code generation
-                'apiPackage'    : 'bio.terra.datarepo.api',
-                'modelPackage'  : 'bio.terra.datarepo.model',
-                'invokerPackage': 'bio.terra.datarepo.client',
-                'sourceFolder'  : openapiTargetFolder
-        ])
-        new DefaultGenerator().opts(config.toClientOptInput()).generate()
-    }
-}
-
-clean.doFirst {
-    delete("${projectDir}/$openapiTargetFolder")
-}
-// -- End of Swagger Client Generation --
-
-
 task testCLIUnit(type: Test) {
     useJUnit {
         includeCategories 'bio.terra.common.category.CLIUnit'
@@ -162,31 +118,11 @@ task testCLIIntegrated(type: Test) {
     outputs.upToDateWhen { false }
 }
 
-task checkApiUpToDate(type: Exec) {
-    commandLine 'sh'
-    args './scripts/checkApiUpToDate.sh'
-}
-
-task updateApi(type: Exec) {
-    commandLine 'sh'
-    args './scripts/updateApi.sh'
-}
-
 sourceSets {
-    generated {
-        compileClasspath = configurations.generatedCompile
-    }
-    main {
-        compileClasspath += generated.output
-        runtimeClasspath += generated.output
-    }
-    test {
-        compileClasspath += generated.output
-        runtimeClasspath += generated.output
-    }
+    main
+    test
     checkstyle {
         toolVersion '7.8.1'
-        checkstyleGenerated.enabled = false // Don't check generated code
         configFile file("config/checkstyle/checkstyle.xml")
     }
     findbugs {
@@ -198,12 +134,3 @@ sourceSets {
     }
 }
 mainClassName = 'bio.terra.Main'
-
-jar {
-    from sourceSets.generated.output
-}
-
-compileGeneratedJava.dependsOn generateApi
-classes.dependsOn generatedClasses
-compileJava.dependsOn compileGeneratedJava
-ideaModule.dependsOn generateApi
