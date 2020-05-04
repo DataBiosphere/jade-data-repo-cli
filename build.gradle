@@ -70,18 +70,13 @@ dependencies {
         swagger = "1.5.22"
         hamcrest = "2.2"
     }
-    compile 'bio.terra:datarepo-client:1.0.0-SNAPSHOT'
+    compile 'bio.terra:datarepo-client:1.0.1-SNAPSHOT'
     compile "org.apache.commons:commons-lang3:${commonsLang3}"
     compile 'ch.qos.logback:logback-classic:1.2.3'       // Logger
     compile 'org.slf4j:slf4j-api:1.7.30'                 // Logging facade
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${jackson}"
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${jackson}"
-
-    compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: "${jersey}"
-    compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: "${jersey}"
-    compile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: "${jersey}"
-    compile "org.glassfish.jersey.inject:jersey-hk2:${jersey}"
 
     compile group: 'com.google.apis', name: 'google-api-services-oauth2', version: "${googleApiServicesOauth2}"
     compile group: 'com.google.api-client', name: 'google-api-client', version: "${googleClient}"
