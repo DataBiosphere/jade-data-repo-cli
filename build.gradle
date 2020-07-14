@@ -70,7 +70,7 @@ dependencies {
         swagger = "1.5.22"
         hamcrest = "2.2"
     }
-    compile 'bio.terra:datarepo-client:1.0.1-SNAPSHOT'
+    compile 'bio.terra:datarepo-client:1.0.28-SNAPSHOT'
     compile "org.apache.commons:commons-lang3:${commonsLang3}"
     compile 'ch.qos.logback:logback-classic:1.2.3'       // Logger
     compile 'org.slf4j:slf4j-api:1.7.30'                 // Logging facade
