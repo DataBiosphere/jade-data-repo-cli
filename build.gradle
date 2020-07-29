@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        swagger = "2.3.1"
+        swagger = "2.4.15"
     }
 
     repositories {
