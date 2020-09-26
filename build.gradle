@@ -1,22 +1,16 @@
 buildscript {
-    ext {
-        swagger = "2.3.1"
-    }
-
     repositories {
         mavenCentral()
     }
-
-    dependencies {
-        classpath("io.swagger:swagger-codegen:${swagger}")
-    }
 }
 
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'application'
-apply plugin: 'checkstyle'
-apply plugin: 'findbugs'
+plugins {
+    id 'java'
+    id 'idea'
+    id 'application'
+    id 'com.diffplug.gradle.spotless' version '3.27.2'
+    id 'com.github.spotbugs' version '4.0.8'
+}
 
 if (hasProperty('buildScan')) {
     buildScan {
@@ -25,17 +19,10 @@ if (hasProperty('buildScan')) {
     }
 }
 
-tasks.withType(FindBugs) {
-    reports {
-        xml.enabled false
-        html.enabled true
-        html.stylesheet resources.text.fromFile('config/findbugs/plain.xsl')
-    }
-}
-
 group 'jadecli'
-version '0.1'
+version '1.0.1'
 sourceCompatibility = 1.8
+mainClassName = 'bio.terra.Main'
 
 repositories {
     mavenCentral()
@@ -67,35 +54,38 @@ dependencies {
         jackson = "2.10.2"
         jersey = "2.30.1"
         junit = "4.13"
-        swagger = "1.5.22"
         hamcrest = "2.2"
+        datarepoClient = "1.0.107-SNAPSHOT"
+        logback = "1.2.3"
+        sl4j = "1.7.30"
+        findbugsAnnotations = "3.0.1"
     }
-    compile 'bio.terra:datarepo-client:1.0.1-SNAPSHOT'
-    compile "org.apache.commons:commons-lang3:${commonsLang3}"
-    compile 'ch.qos.logback:logback-classic:1.2.3'       // Logger
-    compile 'org.slf4j:slf4j-api:1.7.30'                 // Logging facade
 
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${jackson}"
-    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${jackson}"
+    implementation group: 'bio.terra', name: 'datarepo-client', version: "${datarepoClient}"
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: "${commonsLang3}"
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: "${logback}"
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: "${sl4j}"
 
-    compile group: 'com.google.apis', name: 'google-api-services-oauth2', version: "${googleApiServicesOauth2}"
-    compile group: 'com.google.api-client', name: 'google-api-client', version: "${googleClient}"
-    compile group: 'com.google.api-client', name: 'google-api-client-java6', version: "${googleClient}"
-    compile "com.google.cloud:google-cloud-storage:${googleCloudStorage}"
-    compile group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: "${googleOauthClientJetty}"
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${jackson}"
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${jackson}"
+
+    implementation group: 'com.google.apis', name: 'google-api-services-oauth2', version: "${googleApiServicesOauth2}"
+    implementation group: 'com.google.api-client', name: 'google-api-client', version: "${googleClient}"
+    implementation group: 'com.google.api-client', name: 'google-api-client-java6', version: "${googleClient}"
+    implementation group: 'com.google.cloud', name: 'google-cloud-storage', version: "${googleCloudStorage}"
+    implementation group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: "${googleOauthClientJetty}"
 
     // Findbugs annotations, so we can selectively suppress findbugs findings
-    compileOnly 'com.google.code.findbugs:annotations:3.0.1'
+    implementation group: 'com.google.code.findbugs', name: 'annotations', version: "${findbugsAnnotations}"
 
-    testCompile group: 'junit', name: 'junit', version: "${junit}"
-    testCompile group: 'org.hamcrest', name: 'hamcrest', version: "${hamcrest}"
+    testImplementation group: 'junit', name: 'junit', version: "${junit}"
+    testImplementation group: 'org.hamcrest', name: 'hamcrest', version: "${hamcrest}"
 }
 
 test {
     testLogging {
         showStandardStreams = true // set to true to disable stdout & stderr redirection
     }
-    // TODO: uncomment this once we have a solution for Travis running integration tests that require authentication
     exclude '**/CLICommandTests.class'
 }
 
@@ -113,19 +103,36 @@ task testCLIIntegrated(type: Test) {
     outputs.upToDateWhen { false }
 }
 
-sourceSets {
-    main
-    test
-    checkstyle {
-        toolVersion '7.8.1'
-        configFile file("config/checkstyle/checkstyle.xml")
-    }
-    findbugs {
-        toolVersion '3.0.1'
-        ignoreFailures = false
-        excludeFilter = file("config/findbugs/excludeFilter.xml")
-        reportsDir = file("$project.buildDir/reports/findbugs")
-        effort = "max"
+spotless {
+    java {
+        googleJavaFormat()
     }
 }
-mainClassName = 'bio.terra.Main'
+
+spotbugs {
+    effort = 'max'
+    // This makes the "html" reports come out in plain text so you can just open the file in IntelliJ
+    // and look at your bugs instead of having to switch to a browser.
+    extraArgs = [ '-emacs']
+}
+spotbugsMain {
+    reports {
+        html {
+            enabled = true
+            destination = file("$buildDir/reports/spotbugs/main.txt")
+            stylesheet = 'fancy.xsl'
+        }
+    }
+}
+spotbugsTest {
+    reports {
+        html {
+            enabled = true
+            destination = file("$buildDir/reports/spotbugs/test.txt")
+            stylesheet = 'fancy.xsl'
+        }
+    }
+}
+
+compileJava.dependsOn tasks.spotlessApply
+
