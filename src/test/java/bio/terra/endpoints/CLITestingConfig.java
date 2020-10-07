@@ -15,9 +15,6 @@ public final class CLITestingConfig {
       dataRepoURL = "http://localhost:8080/";
     }
 
-    // Secrets default is null; default is supplied in the main code
-    clientSecretsFilePath = System.getenv("JADECLI_TEST_CLIENT_SECRETS");
-
     // Billing account is required
     billingAccount = System.getenv("JADECLI_TEST_BILLING_ACCOUNT");
     if (billingAccount == null) {
@@ -34,10 +31,6 @@ public final class CLITestingConfig {
 
   public String getDataRepoURL() {
     return dataRepoURL;
-  }
-
-  public String getClientSecretsFilePath() {
-    return clientSecretsFilePath;
   }
 
   public String getBillingAccount() {

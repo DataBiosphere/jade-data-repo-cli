@@ -191,8 +191,7 @@ public final class SnapshotCommands {
 
         RepositoryApi api = DRApis.getRepositoryApi();
         ApiResponse<JobModel> job = api.createSnapshotWithHttpInfo(snapshotRequestModel);
-        SnapshotSummaryModel summaryModel =
-            CommandUtils.waitForResponse(api, job, 1, SnapshotSummaryModel.class);
+        CommandUtils.waitForResponse(api, job, 1, SnapshotSummaryModel.class);
       }
     } catch (IOException ex) {
       System.out.println("Error parsing file " + jsonpath + ":");

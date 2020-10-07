@@ -11,9 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -26,16 +24,6 @@ import org.slf4j.LoggerFactory;
 public class CLICommandTests {
 
   private final Logger logger = LoggerFactory.getLogger(CLICommandTests.class);
-
-  @BeforeClass
-  public static void setup() {
-    Login.setClientSecretsFilePath(CLITestingConfig.config().getClientSecretsFilePath());
-  }
-
-  @AfterClass
-  public static void teardown() {
-    Login.setClientSecretsFilePath(null);
-  }
 
   /**
    * Test method that calls commands in sequence so data gets setup in the right order.

@@ -5,9 +5,7 @@ import bio.terra.context.Login;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -26,16 +24,6 @@ import org.slf4j.LoggerFactory;
 public class JavaHTTPRequestTests {
 
   private final Logger logger = LoggerFactory.getLogger(JavaHTTPRequestTests.class);
-
-  @BeforeClass
-  public static void setup() {
-    Login.setClientSecretsFilePath(CLITestingConfig.config().getClientSecretsFilePath());
-  }
-
-  @AfterClass
-  public static void teardown() {
-    Login.setClientSecretsFilePath(null);
-  }
 
   /**
    * Unauthenticated API : GET : serviceStatus
