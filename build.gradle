@@ -31,14 +31,6 @@ repositories {
     }
 }
 
-configurations {
-    generatedCompile
-    developmentOnly
-    runtimeClasspath {
-        extendsFrom developmentOnly
-    }
-}
-
 // Exclude the Spring logger, so everything will use SLF4J
 configurations.all {
     exclude group: "commons-logging", module: "commons-logging"

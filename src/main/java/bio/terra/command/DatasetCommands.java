@@ -4,10 +4,13 @@ import bio.terra.datarepo.api.RepositoryApi;
 import bio.terra.datarepo.client.ApiException;
 import bio.terra.datarepo.client.ApiResponse;
 import bio.terra.datarepo.model.BillingProfileModel;
+import bio.terra.datarepo.model.BulkLoadArrayRequestModel;
+import bio.terra.datarepo.model.BulkLoadArrayResultModel;
+import bio.terra.datarepo.model.BulkLoadFileModel;
+import bio.terra.datarepo.model.BulkLoadFileResultModel;
 import bio.terra.datarepo.model.DatasetRequestModel;
 import bio.terra.datarepo.model.DatasetSummaryModel;
 import bio.terra.datarepo.model.DeleteResponseModel;
-import bio.terra.datarepo.model.FileLoadModel;
 import bio.terra.datarepo.model.FileModel;
 import bio.terra.datarepo.model.IngestRequestModel;
 import bio.terra.datarepo.model.IngestResponseModel;
@@ -443,6 +446,7 @@ public final class DatasetCommands {
     format = CommandUtils.validateFormat(format);
 
     DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
+    String datasetId = summary.getId();
 
     try {
       // If no profile name is specified, use the default profile from the dataset.
@@ -472,18 +476,38 @@ public final class DatasetCommands {
         description = StringUtils.EMPTY;
       }
 
-      FileLoadModel loadModel =
-          new FileLoadModel()
-              .profileId(profileId)
+      BulkLoadFileModel loadModel =
+          new BulkLoadFileModel()
               .sourcePath(inputGspath)
               .targetPath(targetPath)
               .mimeType(mimeType)
               .description(description);
 
-      RepositoryApi api = DRApis.getRepositoryApi();
-      ApiResponse<JobModel> jobModel = api.ingestFileWithHttpInfo(summary.getId(), loadModel);
-      FileModel fileModel = CommandUtils.waitForResponse(api, jobModel, 1, FileModel.class);
+      BulkLoadArrayRequestModel loadRequest =
+          new BulkLoadArrayRequestModel().profileId(profileId).addLoadArrayItem(loadModel);
 
+      RepositoryApi api = DRApis.getRepositoryApi();
+      ApiResponse<JobModel> jobModel = api.bulkFileLoadArrayWithHttpInfo(datasetId, loadRequest);
+
+      BulkLoadArrayResultModel resultModel =
+          CommandUtils.waitForResponse(api, jobModel, 1, BulkLoadArrayResultModel.class);
+      BulkLoadFileResultModel fileResultModel = resultModel.getLoadFileResults().get(0);
+      switch (fileResultModel.getState()) {
+        case SUCCEEDED:
+          break;
+
+        case FAILED:
+          CommandUtils.printErrorAndExit("File load failed: " + fileResultModel.getError());
+          break;
+
+        case RUNNING:
+        case NOT_TRIED:
+          CommandUtils.printErrorAndExit(
+              "File load in a weird state: " + fileResultModel.getState());
+          break;
+      }
+
+      FileModel fileModel = api.lookupFileById(datasetId, fileResultModel.getFileId(), 0);
       DRFile drFile = new DRFile(DRCollectionType.COLLECTION_TYPE_DATASET, fileModel);
       drFile.describe(format);
     } catch (ApiException ex) {

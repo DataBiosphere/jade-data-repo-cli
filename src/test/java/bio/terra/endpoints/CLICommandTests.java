@@ -36,9 +36,8 @@ public class CLICommandTests {
     setSessionBasepath();
 
     // fetch access token in the same way that the CLI does
-    // this depends on the jadecli_client_secret.json file
-    Login.authorize();
-    String token = Login.getUserCredential().getAccessToken();
+    Login.requiresLogin();
+    String token = Login.getAccessToken();
 
     String profileId = findOrCreateTestProfile();
 

@@ -3,8 +3,7 @@ package bio.terra.endpoints;
 public final class CLITestingConfig {
   private static CLITestingConfig theConfig;
   private String dataRepoURL;
-  private String clientSecretsFilePath;
-  private String billingAccount;
+  private final String billingAccount;
 
   public static final String dirName = "src/test/resources/CLICommandTests/";
   public static final String testProfileName = "jadecli_test_profile";

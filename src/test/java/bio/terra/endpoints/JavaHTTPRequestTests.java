@@ -30,6 +30,7 @@ public class JavaHTTPRequestTests {
    *
    * @throws IOException
    */
+  @Ignore
   @Test
   public void serviceStatusTest() throws IOException {
     // endpoint information
@@ -60,6 +61,7 @@ public class JavaHTTPRequestTests {
    *
    * @throws IOException
    */
+  @Ignore
   @Test
   public void retrieveRepositoryConfigTest() throws IOException {
     // endpoint information
@@ -101,8 +103,9 @@ public class JavaHTTPRequestTests {
   public void enumerateDatasetsTest() throws IOException {
     // fetch access token in the same way that the CLI does
     // this depends on the jadecli_client_secret.json file
-    Login.authorize();
-    String token = Login.getUserCredential().getAccessToken();
+    // fetch access token in the same way that the CLI does
+    Login.requiresLogin();
+    String token = Login.getAccessToken();
 
     // endpoint information
     String endpointName = "api/repository/v1/datasets";
