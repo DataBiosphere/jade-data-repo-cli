@@ -1,8 +1,6 @@
 package bio.terra.context;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
+import org.apache.commons.lang3.StringUtils;
 
 public final class Context {
   private static final String CONTEXT_STORE_PATH = ".jadecli/context.properties";

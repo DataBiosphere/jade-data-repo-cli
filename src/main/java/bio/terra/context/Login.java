@@ -13,6 +13,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import org.apache.commons.lang3.StringUtils;
 
@@ -62,7 +63,8 @@ public final class Login {
     if (authType == ContextAuthTypeEnum.AUTH_TYPE_USER) {
       return userCredential.getAccessToken();
     }
-    return saCredential.getAccessToken().getTokenValue();
+    AccessToken accessToken = saCredential.getAccessToken();
+    return accessToken.getTokenValue();
   }
 
   public static Credential getUserCredential() {
@@ -80,6 +82,7 @@ public final class Login {
     try {
       saCredential =
           GoogleCredentials.fromStream(new FileInputStream(keyFile)).createScoped(userLoginScopes);
+      saCredential.refreshIfExpired();
     } catch (IOException e) {
       CommandUtils.printErrorAndExit("Error processing key file: " + keyFile);
     }
@@ -145,7 +148,8 @@ public final class Login {
   private static GoogleClientSecrets getClientSecrets() throws Exception {
     if (clientSecrets == null) {
       JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-      try (InputStream stream = Login.class.getResourceAsStream(CLIENT_SECRET_FILE)) {
+      try (InputStream stream =
+          Login.class.getClassLoader().getResourceAsStream(CLIENT_SECRET_FILE)) {
         clientSecrets =
             GoogleClientSecrets.load(
                 jsonFactory, new InputStreamReader(stream, Charset.defaultCharset()));
