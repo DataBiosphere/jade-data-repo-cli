@@ -1,67 +1,66 @@
 package bio.terra.parser;
 
+import java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.util.Arrays;
-
 public class ParseContext {
-    private ParsedResult result;
-    private String[] args;
-    private int currentIndex;
-    private int markIndex;
+  private ParsedResult result;
+  private String[] args;
+  private int currentIndex;
+  private int markIndex;
 
-    public ParseContext(String[] args) {
-        this.args = Arrays.copyOf(args, args.length);
-        currentIndex = 0;
-        result = new ParsedResult();
-    }
+  public ParseContext(String[] args) {
+    this.args = Arrays.copyOf(args, args.length);
+    currentIndex = 0;
+    result = new ParsedResult();
+  }
 
-    public String getArg() {
-        if (args.length > currentIndex) {
-            return args[currentIndex];
-        }
-        return null;
+  public String getArg() {
+    if (args.length > currentIndex) {
+      return args[currentIndex];
     }
+    return null;
+  }
 
-    public String peekArg() {
-        currentIndex++;
-        String arg = getArg();
-        currentIndex--;
-        return arg;
-    }
+  public String peekArg() {
+    currentIndex++;
+    String arg = getArg();
+    currentIndex--;
+    return arg;
+  }
 
-    public boolean argIsSwitch() {
-        String arg = getArg();
-        return (StringUtils.startsWith(arg, "--") || StringUtils.startsWith(arg, "-"));
-    }
+  public boolean argIsSwitch() {
+    String arg = getArg();
+    return (StringUtils.startsWith(arg, "--") || StringUtils.startsWith(arg, "-"));
+  }
 
-    public void shift() {
-        currentIndex++;
-    }
+  public void shift() {
+    currentIndex++;
+  }
 
-    public void setMark() {
-        markIndex = currentIndex;
-    }
+  public void setMark() {
+    markIndex = currentIndex;
+  }
 
-    public void resetToMark() {
-        currentIndex = markIndex;
-    }
+  public void resetToMark() {
+    currentIndex = markIndex;
+  }
 
-    public ParsedResult getResult() {
-        return result;
-    }
+  public ParsedResult getResult() {
+    return result;
+  }
 
-    public String getCommandLine() {
-        return StringUtils.join(args, ' ');
-    }
+  public String getCommandLine() {
+    return StringUtils.join(args, ' ');
+  }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("result", result)
-                .append("args", args)
-                .append("currentIndex", currentIndex)
-                .toString();
-    }
+  @Override
+  public String toString() {
+    return new ToStringBuilder(this)
+        .append("result", result)
+        .append("args", args)
+        .append("currentIndex", currentIndex)
+        .toString();
+  }
 }

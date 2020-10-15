@@ -6,26 +6,26 @@ import bio.terra.datarepo.api.ResourcesApi;
 
 // Singleton container for pointers to the DR APIs
 public final class DRApis {
-    private static RepositoryApi repositoryApi;
-    private static ResourcesApi resourcesApi;
+  private static RepositoryApi repositoryApi;
+  private static ResourcesApi resourcesApi;
 
-    private DRApis() { }
+  private DRApis() {}
 
-    public static RepositoryApi getRepositoryApi() {
-        if (repositoryApi == null) {
-            repositoryApi = new RepositoryApi();
-        }
-
-        Login.requiresLogin();
-        return repositoryApi;
+  public static RepositoryApi getRepositoryApi() {
+    if (repositoryApi == null) {
+      repositoryApi = new RepositoryApi();
     }
 
-    public static ResourcesApi getResourcesApi() {
-        if (resourcesApi == null) {
-            resourcesApi = new ResourcesApi();
-        }
+    Login.requiresLogin();
+    return repositoryApi;
+  }
 
-        Login.requiresLogin();
-        return resourcesApi;
+  public static ResourcesApi getResourcesApi() {
+    if (resourcesApi == null) {
+      resourcesApi = new ResourcesApi();
     }
+
+    Login.requiresLogin();
+    return resourcesApi;
+  }
 }

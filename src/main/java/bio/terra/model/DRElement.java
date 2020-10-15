@@ -1,77 +1,82 @@
 package bio.terra.model;
 
+import static bio.terra.command.CommandUtils.CLIFormatFlags;
+import static bio.terra.command.CommandUtils.outputPrettyJson;
+import static bio.terra.command.CommandUtils.printErrorAndExit;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static bio.terra.command.CommandUtils.CLIFormatFlags;
-import static bio.terra.command.CommandUtils.outputPrettyJson;
-import static bio.terra.command.CommandUtils.printErrorAndExit;
-
 public abstract class DRElement {
-    public static final String DESCRIBE_FORMAT = "%-12s: %s%n";
+  public static final String DESCRIBE_FORMAT = "%-12s: %s%n";
 
+  // Abstract interface - provide the basics for all kinds of elements
+  public abstract DRElementType getObjectType();
 
-    // Abstract interface - provide the basics for all kinds of elements
-    public abstract DRElementType getObjectType();
-    public abstract String getObjectName();
-    public abstract String getCreated();
-    public abstract String getId();
-    public abstract String getDescription();
+  public abstract String getObjectName();
 
-    // Each element has to be able to enumerate itself
-    public abstract List<DRElement> enumerate();
+  public abstract String getCreated();
 
-    // Each element has to be able to lookup a child path. If the element is the last part in the path;
-    // that is, the path is empty after it is resolved, then the element returns itself. Otherwise,
-    // it recursively calls. When we hit a file system, it looks up in its directory tree, so we don't
-    // worry about those. That limits the recursion to at most 3 levels: dataset/snapshot, files/tables, file/table.
-    // After that, it is an error or it is a leaf.
-    public DRElement lookup(LinkedList<String> pathParts) {
-        return this;
+  public abstract String getId();
+
+  public abstract String getDescription();
+
+  // Each element has to be able to enumerate itself
+  public abstract List<DRElement> enumerate();
+
+  // Each element has to be able to lookup a child path. If the element is the last part in the
+  // path;
+  // that is, the path is empty after it is resolved, then the element returns itself. Otherwise,
+  // it recursively calls. When we hit a file system, it looks up in its directory tree, so we don't
+  // worry about those. That limits the recursion to at most 3 levels: dataset/snapshot,
+  // files/tables, file/table.
+  // After that, it is an error or it is a leaf.
+  public DRElement lookup(LinkedList<String> pathParts) {
+    return this;
+  }
+
+  // Leaf means a recursive walk should stop at this element. Most elements are not leaves, so we
+  // put the common default here.
+  public boolean isLeaf() {
+    return false;
+  }
+
+  // Describe generates output formatted by the object. This doesn't separate presentation from
+  // logic,
+  // but it is simple. The default version displays the default information.
+  public void describe(String format) {
+    switch (CLIFormatFlags.lookup(format)) {
+      case CLI_FORMAT_TEXT:
+        describeText();
+        break;
+
+      case CLI_FORMAT_JSON:
+        describeJson();
+        break;
+
+      default:
+        printErrorAndExit("Unknown format type");
     }
+  }
 
-    // Leaf means a recursive walk should stop at this element. Most elements are not leaves, so we
-    // put the common default here.
-    public boolean isLeaf() {
-        return false;
-    }
+  protected void describeText() {
+    System.out.printf(DESCRIBE_FORMAT, "name", getObjectName());
+    System.out.printf(DESCRIBE_FORMAT, "type", getObjectType().getName());
+    System.out.printf(DESCRIBE_FORMAT, "description", getDescription());
+    System.out.printf(DESCRIBE_FORMAT, "id", getId());
+    System.out.printf(DESCRIBE_FORMAT, "createdDate", getCreated());
+  }
 
-    // Describe generates output formatted by the object. This doesn't separate presentation from logic,
-    // but it is simple. The default version displays the default information.
-    public void describe(String format) {
-        switch (CLIFormatFlags.lookup(format)) {
-            case CLI_FORMAT_TEXT:
-                describeText();
-                break;
+  protected void describeJson() {
+    Map<String, String> objectValues = new HashMap<>();
+    objectValues.put("name", getObjectName());
+    objectValues.put("type", getObjectType().getName());
+    objectValues.put("description", getDescription());
+    objectValues.put("id", getId());
+    objectValues.put("createdDate", getCreated());
 
-            case CLI_FORMAT_JSON:
-                describeJson();
-                break;
-
-            default:
-                printErrorAndExit("Unknown format type");
-        }
-    }
-
-    protected void describeText() {
-        System.out.printf(DESCRIBE_FORMAT, "name", getObjectName());
-        System.out.printf(DESCRIBE_FORMAT, "type", getObjectType().getName());
-        System.out.printf(DESCRIBE_FORMAT, "description", getDescription());
-        System.out.printf(DESCRIBE_FORMAT, "id", getId());
-        System.out.printf(DESCRIBE_FORMAT, "createdDate", getCreated());
-    }
-
-    protected void describeJson() {
-        Map<String, String> objectValues = new HashMap<>();
-        objectValues.put("name", getObjectName());
-        objectValues.put("type", getObjectType().getName());
-        objectValues.put("description", getDescription());
-        objectValues.put("id", getId());
-        objectValues.put("createdDate", getCreated());
-
-        outputPrettyJson(objectValues);
-    }
-
+    outputPrettyJson(objectValues);
+  }
 }

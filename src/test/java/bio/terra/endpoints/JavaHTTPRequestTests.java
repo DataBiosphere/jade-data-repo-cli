@@ -2,9 +2,10 @@ package bio.terra.endpoints;
 
 import bio.terra.common.category.CLIIntegrated;
 import bio.terra.context.Login;
-import org.junit.AfterClass;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -13,121 +14,117 @@ import org.junit.runners.JUnit4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Map;
-
 @RunWith(JUnit4.class)
 @Category(CLIIntegrated.class)
 /**
- * These tests do NOT use the CLI. They are included here to check that the Data Repo instance is responding to basic
- * unauthenticated and authenticated HTTP requests. These tests are just intended to help with debugging CLI failures.
+ * These tests do NOT use the CLI. They are included here to check that the Data Repo instance is
+ * responding to basic unauthenticated and authenticated HTTP requests. These tests are just
+ * intended to help with debugging CLI failures.
  */
 public class JavaHTTPRequestTests {
 
-    private final Logger logger = LoggerFactory.getLogger(JavaHTTPRequestTests.class);
+  private final Logger logger = LoggerFactory.getLogger(JavaHTTPRequestTests.class);
 
-    @BeforeClass
-    public static void setup() {
-        Login.setClientSecretsFilePath(CLITestingConfig.config().getClientSecretsFilePath());
-    }
+  /**
+   * Unauthenticated API : GET : serviceStatus
+   *
+   * @throws IOException
+   */
+  @Ignore
+  @Test
+  public void serviceStatusTest() throws IOException {
+    // endpoint information
+    String endpointName = "status";
+    String endpointType = "GET";
 
-    @AfterClass
-    public static void teardown() {
-        Login.setClientSecretsFilePath(null);
-    }
+    // make request using Java HTTP library
+    Map<String, Object> javaHttpResponse =
+        CLITestingUtils.sendJavaHttpRequest(
+            CLITestingConfig.config().getDataRepoURL() + endpointName, endpointType, null, null);
 
-    /**
-     * Unauthenticated API : GET : serviceStatus
-     * @throws IOException
-     */
-    @Test
-    public void serviceStatusTest() throws IOException {
-        // endpoint information
-        String endpointName = "status";
-        String endpointType = "GET";
+    // make request using curl in a separate process
+    // Map<String, Object> curlResponse =
+    //        EndpointUtils.sendCurlRequest(dataRepoURL + endpointName, endpointType, null);
 
-        // make request using Java HTTP library
-        Map<String, Object> javaHttpResponse = CLITestingUtils.sendJavaHttpRequest(
-                CLITestingConfig.config().getDataRepoURL() + endpointName, endpointType, null, null);
+    // log the response to stdout
+    logger.info("javaHttpResponse: " + javaHttpResponse);
 
-        // make request using curl in a separate process
-        //Map<String, Object> curlResponse =
-        //        EndpointUtils.sendCurlRequest(dataRepoURL + endpointName, endpointType, null);
+    // check that the status code is success
+    Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
 
-        // log the response to stdout
-        logger.info("javaHttpResponse: " + javaHttpResponse);
+    // there should only be one field (statusCode) because there is no response body
+    Assert.assertEquals(1, javaHttpResponse.size());
+  }
 
-        // check that the status code is success
-        Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
+  /**
+   * Unauthenticated API : GET : retrieveRepositoryConfig
+   *
+   * @throws IOException
+   */
+  @Ignore
+  @Test
+  public void retrieveRepositoryConfigTest() throws IOException {
+    // endpoint information
+    String endpointName = "configuration";
+    String endpointType = "GET";
 
-        // there should only be one field (statusCode) because there is no response body
-        Assert.assertEquals(1, javaHttpResponse.size());
-    }
+    // make request using Java HTTP library
+    Map<String, Object> javaHttpResponse =
+        CLITestingUtils.sendJavaHttpRequest(
+            CLITestingConfig.config().getDataRepoURL() + endpointName, endpointType, null, null);
 
-    /**
-     * Unauthenticated API : GET : retrieveRepositoryConfig
-     * @throws IOException
-     */
-    @Test
-    public void retrieveRepositoryConfigTest() throws IOException {
-        // endpoint information
-        String endpointName = "configuration";
-        String endpointType = "GET";
+    // make request using curl in a separate process
+    // Map<String, Object> curlResponse =
+    //        EndpointUtils.sendCurlRequest(dataRepoURL + endpointName, endpointType, null);
 
-        // make request using Java HTTP library
-        Map<String, Object> javaHttpResponse = CLITestingUtils.sendJavaHttpRequest(
-                CLITestingConfig.config().getDataRepoURL() + endpointName, endpointType, null, null);
+    // log the response to stdout
+    logger.info("javaHttpResponse: " + javaHttpResponse);
 
-        // make request using curl in a separate process
-        //Map<String, Object> curlResponse =
-        //        EndpointUtils.sendCurlRequest(dataRepoURL + endpointName, endpointType, null);
+    // check that the status code is success
+    Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
 
-        // log the response to stdout
-        logger.info("javaHttpResponse: " + javaHttpResponse);
+    // clientId should not be null or empty string
+    String javaHttpClientId = (String) javaHttpResponse.get("clientId");
+    Assert.assertNotNull(javaHttpClientId);
+    Assert.assertNotEquals("", javaHttpClientId);
 
-        // check that the status code is success
-        Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
+    // activeProfiles should not be null or empty
+    ArrayList<String> activeProfiles = (ArrayList<String>) javaHttpResponse.get("activeProfiles");
+    Assert.assertNotNull(activeProfiles);
+    Assert.assertFalse(activeProfiles.size() == 0);
+  }
 
-        // clientId should not be null or empty string
-        String javaHttpClientId = (String)javaHttpResponse.get("clientId");
-        Assert.assertNotNull(javaHttpClientId);
-        Assert.assertNotEquals("", javaHttpClientId);
+  /**
+   * Repository API : GET : enumerateDatasets
+   *
+   * @throws IOException
+   */
+  @Ignore
+  public void enumerateDatasetsTest() throws IOException {
+    // fetch access token in the same way that the CLI does
+    // this depends on the jadecli_client_secret.json file
+    // fetch access token in the same way that the CLI does
+    Login.requiresLogin();
+    String token = Login.getAccessToken();
 
-        // activeProfiles should not be null or empty
-        ArrayList<String> activeProfiles = (ArrayList<String>)javaHttpResponse.get("activeProfiles");
-        Assert.assertNotNull(activeProfiles);
-        Assert.assertFalse(activeProfiles.size() == 0);
-    }
+    // endpoint information
+    String endpointName = "api/repository/v1/datasets";
+    String endpointType = "GET";
 
-    /**
-     * Repository API : GET : enumerateDatasets
-     * @throws IOException
-     */
-    @Ignore
-    public void enumerateDatasetsTest() throws IOException {
-        // fetch access token in the same way that the CLI does
-        // this depends on the jadecli_client_secret.json file
-        Login.authorize();
-        String token = Login.getUserCredential().getAccessToken();
+    // make request using Java HTTP library
+    Map<String, Object> javaHttpResponse =
+        CLITestingUtils.sendJavaHttpRequest(
+            CLITestingConfig.config().getDataRepoURL() + endpointName, endpointType, token, null);
 
-        // endpoint information
-        String endpointName = "api/repository/v1/datasets";
-        String endpointType = "GET";
+    // make request using curl in a separate process
+    // Map<String, Object> curlResponse =
+    //        CLITestingUtils.sendCurlRequest(CLITestingConfig.dataRepoURL + endpointName,
+    // endpointType, token);
 
-        // make request using Java HTTP library
-        Map<String, Object> javaHttpResponse = CLITestingUtils.sendJavaHttpRequest(
-                CLITestingConfig.config().getDataRepoURL() + endpointName, endpointType, token, null);
+    // log the response to stdout
+    logger.info("javaHttpResponse: " + javaHttpResponse);
 
-        // make request using curl in a separate process
-        //Map<String, Object> curlResponse =
-        //        CLITestingUtils.sendCurlRequest(CLITestingConfig.dataRepoURL + endpointName, endpointType, token);
-
-        // log the response to stdout
-        logger.info("javaHttpResponse: " + javaHttpResponse);
-
-        // check that the status code is success
-        Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
-    }
-
+    // check that the status code is success
+    Assert.assertEquals(200, javaHttpResponse.get("statusCode"));
+  }
 }
