@@ -1,5 +1,6 @@
 package bio.terra;
 
+import bio.terra.command.AuthCommands;
 import bio.terra.command.CommandEnum;
 import bio.terra.command.CommandUtils;
 import bio.terra.command.DRCommands;
@@ -32,6 +33,11 @@ public final class Main {
       switch (command) {
         case COMMAND_HELP:
           commandHandled = HelpCommands.dispatchCommand(command, result, parser);
+          break;
+
+        case COMMAND_AUTH_LOGIN:
+        case COMMAND_AUTH_SA:
+          commandHandled = AuthCommands.dispatchCommand(command, result);
           break;
 
         case COMMAND_DATASET_CREATE:
@@ -90,6 +96,7 @@ public final class Main {
 
   private static Syntax makeSyntax() {
     return new Syntax()
+        .mergeSyntax(AuthCommands.getSyntax())
         .mergeSyntax(DatasetCommands.getSyntax())
         .mergeSyntax(DRCommands.getSyntax())
         .mergeSyntax(HelpCommands.getSyntax())

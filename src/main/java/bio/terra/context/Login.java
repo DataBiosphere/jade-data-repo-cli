@@ -15,6 +15,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -91,8 +92,7 @@ public final class Login {
   // Google magic to authenticate the user and return the access token
   // Sets userCredential private member
   static void authorizeUser() {
-    String homePath = System.getProperty("user.home");
-    File dataStoreDir = new File(homePath, ".jadecli/creds");
+    File dataStoreDir = getDataStoreDir();
 
     for (int retryCount = 0; retryCount < 2; retryCount++) {
       try {
@@ -118,8 +118,6 @@ public final class Login {
     }
   }
 
-  // Google magic to authenticate the user and return the access token
-  // Sets userCredential private member
   private static void authorizeWorker(File dataStoreDir) throws Exception {
     JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
     HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -132,6 +130,7 @@ public final class Login {
             .setDataStoreFactory(dataStoreFactory)
             .setApprovalPrompt("force")
             .build();
+
     // authorize
     userCredential =
         new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
@@ -145,6 +144,9 @@ public final class Login {
     }
   }
 
+  @SuppressFBWarnings(
+      value = "RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE",
+      justification = "Spotbugs bug: not properly understanding the resource try")
   private static GoogleClientSecrets getClientSecrets() throws Exception {
     if (clientSecrets == null) {
       JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
@@ -156,6 +158,16 @@ public final class Login {
       }
     }
     return clientSecrets;
+  }
+
+  private static File getDataStoreDir() {
+    String homePath = System.getProperty("user.home");
+    return new File(homePath, ".jadecli/creds");
+  }
+
+  public static boolean clearCredentialDirectory() {
+    File dir = getDataStoreDir();
+    return cleanDirectory(dir);
   }
 
   private static boolean cleanDirectory(File dir) {
