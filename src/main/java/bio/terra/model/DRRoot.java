@@ -1,12 +1,12 @@
 package bio.terra.model;
 
 import bio.terra.command.CommandUtils;
-import bio.terra.command.DRApis;
-import bio.terra.datarepo.client.ApiException;
+import bio.terra.command.DRApi;
 import bio.terra.datarepo.model.DatasetSummaryModel;
 import bio.terra.datarepo.model.EnumerateDatasetModel;
 import bio.terra.datarepo.model.EnumerateSnapshotModel;
 import bio.terra.datarepo.model.SnapshotSummaryModel;
+import bio.terra.tdrwrapper.exception.DataRepoClientException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,19 +67,19 @@ public class DRRoot extends DRElement {
     List<DRElement> elementList = new ArrayList<>();
     try {
       EnumerateSnapshotModel enumerateSnapshotModel =
-          DRApis.getRepositoryApi().enumerateSnapshots(0, 10000, null, null, null);
+          DRApi.get().enumerateSnapshots(0, 10000, null, null, null);
       List<SnapshotSummaryModel> snapshots = enumerateSnapshotModel.getItems();
       for (SnapshotSummaryModel snapshot : snapshots) {
         elementList.add(new DRSnapshot(snapshot));
       }
 
       EnumerateDatasetModel enumerateDatasetModel =
-          DRApis.getRepositoryApi().enumerateDatasets(0, 10000, null, null, null);
+          DRApi.get().enumerateDatasets(0, 10000, null, null, null);
       List<DatasetSummaryModel> datasets = enumerateDatasetModel.getItems();
       for (DatasetSummaryModel dataset : datasets) {
         elementList.add(new DRDataset(dataset));
       }
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.err.println("Error processing root enumeration list:");
       CommandUtils.printErrorAndExit(ex.getMessage());
     }
@@ -89,7 +89,7 @@ public class DRRoot extends DRElement {
   private SnapshotSummaryModel findSnapshotByName(String snapshotName) {
     try {
       EnumerateSnapshotModel enumerateSnapshotModel =
-          DRApis.getRepositoryApi().enumerateSnapshots(0, 100000, null, null, snapshotName);
+          DRApi.get().enumerateSnapshots(0, 100000, null, null, snapshotName);
 
       List<SnapshotSummaryModel> datasets = enumerateSnapshotModel.getItems();
       for (SnapshotSummaryModel summary : datasets) {
@@ -99,7 +99,7 @@ public class DRRoot extends DRElement {
       }
       return null;
 
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       throw new IllegalArgumentException("Error processing find dataset by name");
     }
   }
@@ -107,7 +107,7 @@ public class DRRoot extends DRElement {
   private DatasetSummaryModel findDatasetByName(String datasetName) {
     try {
       EnumerateDatasetModel enumerateDatasetModel =
-          DRApis.getRepositoryApi().enumerateDatasets(0, 100000, null, null, datasetName);
+          DRApi.get().enumerateDatasets(0, 100000, null, null, datasetName);
 
       List<DatasetSummaryModel> studies = enumerateDatasetModel.getItems();
       for (DatasetSummaryModel summary : studies) {
@@ -117,7 +117,7 @@ public class DRRoot extends DRElement {
       }
       return null;
 
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       throw new IllegalArgumentException("Error processing find dataset by name");
     }
   }

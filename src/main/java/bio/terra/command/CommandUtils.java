@@ -2,26 +2,19 @@ package bio.terra.command;
 
 import bio.terra.context.Context;
 import bio.terra.context.ContextEnum;
-import bio.terra.datarepo.api.RepositoryApi;
-import bio.terra.datarepo.client.ApiException;
-import bio.terra.datarepo.client.ApiResponse;
 import bio.terra.datarepo.model.BillingProfileModel;
 import bio.terra.datarepo.model.DatasetSummaryModel;
 import bio.terra.datarepo.model.EnumerateBillingProfileModel;
 import bio.terra.datarepo.model.EnumerateDatasetModel;
 import bio.terra.datarepo.model.EnumerateSnapshotModel;
-import bio.terra.datarepo.model.ErrorModel;
-import bio.terra.datarepo.model.JobModel;
 import bio.terra.datarepo.model.PolicyModel;
 import bio.terra.datarepo.model.PolicyResponse;
 import bio.terra.datarepo.model.SnapshotSummaryModel;
 import bio.terra.parser.Option;
+import bio.terra.tdrwrapper.exception.DataRepoClientException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 
 public final class CommandUtils {
@@ -44,59 +37,13 @@ public final class CommandUtils {
     return objectMapper;
   }
 
-  public static void printError(ApiException ex) {
-    try {
-      ErrorModel errorModel = objectMapper.readValue(ex.getResponseBody(), ErrorModel.class);
-      System.out.printf("[%d] %s%n", ex.getCode(), errorModel.getMessage());
-      if (errorModel.getErrorDetail() != null) {
-        for (String detail : errorModel.getErrorDetail()) {
-          System.out.printf("  %s%n", detail);
-        }
+  public static void printError(DataRepoClientException ex) {
+    System.out.printf("[%d] %s%n", ex.getStatusCode(), ex.getMessage());
+    if (ex.getErrorDetails() != null) {
+      for (String detail : ex.getErrorDetails()) {
+        System.out.printf("  %s%n", detail);
       }
-
-    } catch (JsonProcessingException jsonEx) {
-      System.out.printf("[%d] %s%n", ex.getCode(), ex.getMessage());
     }
-  }
-
-  public static <T> T waitForResponse(
-      RepositoryApi api, ApiResponse<JobModel> jobResponse, int sleepSeconds, Class<T> tClass) {
-    try {
-      while (true) {
-        JobModel job = jobResponse.getData();
-        String jobId = job.getId();
-        int statusCode = jobResponse.getStatusCode();
-
-        switch (statusCode) {
-          case 202:
-            // Not done case: sleep and check
-            TimeUnit.SECONDS.sleep(sleepSeconds);
-            jobResponse = api.retrieveJobWithHttpInfo(jobId);
-            break;
-
-          case 200:
-            // Done case: get the result with the header URL and return the response;
-            // The object from retrieve is a LinkedHashMap (always AFAIK), so to get
-            // the right type, I cast it and then convert it back into a JSON string.
-            // TODO: this should handle ErrorModel and it doesn't!
-            Object object = api.retrieveJobResult(jobId);
-            LinkedHashMap<String, Object> hashMap = (LinkedHashMap<String, Object>) object;
-            String jsonString = objectMapper.writeValueAsString(hashMap);
-            return objectMapper.readValue(jsonString, tClass);
-
-          default:
-            throw new IllegalStateException("We shouldn't be here");
-        }
-      }
-    } catch (InterruptedException ex) {
-      System.err.println("Exit due to interrupt");
-    } catch (ApiException ex) {
-      printErrorAndExit("Failed to retrieve job status or result: " + ex.getMessage());
-    } catch (IOException ex) {
-      printErrorAndExit("Failed to parse job result: " + ex.getMessage());
-    }
-
-    return null;
   }
 
   public static void printErrorAndExit(String message) {
@@ -107,7 +54,7 @@ public final class CommandUtils {
   public static DatasetSummaryModel findDatasetByName(String datasetName) {
     try {
       EnumerateDatasetModel enumerateDataset =
-          DRApis.getRepositoryApi().enumerateDatasets(0, 100000, null, null, datasetName);
+          DRApi.get().enumerateDatasets(0, 100000, null, null, datasetName);
 
       List<DatasetSummaryModel> studies = enumerateDataset.getItems();
       for (DatasetSummaryModel summary : studies) {
@@ -118,7 +65,7 @@ public final class CommandUtils {
       CommandUtils.printErrorAndExit("Dataset not found: " + datasetName);
       return null;
 
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       throw new IllegalArgumentException("Error processing find dataset by name");
     }
   }
@@ -126,7 +73,7 @@ public final class CommandUtils {
   public static SnapshotSummaryModel findSnapshotByName(String snapshotName) {
     try {
       EnumerateSnapshotModel enumerateSnapshot =
-          DRApis.getRepositoryApi().enumerateSnapshots(0, 100000, null, null, snapshotName);
+          DRApi.get().enumerateSnapshots(0, 100000, null, null, snapshotName);
 
       List<SnapshotSummaryModel> studies = enumerateSnapshot.getItems();
       for (SnapshotSummaryModel summary : studies) {
@@ -137,15 +84,14 @@ public final class CommandUtils {
       CommandUtils.printErrorAndExit("Snapshot not found: " + snapshotName);
       return null;
 
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       throw new IllegalArgumentException("Error processing find snapshot by name");
     }
   }
 
   public static BillingProfileModel findProfileByName(String profileName) {
     try {
-      EnumerateBillingProfileModel enumerateProfiles =
-          DRApis.getResourcesApi().enumerateProfiles(0, 100000);
+      EnumerateBillingProfileModel enumerateProfiles = DRApi.get().enumerateProfiles(0, 100000);
 
       List<BillingProfileModel> profiles = enumerateProfiles.getItems();
       for (BillingProfileModel profile : profiles) {
@@ -156,7 +102,7 @@ public final class CommandUtils {
       CommandUtils.printErrorAndExit("Profile not found: " + profileName);
       return null;
 
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       throw new IllegalArgumentException("Error processing find dataset by name");
     }
   }

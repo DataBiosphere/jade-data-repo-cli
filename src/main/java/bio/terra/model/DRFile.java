@@ -1,12 +1,12 @@
 package bio.terra.model;
 
 import bio.terra.command.CommandUtils;
-import bio.terra.command.DRApis;
-import bio.terra.datarepo.client.ApiException;
+import bio.terra.command.DRApi;
 import bio.terra.datarepo.model.DRSChecksum;
 import bio.terra.datarepo.model.DirectoryDetailModel;
 import bio.terra.datarepo.model.FileModel;
 import bio.terra.datarepo.model.FileModelType;
+import bio.terra.tdrwrapper.exception.DataRepoClientException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,15 +59,14 @@ public class DRFile extends DRElement {
           FileModel enumDir;
           if (collectionType == DRCollectionType.COLLECTION_TYPE_DATASET) {
             enumDir =
-                DRApis.getRepositoryApi()
-                    .lookupFileById(fileModel.getCollectionId(), fileModel.getFileId(), 1);
+                DRApi.get().lookupFileById(fileModel.getCollectionId(), fileModel.getFileId(), 1);
           } else {
             enumDir =
-                DRApis.getRepositoryApi()
+                DRApi.get()
                     .lookupSnapshotFileById(fileModel.getCollectionId(), fileModel.getFileId(), 1);
           }
           fileModel = enumDir;
-        } catch (ApiException ex) {
+        } catch (DataRepoClientException ex) {
           System.err.println("Error processing directory enumerate:");
           CommandUtils.printError(ex);
         }
