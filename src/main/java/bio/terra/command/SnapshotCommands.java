@@ -12,8 +12,6 @@ import bio.terra.parser.Option;
 import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
 import bio.terra.tdrwrapper.exception.DataRepoClientException;
-import java.io.File;
-import java.io.IOException;
 
 public final class SnapshotCommands {
 
@@ -32,7 +30,9 @@ public final class SnapshotCommands {
                         .longName("input-json")
                         .hasArgument(true)
                         .optional(false)
-                        .help("Path to a file containing the JSON form of a snapshot"))
+                        .help(
+                            "JSON definition of a snapshot; if the argument starts with @,"
+                                + " it is interpreted as a file containing the json"))
                 .addOption(
                     new Option()
                         .shortName("n")
@@ -170,11 +170,10 @@ public final class SnapshotCommands {
     return true;
   }
 
-  public static void snapshotCreate(String jsonpath, String name, String profileName) {
+  public static void snapshotCreate(String json, String name, String profileName) {
     try {
-      File file = new File(jsonpath);
       SnapshotRequestModel snapshotRequestModel =
-          CommandUtils.getObjectMapper().readValue(file, SnapshotRequestModel.class);
+          CommandUtils.makeRequestFromJson(json, SnapshotRequestModel.class);
       if (snapshotRequestModel != null) {
         // Override the name and profile if requested
         if (name != null) {
@@ -187,9 +186,6 @@ public final class SnapshotCommands {
 
         DRApi.get().createSnapshot(snapshotRequestModel);
       }
-    } catch (IOException ex) {
-      System.out.println("Error parsing file " + jsonpath + ":");
-      System.out.println(ex.getMessage());
     } catch (DataRepoClientException ex) {
       System.out.println("Error processing snapshot create:");
       CommandUtils.printError(ex);

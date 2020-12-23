@@ -14,12 +14,15 @@ import bio.terra.parser.Option;
 import bio.terra.tdrwrapper.exception.DataRepoClientException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 public final class CommandUtils {
 
   public static final String SLASH = "/";
+  public static final String AT = "@";
 
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -202,5 +205,20 @@ public final class CommandUtils {
     } catch (JsonProcessingException ex) {
       CommandUtils.printErrorAndExit("Conversion to JSON string failed: " + ex.getMessage());
     }
+  }
+
+  public static <T> T makeRequestFromJson(String parameter, Class<T> tClass) {
+    try {
+      if (StringUtils.startsWith(parameter, AT)) {
+        File file = new File(StringUtils.removeStart(parameter, AT));
+        return CommandUtils.getObjectMapper().readValue(file, tClass);
+      }
+
+      return CommandUtils.getObjectMapper().readValue(parameter, tClass);
+    } catch (IOException ex) {
+      System.out.println("Error parsing json `" + parameter + "`");
+      CommandUtils.printErrorAndExit(ex.getMessage());
+    }
+    return null; // unreachable
   }
 }

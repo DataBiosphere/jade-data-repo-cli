@@ -21,12 +21,9 @@ import bio.terra.parser.Option;
 import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
 import bio.terra.tdrwrapper.exception.DataRepoClientException;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import org.apache.commons.lang3.StringUtils;
 
 public final class DatasetCommands {
 
@@ -45,7 +42,9 @@ public final class DatasetCommands {
                         .longName("input-json")
                         .hasArgument(true)
                         .optional(false)
-                        .help("Path to a file containing the JSON form of a dataset"))
+                        .help(
+                            "JSON definition of a dataset; if the argument starts with @,"
+                                + " it is interpreted as a file containing the json"))
                 .addOption(
                     new Option()
                         .shortName("n")
@@ -300,11 +299,10 @@ public final class DatasetCommands {
     return true;
   }
 
-  private static void datasetCreate(String jsonpath, String name, String profileName) {
+  private static void datasetCreate(String json, String name, String profileName) {
     try {
-      File file = new File(jsonpath);
       DatasetRequestModel datasetRequestModel =
-          CommandUtils.getObjectMapper().readValue(file, DatasetRequestModel.class);
+          CommandUtils.makeRequestFromJson(json, DatasetRequestModel.class);
       if (datasetRequestModel != null) {
         // Override the name and profile if requested
         if (name != null) {
@@ -319,9 +317,6 @@ public final class DatasetCommands {
 
         System.out.println(datasetSummary.toString());
       }
-    } catch (IOException ex) {
-      System.out.println("Error parsing file " + jsonpath + ":");
-      System.out.println(ex.getMessage());
     } catch (DataRepoClientException ex) {
       System.out.println("Error processing dataset create:");
       CommandUtils.printError(ex);
