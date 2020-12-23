@@ -40,6 +40,7 @@ public final class Login {
           "openid",
           "email",
           "profile",
+          "https://www.googleapis.com/auth/cloud-platform",
           "https://www.googleapis.com/auth/devstorage.read_only",
           "https://www.googleapis.com/auth/bigquery.readonly");
 

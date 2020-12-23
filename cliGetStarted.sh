@@ -13,6 +13,8 @@
 # Functions - some functions to keep things DRY-ish
 ###########
 
+
+# 
 function gen_to_gs() {
     LOCALFILE=$(mktemp cli.XXXXXX)
     echo "$1" > ${LOCALFILE}
@@ -57,7 +59,7 @@ BILLING_PROFILE="<YOUR PROFILE NAME>"
 # To create a billing profile, you will need to know a Google billing account that both you and the
 # TDR service account have the 'billing.resourceAssociations.create' permissions on. If you are configuring
 # the billing account, here are the TDR service accounts for the environments:
-# dev       - 
+# dev       - jade-k8-sa@broad-jade-dev.iam.gserviceaccount.com
 # fake prod -
 ### TODO: fill in service account names
 
@@ -97,7 +99,7 @@ DATASET_JSON=$(cat <<-END
         "columns": [
           {"name": "id", "datatype": "string"},
           {"name": "participant_id", "datatype": "string"},
-          {"name": "date_collected", "datatype": "date"},
+          {"name": "date_collected", "datatype": "date"}
         ],
         "primaryKey": ["id"]
       },
@@ -117,7 +119,7 @@ DATASET_JSON=$(cat <<-END
       },
       {
         "name": "sample_participants",
-        "from": {"table": "sample", "column": "participant_ids"},
+        "from": {"table": "sample", "column": "participant_id"},
         "to":   {"table": "participant", "column": "id"}
       },
       {
@@ -144,10 +146,11 @@ tdr dataset create --name "${DATASET}" --profile "${BILLING_PROFILE}" --input-js
 ###########
 #
 # TDR loads data from buckets. In order to do the data load, please supply a bucket name. You must have
-# read/write access to the bucket. The TDR service account needs read access to the bucket. See Step 1
-# for the appropriate service account. Fill your bucket name in here:
+# read/write access to a bucket or directory in a bucket. The TDR service account needs read access to the bucket.
+# See Step 1 for the appropriate service account.
+# Fill your bucket name and directory here WITHOUT a trailing /. For example, "bucket/directory"
 
-BUCKET="<YOUR BUCKET NAME>"
+BUCKET="<YOUR BUCKET PATH HERE>"
 
 # Generate trivial data files into the bucket. Note: you may have to authenticate with gcloud.
 
@@ -155,8 +158,8 @@ declare -a FILEIDS
 
 for i in `seq 0 5`; do
     GSPATH=$(gen_to_gs "data file $i")
-    FILERESULT=$(tdr dataset file load --input-gspath "${GSPATH}" --target-path "/cliSampleData/${LOCALFILE}" --format json "${DATASET}")
-    FILEIDS[$i] = jq -r .fileId
+    FILERESULT=$(tdr dataset file load --input-gspath "${GSPATH}" --target-path "/cliSampleData/file${i}" --format json "${DATASET}")
+    FILEIDS[$i]=$(echo "${FILERESULT}" | jq -r .fileId)
 done
 
 # We will use the FILEIDS array next when we load table data into the dataset
@@ -187,12 +190,12 @@ END
 )
 
 FILE_DATA=$(cat <<-END
-{"id":"${FILEIDS[0]","sample_id":"sample0"}
-{"id":"${FILEIDS[1]","sample_id":"sample1"}
-{"id":"${FILEIDS[2]","sample_id":"sample2"}
-{"id":"${FILEIDS[3]","sample_id":"sample3"}
-{"id":"${FILEIDS[4]","sample_id":"sample3"}
-{"id":"${FILEIDS[5]","sample_id":"sample4"}
+{"id":"${FILEIDS[0]}","sample_id":"sample0"}
+{"id":"${FILEIDS[1]}","sample_id":"sample1"}
+{"id":"${FILEIDS[2]}","sample_id":"sample2"}
+{"id":"${FILEIDS[3]}","sample_id":"sample3"}
+{"id":"${FILEIDS[4]}","sample_id":"sample3"}
+{"id":"${FILEIDS[5]}","sample_id":"sample4"}
 END
 )
 
@@ -226,3 +229,35 @@ END
 )
 
 tdr snapshot create --name "${SNAPSHOT}" --profile "${BILLING_PROFILE}" --input-json "${SNAPSHOT_JSON}"
+
+###########
+# Step 6. Look at what you have created
+###########
+
+# Position to the top - note that plain "tdr cd /" is a shortcut
+tdr session cd /
+
+# List all datasets and snapshots - note that plain "tdr ls" is a shortcut
+tdr dr list
+
+# Position to your dataset
+tdr cd /${DATASET}
+tdr ls
+
+# You can see two "directories" one for the files and one for the tables.
+tdr ls files
+tdr ls tables
+
+# You can get the metadata for a file or table by saying - not that plain "tdr describe" is a shortcut
+tdr dr describe files/cliSampleData/file0
+tdr describe tables/participant
+
+# You can stream the contents of a file to stdout like this:
+tdr dr stream files/cliSampleData/file0
+
+# The same commands work for snapshots. Note that the file system in snapshots has the dataset name as
+# a top level directory in anticipation of multi-dataset snapshots:
+tdr cd /${SNAPSHOT}
+tdr ls files
+tdr ls files/${DATASET}
+
