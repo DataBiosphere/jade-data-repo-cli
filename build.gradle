@@ -50,7 +50,7 @@ dependencies {
         datarepoClient = "1.0.187-SNAPSHOT"
         logback = "1.2.3"
         sl4j = "1.7.30"
-        findbugsAnnotations = "3.0.1"
+        findbugsAnnotations = "3.0.1u2"
     }
 
     //implementation files("/Users/ddietterich/code/DR-1523-billing-upgrade/datarepo-client/build/libs/datarepo-client-1.0.169-SNAPSHOT.jar")
