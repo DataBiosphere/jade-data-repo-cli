@@ -43,11 +43,10 @@ import bio.terra.tdrwrapper.exception.DataRepoUnknownClientException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpStatusCodes;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public class DataRepoWrap {
   private static final Logger logger = LoggerFactory.getLogger(DataRepoWrap.class);

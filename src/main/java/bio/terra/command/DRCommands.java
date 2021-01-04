@@ -10,11 +10,10 @@ import bio.terra.parser.Command;
 import bio.terra.parser.Option;
 import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 // object types
 // dir, file, dataset, snapshot, cont(ainer)

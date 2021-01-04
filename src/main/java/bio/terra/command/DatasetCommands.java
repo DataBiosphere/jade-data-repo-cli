@@ -21,11 +21,10 @@ import bio.terra.parser.Option;
 import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
 import bio.terra.tdrwrapper.exception.DataRepoClientException;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
 
 public final class DatasetCommands {
 
