@@ -1,12 +1,7 @@
 package bio.terra.command;
 
-import bio.terra.datarepo.api.RepositoryApi;
-import bio.terra.datarepo.client.ApiException;
-import bio.terra.datarepo.client.ApiResponse;
 import bio.terra.datarepo.model.BillingProfileModel;
 import bio.terra.datarepo.model.DeleteResponseModel;
-import bio.terra.datarepo.model.JobModel;
-import bio.terra.datarepo.model.PolicyMemberRequest;
 import bio.terra.datarepo.model.PolicyResponse;
 import bio.terra.datarepo.model.SnapshotRequestModel;
 import bio.terra.datarepo.model.SnapshotSummaryModel;
@@ -16,8 +11,7 @@ import bio.terra.parser.Command;
 import bio.terra.parser.Option;
 import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
-import java.io.File;
-import java.io.IOException;
+import bio.terra.tdrwrapper.exception.DataRepoClientException;
 
 public final class SnapshotCommands {
 
@@ -36,7 +30,9 @@ public final class SnapshotCommands {
                         .longName("input-json")
                         .hasArgument(true)
                         .optional(false)
-                        .help("Path to a file containing the JSON form of a snapshot"))
+                        .help(
+                            "JSON definition of a snapshot; if the argument starts with @,"
+                                + " it is interpreted as a file containing the json"))
                 .addOption(
                     new Option()
                         .shortName("n")
@@ -174,11 +170,10 @@ public final class SnapshotCommands {
     return true;
   }
 
-  public static void snapshotCreate(String jsonpath, String name, String profileName) {
+  public static void snapshotCreate(String json, String name, String profileName) {
     try {
-      File file = new File(jsonpath);
       SnapshotRequestModel snapshotRequestModel =
-          CommandUtils.getObjectMapper().readValue(file, SnapshotRequestModel.class);
+          CommandUtils.makeRequestFromJson(json, SnapshotRequestModel.class);
       if (snapshotRequestModel != null) {
         // Override the name and profile if requested
         if (name != null) {
@@ -189,14 +184,9 @@ public final class SnapshotCommands {
           snapshotRequestModel.profileId(profileModel.getId());
         }
 
-        RepositoryApi api = DRApis.getRepositoryApi();
-        ApiResponse<JobModel> job = api.createSnapshotWithHttpInfo(snapshotRequestModel);
-        CommandUtils.waitForResponse(api, job, 1, SnapshotSummaryModel.class);
+        DRApi.get().createSnapshot(snapshotRequestModel);
       }
-    } catch (IOException ex) {
-      System.out.println("Error parsing file " + jsonpath + ":");
-      System.out.println(ex.getMessage());
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing snapshot create:");
       CommandUtils.printError(ex);
     }
@@ -205,13 +195,10 @@ public final class SnapshotCommands {
   public static void snapshotDelete(String snapshotName) {
     SnapshotSummaryModel summary = CommandUtils.findSnapshotByName(snapshotName);
     try {
-      RepositoryApi api = DRApis.getRepositoryApi();
-      ApiResponse<JobModel> job = api.deleteSnapshotWithHttpInfo(summary.getId());
-      DeleteResponseModel deleteResponse =
-          CommandUtils.waitForResponse(api, job, 1, DeleteResponseModel.class);
+      DeleteResponseModel deleteResponse = DRApi.get().deleteSnapshot(summary.getId());
       System.out.printf(
           "Snapshot deleted: %s (%s)%n", snapshotName, deleteResponse.getObjectState().getValue());
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing snapshot delete:");
       CommandUtils.printError(ex);
     }
@@ -229,23 +216,21 @@ public final class SnapshotCommands {
   public static void snapshotPolicyShow(String snapshotName) {
     SnapshotSummaryModel summary = CommandUtils.findSnapshotByName(snapshotName);
     try {
-      PolicyResponse policyResponse =
-          DRApis.getRepositoryApi().retrieveSnapshotPolicies(summary.getId());
+      PolicyResponse policyResponse = DRApi.get().retrieveSnapshotPolicies(summary.getId());
       CommandUtils.printPolicyResponse(policyResponse);
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing show policy:");
       CommandUtils.printError(ex);
     }
   }
 
   public static void snapshotPolicyAdd(String snapshotName, String policyName, String email) {
-    PolicyMemberRequest member = new PolicyMemberRequest().email(email);
     SnapshotSummaryModel summary = CommandUtils.findSnapshotByName(snapshotName);
     try {
       PolicyResponse policyResponse =
-          DRApis.getRepositoryApi().addSnapshotPolicyMember(summary.getId(), policyName, member);
+          DRApi.get().addSnapshotPolicyMember(summary.getId(), policyName, email);
       CommandUtils.printPolicyResponse(policyResponse);
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error adding policy member:");
       CommandUtils.printError(ex);
     }
@@ -255,9 +240,9 @@ public final class SnapshotCommands {
     SnapshotSummaryModel summary = CommandUtils.findSnapshotByName(snapshotName);
     try {
       PolicyResponse policyResponse =
-          DRApis.getRepositoryApi().deleteSnapshotPolicyMember(summary.getId(), policyName, email);
+          DRApi.get().deleteSnapshotPolicyMember(summary.getId(), policyName, email);
       CommandUtils.printPolicyResponse(policyResponse);
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error removing policy member:");
       CommandUtils.printError(ex);
     }

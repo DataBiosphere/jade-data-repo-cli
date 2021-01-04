@@ -1,8 +1,7 @@
 package bio.terra.model;
 
 import bio.terra.command.CommandUtils;
-import bio.terra.command.DRApis;
-import bio.terra.datarepo.client.ApiException;
+import bio.terra.command.DRApi;
 import bio.terra.datarepo.model.AssetModel;
 import bio.terra.datarepo.model.AssetTableModel;
 import bio.terra.datarepo.model.DatasetModel;
@@ -10,6 +9,7 @@ import bio.terra.datarepo.model.DatasetSummaryModel;
 import bio.terra.datarepo.model.RelationshipModel;
 import bio.terra.datarepo.model.RelationshipTermModel;
 import bio.terra.datarepo.model.TableModel;
+import bio.terra.tdrwrapper.exception.DataRepoClientException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,7 +89,7 @@ public class DRDataset extends DRElement {
     try {
       // fetch the full Dataset model, instead of using the summary model that is a property of this
       // class
-      DatasetModel dataset = DRApis.getRepositoryApi().retrieveDataset(summary.getId());
+      DatasetModel dataset = DRApi.get().retrieveDataset(summary.getId());
 
       System.out.println("name       : " + dataset.getName());
       System.out.println("description: " + dataset.getDescription());
@@ -103,7 +103,7 @@ public class DRDataset extends DRElement {
       printRelationships(dataset.getSchema().getRelationships());
       System.out.println("..Assets");
       printAssets(dataset.getSchema().getAssets());
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing dataset describe:");
       CommandUtils.printError(ex);
     }
@@ -114,10 +114,10 @@ public class DRDataset extends DRElement {
     try {
       // fetch the full Dataset model, instead of using the summary model that is a property of this
       // class
-      DatasetModel dataset = DRApis.getRepositoryApi().retrieveDataset(summary.getId());
+      DatasetModel dataset = DRApi.get().retrieveDataset(summary.getId());
 
       CommandUtils.outputPrettyJson(dataset);
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing dataset describe:");
       CommandUtils.printError(ex);
     }
@@ -173,8 +173,8 @@ public class DRDataset extends DRElement {
 
   private DatasetModel getDataset(String id) {
     try {
-      return DRApis.getRepositoryApi().retrieveDataset(id);
-    } catch (ApiException ex) {
+      return DRApi.get().retrieveDataset(id);
+    } catch (DataRepoClientException ex) {
       System.err.println("Error retrieving dataset");
       CommandUtils.printErrorAndExit(ex.getMessage());
     }

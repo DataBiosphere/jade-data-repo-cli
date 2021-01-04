@@ -1,5 +1,7 @@
 package bio.terra.context;
 
+import static bio.terra.context.ContextEnum.AUTH_KEY_FILE;
+
 import bio.terra.command.CommandUtils;
 import bio.terra.datarepo.client.Configuration;
 import com.google.api.client.auth.oauth2.Credential;
@@ -16,8 +18,6 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,8 +26,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
-
-import static bio.terra.context.ContextEnum.AUTH_KEY_FILE;
+import org.apache.commons.lang3.StringUtils;
 
 public final class Login {
   private static Credential userCredential;
@@ -41,6 +40,7 @@ public final class Login {
           "openid",
           "email",
           "profile",
+          "https://www.googleapis.com/auth/cloud-platform",
           "https://www.googleapis.com/auth/devstorage.read_only",
           "https://www.googleapis.com/auth/bigquery.readonly");
 
@@ -54,6 +54,7 @@ public final class Login {
       authorizeSA();
     }
 
+    // Set the data repo api client access
     Configuration.getDefaultApiClient()
         .setUserAgent(APPLICATION_NAME)
         .setBasePath(Context.getInstance().getContextItem(ContextEnum.BASE_PATH))

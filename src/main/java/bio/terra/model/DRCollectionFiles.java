@@ -3,7 +3,7 @@ package bio.terra.model;
 import static bio.terra.model.DRCollectionType.COLLECTION_TYPE_DATASET;
 
 import bio.terra.command.CommandUtils;
-import bio.terra.command.DRApis;
+import bio.terra.command.DRApi;
 import bio.terra.datarepo.client.ApiException;
 import bio.terra.datarepo.model.DirectoryDetailModel;
 import bio.terra.datarepo.model.FileModel;
@@ -124,8 +124,8 @@ public class DRCollectionFiles extends DRElement {
 
   private FileModel pathLookup(String path, int depth) throws ApiException {
     if (collectionType == COLLECTION_TYPE_DATASET) {
-      return DRApis.getRepositoryApi().lookupFileByPath(collectionId, path, depth);
+      return DRApi.get().lookupFileByPath(collectionId, path, depth);
     }
-    return DRApis.getRepositoryApi().lookupSnapshotFileByPath(collectionId, path, depth);
+    return DRApi.get().lookupSnapshotFileByPath(collectionId, path, depth);
   }
 }

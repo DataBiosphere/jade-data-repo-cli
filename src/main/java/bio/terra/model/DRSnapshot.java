@@ -1,11 +1,11 @@
 package bio.terra.model;
 
 import bio.terra.command.CommandUtils;
-import bio.terra.command.DRApis;
-import bio.terra.datarepo.client.ApiException;
+import bio.terra.command.DRApi;
 import bio.terra.datarepo.model.SnapshotModel;
 import bio.terra.datarepo.model.SnapshotSummaryModel;
 import bio.terra.datarepo.model.TableModel;
+import bio.terra.tdrwrapper.exception.DataRepoClientException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -85,7 +85,7 @@ public class DRSnapshot extends DRElement {
   @Override
   protected void describeText() {
     try {
-      SnapshotModel snapshot = DRApis.getRepositoryApi().retrieveSnapshot(summary.getId());
+      SnapshotModel snapshot = DRApi.get().retrieveSnapshot(summary.getId());
 
       System.out.println("name       : " + snapshot.getName());
       System.out.println("description: " + snapshot.getDescription());
@@ -95,7 +95,7 @@ public class DRSnapshot extends DRElement {
       for (TableModel table : snapshot.getTables()) {
         new DRTable(table, snapshot.getCreatedDate()).describeText();
       }
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing snapshot describe:");
       CommandUtils.printError(ex);
     }
@@ -106,10 +106,10 @@ public class DRSnapshot extends DRElement {
     try {
       // fetch the full Snapshot model, instead of using the summary model that is a property of
       // this class
-      SnapshotModel snapshot = DRApis.getRepositoryApi().retrieveSnapshot(summary.getId());
+      SnapshotModel snapshot = DRApi.get().retrieveSnapshot(summary.getId());
 
       CommandUtils.outputPrettyJson(snapshot);
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing snapshot describe:");
       CommandUtils.printError(ex);
     }
@@ -122,8 +122,8 @@ public class DRSnapshot extends DRElement {
 
   private SnapshotModel getSnapshot(String id) {
     try {
-      return DRApis.getRepositoryApi().retrieveSnapshot(id);
-    } catch (ApiException ex) {
+      return DRApi.get().retrieveSnapshot(id);
+    } catch (DataRepoClientException ex) {
       System.err.println("Error retrieving snapshot");
       CommandUtils.printErrorAndExit(ex.getMessage());
     }

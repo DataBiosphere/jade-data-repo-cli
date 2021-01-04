@@ -1,8 +1,5 @@
 package bio.terra.command;
 
-import bio.terra.datarepo.api.RepositoryApi;
-import bio.terra.datarepo.client.ApiException;
-import bio.terra.datarepo.client.ApiResponse;
 import bio.terra.datarepo.model.BillingProfileModel;
 import bio.terra.datarepo.model.BulkLoadArrayRequestModel;
 import bio.terra.datarepo.model.BulkLoadArrayResultModel;
@@ -14,8 +11,6 @@ import bio.terra.datarepo.model.DeleteResponseModel;
 import bio.terra.datarepo.model.FileModel;
 import bio.terra.datarepo.model.IngestRequestModel;
 import bio.terra.datarepo.model.IngestResponseModel;
-import bio.terra.datarepo.model.JobModel;
-import bio.terra.datarepo.model.PolicyMemberRequest;
 import bio.terra.datarepo.model.PolicyResponse;
 import bio.terra.model.DRCollectionType;
 import bio.terra.model.DRDataset;
@@ -25,10 +20,10 @@ import bio.terra.parser.Command;
 import bio.terra.parser.Option;
 import bio.terra.parser.ParsedResult;
 import bio.terra.parser.Syntax;
-import java.io.File;
-import java.io.IOException;
+import bio.terra.tdrwrapper.exception.DataRepoClientException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 
 public final class DatasetCommands {
@@ -48,7 +43,9 @@ public final class DatasetCommands {
                         .longName("input-json")
                         .hasArgument(true)
                         .optional(false)
-                        .help("Path to a file containing the JSON form of a dataset"))
+                        .help(
+                            "JSON definition of a dataset; if the argument starts with @,"
+                                + " it is interpreted as a file containing the json"))
                 .addOption(
                     new Option()
                         .shortName("n")
@@ -303,11 +300,10 @@ public final class DatasetCommands {
     return true;
   }
 
-  private static void datasetCreate(String jsonpath, String name, String profileName) {
+  private static void datasetCreate(String json, String name, String profileName) {
     try {
-      File file = new File(jsonpath);
       DatasetRequestModel datasetRequestModel =
-          CommandUtils.getObjectMapper().readValue(file, DatasetRequestModel.class);
+          CommandUtils.makeRequestFromJson(json, DatasetRequestModel.class);
       if (datasetRequestModel != null) {
         // Override the name and profile if requested
         if (name != null) {
@@ -318,17 +314,11 @@ public final class DatasetCommands {
           datasetRequestModel.defaultProfileId(profileModel.getId());
         }
 
-        RepositoryApi api = DRApis.getRepositoryApi();
-        ApiResponse<JobModel> job = api.createDatasetWithHttpInfo(datasetRequestModel);
-        DatasetSummaryModel datasetSummary =
-            CommandUtils.waitForResponse(api, job, 1, DatasetSummaryModel.class);
+        DatasetSummaryModel datasetSummary = DRApi.get().createDataset(datasetRequestModel);
 
         System.out.println(datasetSummary.toString());
       }
-    } catch (IOException ex) {
-      System.out.println("Error parsing file " + jsonpath + ":");
-      System.out.println(ex.getMessage());
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing dataset create:");
       CommandUtils.printError(ex);
     }
@@ -338,14 +328,11 @@ public final class DatasetCommands {
     DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
 
     try {
-      RepositoryApi api = DRApis.getRepositoryApi();
-      ApiResponse<JobModel> job = api.deleteDatasetWithHttpInfo(summary.getId());
-      DeleteResponseModel deleteResponse =
-          CommandUtils.waitForResponse(api, job, 1, DeleteResponseModel.class);
+      DeleteResponseModel deleteResponse = DRApi.get().deleteDataset(summary.getId());
 
       System.out.printf(
           "Dataset deleted: %s (%s)%n", datasetName, deleteResponse.getObjectState().getValue());
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing dataset delete:");
       CommandUtils.printError(ex);
     }
@@ -363,23 +350,21 @@ public final class DatasetCommands {
   private static void datasetPolicyShow(String datasetName) {
     DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
     try {
-      PolicyResponse policyResponse =
-          DRApis.getRepositoryApi().retrieveDatasetPolicies(summary.getId());
+      PolicyResponse policyResponse = DRApi.get().retrieveDatasetPolicies(summary.getId());
       CommandUtils.printPolicyResponse(policyResponse);
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing show policy:");
       CommandUtils.printError(ex);
     }
   }
 
   private static void datasetPolicyAdd(String datasetName, String policyName, String email) {
-    PolicyMemberRequest member = new PolicyMemberRequest().email(email);
     DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
     try {
       PolicyResponse policyResponse =
-          DRApis.getRepositoryApi().addDatasetPolicyMember(summary.getId(), policyName, member);
+          DRApi.get().addDatasetPolicyMember(summary.getId(), policyName, email);
       CommandUtils.printPolicyResponse(policyResponse);
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error adding policy member:");
       CommandUtils.printError(ex);
     }
@@ -389,9 +374,9 @@ public final class DatasetCommands {
     DatasetSummaryModel summary = CommandUtils.findDatasetByName(datasetName);
     try {
       PolicyResponse policyResponse =
-          DRApis.getRepositoryApi().deleteDatasetPolicyMember(summary.getId(), policyName, email);
+          DRApi.get().deleteDatasetPolicyMember(summary.getId(), policyName, email);
       CommandUtils.printPolicyResponse(policyResponse);
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error removing policy member:");
       CommandUtils.printError(ex);
     }
@@ -419,17 +404,12 @@ public final class DatasetCommands {
             .format(lookupFormatEnum(inputFormat));
 
     try {
-      ApiResponse<JobModel> job =
-          DRApis.getRepositoryApi().ingestDatasetWithHttpInfo(summary.getId(), ingestRequest);
-      IngestResponseModel response =
-          CommandUtils.waitForResponse(
-              DRApis.getRepositoryApi(), job, 1, IngestResponseModel.class);
-
+      IngestResponseModel response = DRApi.get().ingestDataset(summary.getId(), ingestRequest);
       System.out.printf(
           "Loaded %d rows; %d bad rows skipped%n",
           response.getRowCount(), response.getBadRowCount());
 
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing table load: ");
       CommandUtils.printError(ex);
     }
@@ -484,13 +464,14 @@ public final class DatasetCommands {
               .description(description);
 
       BulkLoadArrayRequestModel loadRequest =
-          new BulkLoadArrayRequestModel().profileId(profileId).addLoadArrayItem(loadModel);
+          new BulkLoadArrayRequestModel()
+              .profileId(profileId)
+              .maxFailedFileLoads(0)
+              .loadTag("clifileload" + UUID.randomUUID())
+              .addLoadArrayItem(loadModel);
 
-      RepositoryApi api = DRApis.getRepositoryApi();
-      ApiResponse<JobModel> jobModel = api.bulkFileLoadArrayWithHttpInfo(datasetId, loadRequest);
+      BulkLoadArrayResultModel resultModel = DRApi.get().bulkFileLoadArray(datasetId, loadRequest);
 
-      BulkLoadArrayResultModel resultModel =
-          CommandUtils.waitForResponse(api, jobModel, 1, BulkLoadArrayResultModel.class);
       BulkLoadFileResultModel fileResultModel = resultModel.getLoadFileResults().get(0);
       switch (fileResultModel.getState()) {
         case SUCCEEDED:
@@ -507,10 +488,10 @@ public final class DatasetCommands {
           break;
       }
 
-      FileModel fileModel = api.lookupFileById(datasetId, fileResultModel.getFileId(), 0);
+      FileModel fileModel = DRApi.get().lookupFileById(datasetId, fileResultModel.getFileId(), 0);
       DRFile drFile = new DRFile(DRCollectionType.COLLECTION_TYPE_DATASET, fileModel);
       drFile.describe(format);
-    } catch (ApiException ex) {
+    } catch (DataRepoClientException ex) {
       System.out.println("Error processing file ingest: ");
       CommandUtils.printError(ex);
     } catch (UnsupportedEncodingException e) {
@@ -536,11 +517,10 @@ public final class DatasetCommands {
 
     // Show dataset file is the same as describe
     DatasetSummaryModel datasetSummary = CommandUtils.findDatasetByName(datasetName);
-    RepositoryApi api = DRApis.getRepositoryApi();
     FileModel fileModel = null;
     try {
-      fileModel = api.lookupFileByPath(datasetSummary.getId(), filePath, depthInt);
-    } catch (ApiException ex) {
+      fileModel = DRApi.get().lookupFileByPath(datasetSummary.getId(), filePath, depthInt);
+    } catch (DataRepoClientException ex) {
       CommandUtils.printErrorAndExit("Error processing file lookup: " + ex.getMessage());
     }
 

@@ -199,8 +199,9 @@ public final class DRCommands {
       if (fileModel.getFileType() == FileModelType.FILE) {
         StreamFile.streamFile(fileModel.getFileDetail().getAccessUrl());
       }
+    } else {
+      CommandUtils.printErrorAndExit("You can only stream files right now");
     }
-    CommandUtils.printErrorAndExit("You can only stream files right now");
   }
 
   // General element lookup
