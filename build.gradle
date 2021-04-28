@@ -9,7 +9,7 @@ plugins {
     id 'idea'
     id 'application'
     id 'com.diffplug.gradle.spotless' version '3.27.2'
-    id 'com.github.spotbugs' version '4.0.8'
+    id 'com.github.spotbugs' version '4.7.1'
 }
 
 if (hasProperty('buildScan')) {
